@@ -31,7 +31,8 @@ Current status:
 - `npx --yes pnpm@9.15.0 lint` passes for the monorepo with warnings only in `apps/poupi-baby`.
 - `npx --yes pnpm@9.15.0 build` passes for the monorepo.
 - GitHub Actions CI is green on `main`.
-- Green run: `26451821825`.
+- Latest green run: `26451961070`.
+- Branch protection for `main` requires `Frontend checks`, strict status checks, no force pushes and no branch deletion.
 - `npx tsc --noEmit` passes in `apps/poupi-baby`.
 - `npx eslint .` in `apps/poupi-baby` has 0 errors and remaining warnings only.
 - Local development fallback is centralized in:
@@ -60,9 +61,8 @@ SENTRY_DSN=
 
 ## Safe Migration Sequence
 
-1. Configure branch protection for `main`.
-2. Connect Coolify/deploy flow to GitHub.
-3. Deploy from CI/Coolify, not from notebook-only state.
+1. Connect Coolify/deploy flow to GitHub.
+2. Deploy from CI/Coolify, not from notebook-only state.
 
 ## Do Not Do
 
