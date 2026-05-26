@@ -7,6 +7,6 @@ coverage
 .env.*
 !.env.example
 !.env.local.example
+*.tsbuildinfo
 *.log
 .DS_Store
-

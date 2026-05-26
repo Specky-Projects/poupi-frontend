@@ -23,7 +23,13 @@ The check must pass before any production deploy.
 
 Current status:
 
+- Git baseline exists locally on branch `main`.
+- Baseline commit: `92b2d56 chore: establish frontend baseline`.
 - `npm run check:prod-env` passes.
+- `npx --yes pnpm@9.15.0 check:prod-env` passes.
+- `npx --yes pnpm@9.15.0 typecheck` passes for the monorepo.
+- `npx --yes pnpm@9.15.0 lint` passes for the monorepo with warnings only in `apps/poupi-baby`.
+- `npx --yes pnpm@9.15.0 build` passes for the monorepo.
 - `npx tsc --noEmit` passes in `apps/poupi-baby`.
 - `npx eslint .` in `apps/poupi-baby` has 0 errors and remaining warnings only.
 - Local development fallback is centralized in:
@@ -52,14 +58,10 @@ SENTRY_DSN=
 
 ## Safe Migration Sequence
 
-1. Put this folder under Git or replace it with a clean clone from the official GitHub repo.
-2. Confirm all `.env.local` files are ignored and not staged.
-3. Run `pnpm install --frozen-lockfile`.
-4. Run `pnpm check:prod-env`.
-5. Keep duplicated backend URL fallbacks out of app routes and pages.
-6. Keep helpers failing fast in production when `BACKEND_URL` or `NEXT_PUBLIC_API_URL` is missing.
-7. Run `pnpm lint`, `pnpm typecheck`, and `pnpm build`.
-8. Deploy from CI/Coolify, not from notebook-only state.
+1. Create or attach the official GitHub remote.
+2. Push branch `main`.
+3. Configure CI to run `pnpm install --frozen-lockfile`, `pnpm check:prod-env`, `pnpm lint`, `pnpm typecheck`, and `pnpm build`.
+4. Deploy from CI/Coolify, not from notebook-only state.
 
 ## Do Not Do
 
