@@ -1,0 +1,22 @@
+{
+    "name":  "@poupi-frontend/api-client",
+    "version":  "0.1.0",
+    "private":  true,
+    "type":  "module",
+    "exports":  {
+                    ".":  "./src/index.ts"
+                },
+    "scripts":  {
+                    "build":  "tsc --noEmit",
+                    "lint":  "eslint src --ext .ts",
+                    "typecheck":  "tsc --noEmit"
+                },
+    "dependencies":  {
+                         "@poupi-frontend/types":  "workspace:*"
+                     },
+    "devDependencies":  {
+                            "@poupi-frontend/config":  "workspace:*",
+                            "typescript":  "^5.8.0",
+                            "eslint":  "^9"
+                        }
+}

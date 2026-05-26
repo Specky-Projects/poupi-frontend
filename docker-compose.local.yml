@@ -1,0 +1,8 @@
+# poupi-frontend is intentionally local-first and does not require Docker.
+# Run it with pnpm/turbo instead of Docker:
+#   pnpm install
+#   pnpm dev
+#
+# This placeholder keeps the local runtime convention consistent across Poupi
+# repos without introducing containers or restart policies.
+services: {}

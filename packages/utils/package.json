@@ -1,0 +1,19 @@
+{
+    "name":  "@poupi-frontend/utils",
+    "version":  "0.1.0",
+    "private":  true,
+    "type":  "module",
+    "exports":  {
+                    ".":  "./src/index.ts"
+                },
+    "scripts":  {
+                    "build":  "tsc --noEmit",
+                    "lint":  "eslint src --ext .ts",
+                    "typecheck":  "tsc --noEmit"
+                },
+    "devDependencies":  {
+                            "@poupi-frontend/config":  "workspace:*",
+                            "typescript":  "^5.8.0",
+                            "eslint":  "^9"
+                        }
+}

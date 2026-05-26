@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryptoBot — Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body { font-family: 'Courier New', monospace; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 1.25rem; }
+    .up   { color: #10b981; }
+    .down { color: #ef4444; }
+    .muted { color: #94a3b8; }
+    .badge-green  { background:#064e3b; color:#34d399; padding:2px 8px; border-radius:9999px; font-size:0.7rem; }
+    .badge-yellow { background:#451a03; color:#fbbf24; padding:2px 8px; border-radius:9999px; font-size:0.7rem; }
+    .badge-red    { background:#450a0a; color:#f87171; padding:2px 8px; border-radius:9999px; font-size:0.7rem; }
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .table-row:hover { background:#0f172a; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+  <!-- Header -->
+  <div class="border-b border-slate-700 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-xl">⚡</span>
+      <span class="text-lg font-bold tracking-tight">CryptoBot</span>
+      <span id="badge-mode" class="badge-yellow">Paper Trading</span>
+      <span id="badge-status" class="badge-red">...</span>
+    </div>
+    <div class="text-right">
+      <div id="symbol" class="text-slate-300 font-bold">BTC/USDT</div>
+      <div id="live-price" class="text-2xl font-bold">—</div>
+      <div id="updated-at" class="muted text-xs">atualizando...</div>
+    </div>
+  </div>
+
+  <div class="p-6 space-y-6 max-w-6xl mx-auto">
+
+    <!-- Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="card">
+        <div class="muted text-xs mb-1">SALDO ATUAL</div>
+        <div id="balance" class="text-2xl font-bold">$—</div>
+        <div id="balance-initial" class="muted text-xs mt-1">inicial: $—</div>
+      </div>
+      <div class="card">
+        <div class="muted text-xs mb-1">P&amp;L TOTAL</div>
+        <div id="total-pnl" class="text-2xl font-bold">—</div>
+        <div id="total-pnl-pct" class="muted text-xs mt-1">—</div>
+      </div>
+      <div class="card">
+        <div class="muted text-xs mb-1">WIN RATE</div>
+        <div id="win-rate" class="text-2xl font-bold">—</div>
+        <div id="wins-total" class="muted text-xs mt-1">— vitórias / — trades</div>
+      </div>
+      <div class="card">
+        <div class="muted text-xs mb-1">POSIÇÃO</div>
+        <div id="position-status" class="text-2xl font-bold muted">—</div>
+        <div id="position-detail" class="muted text-xs mt-1">—</div>
+      </div>
+    </div>
+
+    <!-- Métricas de performance -->
+    <div id="perf-cards" class="grid grid-cols-2 md:grid-cols-4 gap-4 hidden">
+      <div class="card">
+        <div class="muted text-xs mb-1">SHARPE RATIO</div>
+        <div id="perf-sharpe" class="text-2xl font-bold">—</div>
+        <div class="muted text-xs mt-1">por trade</div>
+      </div>
+      <div class="card">
+        <div class="muted text-xs mb-1">MAX DRAWDOWN</div>
+        <div id="perf-dd" class="text-2xl font-bold">—</div>
+        <div id="perf-dd-sub" class="muted text-xs mt-1">queda pico→vale</div>
+      </div>
+      <div class="card">
+        <div class="muted text-xs mb-1">EXPECTANCY</div>
+        <div id="perf-exp" class="text-2xl font-bold">—</div>
+        <div class="muted text-xs mt-1">média por trade</div>
+      </div>
+      <div class="card">
+        <div class="muted text-xs mb-1">PROFIT FACTOR</div>
+        <div id="perf-pf" class="text-2xl font-bold">—</div>
+        <div id="perf-pf-sub" class="muted text-xs mt-1">lucro / perda bruta</div>
+      </div>
+    </div>
+
+    <!-- Storage analytics -->
+    <div id="storage-cards" class="grid grid-cols-2 md:grid-cols-4 gap-4 hidden">
+      <div class="card">
+        <div class="muted text-xs mb-1">MAE MEDIO</div>
+        <div id="mae-avg" class="text-2xl font-bold">—</div>
+        <div id="mae-worst" class="muted text-xs mt-1">pior: —</div>
+      </div>
+      <div class="card">
+        <div class="muted text-xs mb-1">MFE MEDIO</div>
+        <div id="mfe-avg" class="text-2xl font-bold">—</div>
+        <div id="mfe-best" class="muted text-xs mt-1">melhor: —</div>
+      </div>
+      <div class="card">
+        <div class="muted text-xs mb-1">MAE WIN / LOSS</div>
+        <div id="mae-split" class="text-sm font-bold">—</div>
+        <div class="muted text-xs mt-1">pressao antes do resultado</div>
+      </div>
+      <div class="card">
+        <div class="muted text-xs mb-1">MFE WIN / LOSS</div>
+        <div id="mfe-split" class="text-sm font-bold">—</div>
+        <div class="muted text-xs mt-1">potencial capturado/perdido</div>
+      </div>
+      <div class="card">
+        <div class="muted text-xs mb-1">STOP SUGERIDO</div>
+        <div id="cal-stop" class="text-2xl font-bold">—</div>
+        <div class="muted text-xs mt-1">diagnostico MAE</div>
+      </div>
+      <div class="card">
+        <div class="muted text-xs mb-1">TAKE SUGERIDO</div>
+        <div id="cal-take" class="text-2xl font-bold">—</div>
+        <div class="muted text-xs mt-1">diagnostico MFE</div>
+      </div>
+    </div>
+
+    <div id="regime-card" class="card hidden">
+      <div class="text-sm font-bold mb-4 text-slate-300">PERFORMANCE POR REGIME</div>
+      <div id="regime-empty" class="text-center muted py-8 text-sm hidden">
+        Sem trades fechados com contexto de regime ainda.
+      </div>
+      <div id="regime-table-wrap" class="overflow-x-auto hidden">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="muted border-b border-slate-700 text-xs">
+              <th class="text-left pb-2 pr-4">REGIME</th>
+              <th class="text-right pb-2 pr-4">TRADES</th>
+              <th class="text-right pb-2 pr-4">WIN RATE</th>
+              <th class="text-right pb-2 pr-4">P&L</th>
+              <th class="text-right pb-2 pr-4">P&L MEDIO</th>
+              <th class="text-right pb-2 pr-4">MAE</th>
+              <th class="text-right pb-2">MFE</th>
+            </tr>
+          </thead>
+          <tbody id="regime-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="decision-card" class="card hidden">
+      <div class="text-sm font-bold mb-4 text-slate-300">SINAIS E FILTROS</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div>
+          <div class="muted text-xs mb-1">ACEITOS</div>
+          <div id="sig-accepted" class="text-2xl font-bold up">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">REJEITADOS</div>
+          <div id="sig-rejected" class="text-2xl font-bold text-yellow-400">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">TAXA ACEITE</div>
+          <div id="sig-rate" class="text-2xl font-bold">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">MODO</div>
+          <div id="advisory-mode" class="text-sm font-bold">ADVISORY</div>
+        </div>
+      </div>
+      <div id="decision-reasons" class="grid md:grid-cols-2 gap-2 text-xs"></div>
+      <div id="advisory-list" class="mt-4 space-y-2 text-xs"></div>
+    </div>
+
+    <div id="ai-card" class="card hidden">
+      <div class="text-sm font-bold mb-4 text-slate-300">DECISAO IA</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div>
+          <div class="muted text-xs mb-1">MODO</div>
+          <div id="ai-mode" class="text-sm font-bold">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">HUMANO</div>
+          <div id="ai-human" class="text-sm font-bold">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">ACOES</div>
+          <div id="ai-actions-count" class="text-2xl font-bold">0</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">LIVE</div>
+          <div id="ai-live" class="text-sm font-bold">—</div>
+        </div>
+      </div>
+      <div id="ai-actions" class="grid md:grid-cols-2 gap-2 text-xs"></div>
+    </div>
+
+    <div id="confidence-card" class="card hidden">
+      <div class="text-sm font-bold mb-4 text-slate-300">PERFORMANCE POR CONFIANCA</div>
+      <div id="confidence-empty" class="text-center muted py-8 text-sm hidden">
+        Sem trades fechados com confidence registrada.
+      </div>
+      <div id="confidence-table-wrap" class="overflow-x-auto hidden">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="muted border-b border-slate-700 text-xs">
+              <th class="text-left pb-2 pr-4">BUCKET</th>
+              <th class="text-right pb-2 pr-4">TRADES</th>
+              <th class="text-right pb-2 pr-4">WIN RATE</th>
+              <th class="text-right pb-2 pr-4">P&L</th>
+              <th class="text-right pb-2">P&L MEDIO</th>
+            </tr>
+          </thead>
+          <tbody id="confidence-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="strategy-card" class="card hidden">
+      <div class="text-sm font-bold mb-4 text-slate-300">PERFORMANCE POR VERSAO</div>
+      <div id="strategy-empty" class="text-center muted py-8 text-sm hidden">
+        Sem trades fechados por versao ainda.
+      </div>
+      <div id="strategy-table-wrap" class="overflow-x-auto hidden">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="muted border-b border-slate-700 text-xs">
+              <th class="text-left pb-2 pr-4">VERSAO</th>
+              <th class="text-right pb-2 pr-4">TRADES</th>
+              <th class="text-right pb-2 pr-4">WIN RATE</th>
+              <th class="text-right pb-2 pr-4">P&L</th>
+              <th class="text-right pb-2">PIOR/MELHOR</th>
+            </tr>
+          </thead>
+          <tbody id="strategy-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="shadow-card" class="card hidden">
+      <div class="text-sm font-bold mb-4 text-slate-300">SHADOW LIVE</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div>
+          <div class="muted text-xs mb-1">ABERTOS</div>
+          <div id="shadow-open" class="text-2xl font-bold">0</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">FECHADOS</div>
+          <div id="shadow-closed" class="text-2xl font-bold">0</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">WIN RATE</div>
+          <div id="shadow-win" class="text-2xl font-bold">0%</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">P&L TEORICO</div>
+          <div id="shadow-pnl" class="text-2xl font-bold">0%</div>
+        </div>
+      </div>
+      <div id="shadow-compare" class="muted text-xs mt-4"></div>
+    </div>
+
+    <div id="replay-card" class="card hidden">
+      <div class="text-sm font-bold mb-4 text-slate-300">REPLAY HISTORICO</div>
+      <div id="replay-empty" class="text-center muted py-8 text-sm hidden">
+        Snapshots insuficientes para replay.
+      </div>
+      <div id="replay-content" class="hidden">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div>
+            <div class="muted text-xs mb-1">P&L SIMULADO</div>
+            <div id="replay-pnl" class="text-2xl font-bold">0%</div>
+          </div>
+          <div>
+            <div class="muted text-xs mb-1">TRADES</div>
+            <div id="replay-trades" class="text-2xl font-bold">0</div>
+          </div>
+          <div>
+            <div class="muted text-xs mb-1">MUDOU SINAL</div>
+            <div id="replay-signal-rate" class="text-2xl font-bold">0%</div>
+          </div>
+          <div>
+            <div class="muted text-xs mb-1">MUDOU ACEITE</div>
+            <div id="replay-accept-rate" class="text-2xl font-bold">0%</div>
+          </div>
+        </div>
+        <div id="replay-window" class="muted text-xs mb-4"></div>
+        <div id="replay-changes" class="grid md:grid-cols-2 gap-2 text-xs"></div>
+      </div>
+    </div>
+
+    <!-- Estado do bot -->
+    <div id="bot-state-card" class="card hidden">
+      <div class="text-sm font-bold mb-4 text-slate-300">ESTADO DO BOT — ÚLTIMO TICK</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div>
+          <div class="muted text-xs mb-1">SINAL</div>
+          <div id="st-signal" class="text-sm font-bold">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">REGIME</div>
+          <div id="st-regime" class="text-sm font-bold">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">CONFIANÇA</div>
+          <div id="st-confidence" class="text-sm font-bold">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">PRÓX. VELA</div>
+          <div id="st-next" class="text-sm font-bold">—</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div>
+          <div class="muted text-xs mb-1">RSI</div>
+          <div id="st-rsi" class="text-sm">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">MA RÁPIDA / LENTA</div>
+          <div id="st-ma" class="text-sm">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">ADX / VOL</div>
+          <div id="st-adx" class="text-sm">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">ÚLTIMO TICK</div>
+          <div id="st-at" class="muted text-xs">—</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+        <div>
+          <div class="muted text-xs mb-1">ATR (volatilidade)</div>
+          <div id="st-atr" class="text-sm">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">BREAKOUT SCORE</div>
+          <div id="st-bk" class="text-sm font-bold">—</div>
+        </div>
+        <div>
+          <div class="muted text-xs mb-1">HV (vol. histórica)</div>
+          <div id="st-hv" class="text-sm">—</div>
+        </div>
+      </div>
+      <div id="st-trailing" class="muted text-xs mt-3 hidden"></div>
+    </div>
+
+    <!-- Equity curve -->
+    <div class="card">
+      <div class="text-sm font-bold mb-4 text-slate-300">EQUITY CURVE</div>
+      <div id="chart-empty" class="text-center muted py-12 text-sm hidden">
+        Sem trades ainda — o gráfico aparece após o primeiro trade fechado.
+      </div>
+      <div id="chart-container">
+        <canvas id="equityChart" height="90"></canvas>
+      </div>
+    </div>
+
+    <!-- Trades recentes -->
+    <div class="card">
+      <div class="text-sm font-bold mb-4 text-slate-300">TRADES RECENTES</div>
+      <div id="trades-empty" class="text-center muted py-8 text-sm hidden">
+        Nenhum trade fechado ainda.
+      </div>
+      <div id="trades-table-wrap" class="overflow-x-auto hidden">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="muted border-b border-slate-700 text-xs">
+              <th class="text-left pb-2 pr-4">DATA</th>
+              <th class="text-left pb-2 pr-4">SINAL</th>
+              <th class="text-right pb-2 pr-4">ENTRADA</th>
+              <th class="text-right pb-2 pr-4">SAÍDA</th>
+              <th class="text-right pb-2 pr-4">QTD</th>
+              <th class="text-right pb-2 pr-4">P&amp;L</th>
+              <th class="text-right pb-2">%</th>
+            </tr>
+          </thead>
+          <tbody id="trades-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Atividade recente -->
+    <div class="card">
+      <div class="text-sm font-bold mb-4 text-slate-300">ATIVIDADE RECENTE</div>
+      <div id="log-empty" class="text-center muted py-8 text-sm hidden">
+        Nenhuma atividade registrada ainda.
+      </div>
+      <div id="log-feed" class="space-y-1 font-mono text-xs hidden"></div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="text-center muted text-xs pb-6">
+    Atualiza automaticamente a cada 60s &nbsp;·&nbsp; próxima em <span id="countdown">60</span>s
+  </div>
+
+<script>
+  let chart = null;
+
+  const fmt = (n, d=2) => n == null ? '—' :
+    n.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+  const fmtDate = iso => iso ? iso.slice(0,16).replace('T',' ') : '—';
+  const pnlClass = v => v == null ? '' : v >= 0 ? 'up' : 'down';
+  const sign = v => v >= 0 ? '+' : '';
+
+  async function refresh() {
+    try {
+      const [s, trades, log] = await Promise.all([
+        fetch('/api/status').then(r => r.json()),
+        fetch('/api/trades').then(r => r.json()),
+        fetch('/api/log').then(r => r.json()),
+      ]);
+      updateCards(s);
+      updatePerfCards(s.perf);
+      updateStorageAnalytics(s.storage);
+      updateBotState(s.last_tick);
+      updateChart(s.equity);
+      updateTradesTable(trades);
+      updateLog(log);
+    } catch(e) { console.error(e); }
+  }
+
+  const LOG_COLORS = {
+    '📈': 'text-slate-300',
+    '🧠': 'text-slate-300',
+    '📊': 'text-slate-400',
+    '🟢': 'text-emerald-400',
+    '💰': 'text-emerald-400',
+    '🔴': 'text-red-400',
+    '🔔': 'text-yellow-400',
+    '🚨': 'text-red-400',
+    '⚠️': 'text-yellow-400',
+    '💤': 'text-slate-600',
+    '📍': 'text-yellow-600',
+    '💡': 'text-blue-400',
+    '🤖': 'text-blue-400',
+    '⏹':  'text-slate-500',
+  };
+
+  function logColor(msg) {
+    for (const [emoji, cls] of Object.entries(LOG_COLORS)) {
+      if (msg.includes(emoji)) return cls;
+    }
+    return 'text-slate-400';
+  }
+
+  function updateLog(entries) {
+    const empty = document.getElementById('log-empty');
+    const feed  = document.getElementById('log-feed');
+    if (!entries || entries.length === 0) {
+      empty.classList.remove('hidden');
+      feed.classList.add('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    feed.classList.remove('hidden');
+    feed.innerHTML = entries.map(e => {
+      const ts  = e.ts ? `<span class="text-slate-600 select-none mr-2">${e.ts.slice(5)}</span>` : '';
+      const cls = logColor(e.msg);
+      const msg = e.msg.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `<div class="py-0.5 border-b border-slate-800 last:border-0 ${cls}">${ts}${msg}</div>`;
+    }).join('');
+  }
+
+  function updateCards(s) {
+    // badges
+    const m = document.getElementById('badge-mode');
+    m.textContent = s.paper_trading ? 'Paper Trading' : 'Live Trading';
+    m.className = s.paper_trading ? 'badge-yellow' : 'badge-green';
+
+    const b = document.getElementById('badge-status');
+    const active = s.bot_status === 'active';
+    b.textContent = active ? '● rodando' : '○ parado';
+    b.className = active ? 'badge-green pulse' : 'badge-red';
+
+    document.getElementById('symbol').textContent    = s.symbol || 'BTC/USDT';
+    document.getElementById('live-price').textContent = s.live_price ? `$${fmt(s.live_price)}` : '—';
+    document.getElementById('updated-at').textContent = s.updated_at || '';
+
+    // saldo
+    document.getElementById('balance').textContent         = `$${fmt(s.balance)}`;
+    document.getElementById('balance-initial').textContent = `inicial: $${fmt(s.initial_balance)}`;
+
+    // pnl
+    const pEl = document.getElementById('total-pnl');
+    pEl.textContent = s.total_pnl != null ? `${sign(s.total_pnl)}$${fmt(s.total_pnl)}` : '—';
+    pEl.className   = `text-2xl font-bold ${pnlClass(s.total_pnl)}`;
+    const pPct = document.getElementById('total-pnl-pct');
+    pPct.textContent = s.total_pnl_pct != null ? `${sign(s.total_pnl_pct)}${fmt(s.total_pnl_pct)}%` : '—';
+    pPct.className   = `text-xs mt-1 ${pnlClass(s.total_pnl_pct)}`;
+
+    // win rate
+    const wr = document.getElementById('win-rate');
+    wr.textContent = s.total_trades > 0 ? `${fmt(s.win_rate,1)}%` : '—';
+    wr.className   = `text-2xl font-bold ${s.win_rate >= 50 ? 'up' : s.total_trades > 0 ? 'down' : ''}`;
+    document.getElementById('wins-total').textContent =
+      s.total_trades > 0 ? `${s.wins} vitórias / ${s.total_trades} trades` : 'sem trades ainda';
+
+    // posição
+    const pos = document.getElementById('position-status');
+    const det = document.getElementById('position-detail');
+    if (s.in_position) {
+      pos.textContent = 'COMPRADO';
+      pos.className   = 'text-2xl font-bold up';
+      const unr = s.unrealized_pnl;
+      if (unr != null) {
+        det.textContent = `entrada $${fmt(s.buy_price)} · não-realizado ${sign(unr)}$${fmt(unr)} (${sign(s.unrealized_pct)}${fmt(s.unrealized_pct)}%)`;
+        det.className   = `text-xs mt-1 ${pnlClass(unr)}`;
+      } else {
+        det.textContent = `entrada $${fmt(s.buy_price)}`;
+        det.className   = 'muted text-xs mt-1';
+      }
+    } else {
+      pos.textContent = 'AGUARDANDO';
+      pos.className   = 'text-2xl font-bold muted';
+      det.textContent = 'sem posição aberta';
+      det.className   = 'muted text-xs mt-1';
+    }
+  }
+
+  function updatePerfCards(p) {
+    if (!p || !Object.keys(p).length) return;
+    document.getElementById('perf-cards').classList.remove('hidden');
+
+    // Sharpe
+    const sh = p.sharpe;
+    const shEl = document.getElementById('perf-sharpe');
+    shEl.textContent = sh != null ? fmt(sh, 2) : '—';
+    shEl.className = sh == null ? 'text-2xl font-bold'
+                   : sh >= 1   ? 'text-2xl font-bold up'
+                   : sh >= 0.5 ? 'text-2xl font-bold text-yellow-400'
+                   :             'text-2xl font-bold down';
+
+    // Max Drawdown
+    const dd = p.max_drawdown;
+    const ddEl = document.getElementById('perf-dd');
+    ddEl.textContent = dd != null ? `${fmt(dd, 1)}%` : '—';
+    ddEl.className = dd == null ? 'text-2xl font-bold'
+                   : dd <= 5   ? 'text-2xl font-bold up'
+                   : dd <= 15  ? 'text-2xl font-bold text-yellow-400'
+                   :             'text-2xl font-bold down';
+
+    // Expectancy
+    const ex = p.expectancy;
+    const exEl = document.getElementById('perf-exp');
+    exEl.textContent = ex != null ? `${sign(ex)}$${fmt(Math.abs(ex))}` : '—';
+    exEl.className = `text-2xl font-bold ${pnlClass(ex)}`;
+    if (p.avg_win != null && p.avg_loss != null)
+      document.querySelector('#perf-exp').parentElement.querySelector('.muted.text-xs.mt-1')
+        .textContent = `win $${fmt(p.avg_win)} / loss $${fmt(Math.abs(p.avg_loss))}`;
+
+    // Profit Factor
+    const pf = p.profit_factor;
+    const pfEl = document.getElementById('perf-pf');
+    pfEl.textContent = pf != null ? (pf >= 999 ? '∞' : fmt(pf, 2)) : '—';
+    pfEl.className = pf == null ? 'text-2xl font-bold'
+                   : pf >= 1.5 ? 'text-2xl font-bold up'
+                   : pf >= 1   ? 'text-2xl font-bold text-yellow-400'
+                   :             'text-2xl font-bold down';
+  }
+
+  function updateStorageAnalytics(storage) {
+    if (!storage) return;
+    updateMaeMfeCards(storage.mae_mfe || {});
+    updateCalibration(storage.calibration || {});
+    updateRegimeTable(storage.regime_performance || []);
+    updateSignalDecisions(storage.signal_decisions || {}, storage.advisory || {});
+    updateAiDecision(storage.ai_decision || {});
+    updateConfidenceTable(storage.confidence_performance || []);
+    updateStrategyVersions(storage.strategy_versions || []);
+    updateShadowLive(storage.shadow || {}, storage.shadow_compare || {});
+    updateReplay(storage.replay || {});
+  }
+
+  function updateMaeMfeCards(m) {
+    if (!m || !m.total_trades) return;
+    document.getElementById('storage-cards').classList.remove('hidden');
+
+    const avgMae = m.avg_mae;
+    const worstMae = m.worst_mae;
+    const avgMfe = m.avg_mfe;
+    const bestMfe = m.best_mfe;
+
+    const maeEl = document.getElementById('mae-avg');
+    maeEl.textContent = avgMae != null ? `${fmt(avgMae, 2)}%` : '—';
+    maeEl.className = avgMae == null ? 'text-2xl font-bold'
+                    : avgMae > -1.5 ? 'text-2xl font-bold up'
+                    : avgMae > -4   ? 'text-2xl font-bold text-yellow-400'
+                    :                 'text-2xl font-bold down';
+    document.getElementById('mae-worst').textContent =
+      worstMae != null ? `pior: ${fmt(worstMae, 2)}%` : 'pior: —';
+
+    const mfeEl = document.getElementById('mfe-avg');
+    mfeEl.textContent = avgMfe != null ? `${sign(avgMfe)}${fmt(avgMfe, 2)}%` : '—';
+    mfeEl.className = avgMfe == null ? 'text-2xl font-bold'
+                    : avgMfe >= 3   ? 'text-2xl font-bold up'
+                    : avgMfe >= 1   ? 'text-2xl font-bold text-yellow-400'
+                    :                 'text-2xl font-bold down';
+    document.getElementById('mfe-best').textContent =
+      bestMfe != null ? `melhor: ${sign(bestMfe)}${fmt(bestMfe, 2)}%` : 'melhor: —';
+
+    document.getElementById('mae-split').textContent =
+      `${pctText(m.avg_mae_winners)} / ${pctText(m.avg_mae_losers)}`;
+    document.getElementById('mfe-split').textContent =
+      `${pctText(m.avg_mfe_winners)} / ${pctText(m.avg_mfe_losers)}`;
+  }
+
+  function updateCalibration(c) {
+    if (!c || !c.total_trades) return;
+    document.getElementById('storage-cards').classList.remove('hidden');
+    document.getElementById('cal-stop').textContent = pctText(c.suggested_stop_loss_pct);
+    document.getElementById('cal-take').textContent = pctText(c.suggested_take_profit_pct);
+  }
+
+  function updateRegimeTable(regimes) {
+    const card = document.getElementById('regime-card');
+    const empty = document.getElementById('regime-empty');
+    const wrap = document.getElementById('regime-table-wrap');
+    const tbody = document.getElementById('regime-body');
+    card.classList.remove('hidden');
+
+    if (!regimes || regimes.length === 0) {
+      empty.classList.remove('hidden');
+      wrap.classList.add('hidden');
+      return;
+    }
+
+    empty.classList.add('hidden');
+    wrap.classList.remove('hidden');
+    tbody.innerHTML = regimes.map(r => {
+      const pnl = r.net_pnl ?? 0;
+      const cls = pnl >= 0 ? 'up' : 'down';
+      return `
+        <tr class="table-row border-b border-slate-800">
+          <td class="py-2 pr-4 text-xs">${r.regime || 'unknown'}</td>
+          <td class="py-2 pr-4 text-right text-xs">${r.total_trades || 0}</td>
+          <td class="py-2 pr-4 text-right text-xs">${fmt(r.win_rate || 0, 1)}%</td>
+          <td class="py-2 pr-4 text-right text-xs font-bold ${cls}">${sign(pnl)}$${fmt(pnl)}</td>
+          <td class="py-2 pr-4 text-right text-xs ${pnlClass(r.avg_pnl)}">${moneyText(r.avg_pnl)}</td>
+          <td class="py-2 pr-4 text-right text-xs">${pctText(r.avg_mae)}</td>
+          <td class="py-2 text-right text-xs">${pctText(r.avg_mfe)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  const pctText = v => v == null ? '—' : `${sign(v)}${fmt(v, 2)}%`;
+  const moneyText = v => v == null ? '—' : `${v >= 0 ? '+' : '-'}$${fmt(Math.abs(v))}`;
+
+  function updateSignalDecisions(s, advisory) {
+    const card = document.getElementById('decision-card');
+    card.classList.remove('hidden');
+    document.getElementById('sig-accepted').textContent = s.accepted_decisions ?? 0;
+    document.getElementById('sig-rejected').textContent = s.rejected_decisions ?? 0;
+    document.getElementById('sig-rate').textContent = pctText(s.acceptance_rate ?? 0);
+    document.getElementById('advisory-mode').textContent =
+      advisory && advisory.auto_apply === false ? 'ADVISORY' : '—';
+
+    const reasons = s.by_reason || [];
+    document.getElementById('decision-reasons').innerHTML = reasons.length
+      ? reasons.slice(0, 8).map(r => `
+          <div class="border border-slate-800 rounded p-2 flex items-center justify-between">
+            <span>${r.reason || 'unknown'} ${r.accepted ? '(aceito)' : '(rejeitado)'}</span>
+            <span class="${r.accepted ? 'up' : 'text-yellow-400'}">${r.count || 0}</span>
+          </div>`).join('')
+      : '<div class="muted">Sem decisões registradas ainda.</div>';
+
+    const recs = advisory.recommendations || [];
+    document.getElementById('advisory-list').innerHTML = recs.length
+      ? recs.slice(0, 5).map(r => `
+          <div class="border border-slate-800 rounded p-2">
+            <span class="muted">${r.type || 'advisory'}</span>
+            <div>${r.message || ''}</div>
+          </div>`).join('')
+      : '<div class="muted">Sem recomendações no modo advisory.</div>';
+  }
+
+  function updateConfidenceTable(rows) {
+    const card = document.getElementById('confidence-card');
+    const empty = document.getElementById('confidence-empty');
+    const wrap = document.getElementById('confidence-table-wrap');
+    const tbody = document.getElementById('confidence-body');
+    card.classList.remove('hidden');
+
+    if (!rows || rows.length === 0) {
+      empty.classList.remove('hidden');
+      wrap.classList.add('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    wrap.classList.remove('hidden');
+    tbody.innerHTML = rows.map(r => {
+      const bucket = r.confidence_bucket ?? 0;
+      const pnl = r.net_pnl ?? 0;
+      return `
+        <tr class="table-row border-b border-slate-800">
+          <td class="py-2 pr-4 text-xs">${bucket}-${bucket + 9}</td>
+          <td class="py-2 pr-4 text-right text-xs">${r.total_trades || 0}</td>
+          <td class="py-2 pr-4 text-right text-xs">${fmt(r.win_rate || 0, 1)}%</td>
+          <td class="py-2 pr-4 text-right text-xs font-bold ${pnlClass(pnl)}">${moneyText(pnl)}</td>
+          <td class="py-2 text-right text-xs ${pnlClass(r.avg_pnl)}">${moneyText(r.avg_pnl)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  function updateStrategyVersions(rows) {
+    const card = document.getElementById('strategy-card');
+    const empty = document.getElementById('strategy-empty');
+    const wrap = document.getElementById('strategy-table-wrap');
+    const tbody = document.getElementById('strategy-body');
+    card.classList.remove('hidden');
+    if (!rows || rows.length === 0) {
+      empty.classList.remove('hidden');
+      wrap.classList.add('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    wrap.classList.remove('hidden');
+    tbody.innerHTML = rows.map(r => {
+      const pnl = r.net_pnl ?? 0;
+      return `
+        <tr class="table-row border-b border-slate-800">
+          <td class="py-2 pr-4 text-xs">${r.strategy_version || 'v1.0'}</td>
+          <td class="py-2 pr-4 text-right text-xs">${r.total_trades || 0}</td>
+          <td class="py-2 pr-4 text-right text-xs">${fmt(r.win_rate || 0, 1)}%</td>
+          <td class="py-2 pr-4 text-right text-xs font-bold ${pnlClass(pnl)}">${moneyText(pnl)}</td>
+          <td class="py-2 text-right text-xs">${pctText(r.worst_trade_pct)} / ${pctText(r.best_trade_pct)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  function updateAiDecision(ai) {
+    const card = document.getElementById('ai-card');
+    const actions = ai.actions || [];
+    card.classList.remove('hidden');
+    document.getElementById('ai-mode').textContent = ai.mode || '—';
+    document.getElementById('ai-human').textContent =
+      ai.human_review_required === false ? 'NAO' : 'SIM';
+    document.getElementById('ai-actions-count').textContent = actions.length;
+    document.getElementById('ai-live').textContent = ai.live_auto_apply ? 'AUTO' : 'VALIDADO';
+    document.getElementById('ai-actions').innerHTML = actions.length
+      ? actions.slice(0, 8).map(a => `
+          <div class="border border-slate-800 rounded p-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="muted">${a.type || 'acao'} · ${a.stage || 'observe'}</span>
+              <span>${a.confidence || 0}%</span>
+            </div>
+            <div class="font-bold">${a.decision || ''}</div>
+            <div class="muted">${a.reason || ''}</div>
+          </div>`).join('')
+      : '<div class="muted">IA sem acao operacional com os dados atuais.</div>';
+  }
+
+  function updateShadowLive(s, compare) {
+    const total = s.total || 0;
+    if (!total) return;
+    document.getElementById('shadow-card').classList.remove('hidden');
+    document.getElementById('shadow-open').textContent = s.open || 0;
+    document.getElementById('shadow-closed').textContent = s.closed || 0;
+    document.getElementById('shadow-win').textContent = pctText(s.win_rate || 0);
+    const pnl = s.net_pnl_pct || 0;
+    const pnlEl = document.getElementById('shadow-pnl');
+    pnlEl.textContent = pctText(pnl);
+    pnlEl.className = `text-2xl font-bold ${pnlClass(pnl)}`;
+    const cmp = compare || {};
+    document.getElementById('shadow-compare').textContent =
+      cmp.pairs ? `Shadow pareado com paper/live: ${cmp.pairs} pares | delta medio ${pctText(cmp.avg_delta_pct || 0)}` : 'Sem pares shadow vs paper/live ainda.';
+  }
+
+  function updateReplay(r) {
+    const card = document.getElementById('replay-card');
+    const empty = document.getElementById('replay-empty');
+    const content = document.getElementById('replay-content');
+    card.classList.remove('hidden');
+    if (!r || !r.ready) {
+      empty.classList.remove('hidden');
+      content.classList.add('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    content.classList.remove('hidden');
+    const pnl = r.net_pnl_pct || 0;
+    const pnlEl = document.getElementById('replay-pnl');
+    pnlEl.textContent = pctText(pnl);
+    pnlEl.className = `text-2xl font-bold ${pnlClass(pnl)}`;
+    document.getElementById('replay-trades').textContent = r.trades || 0;
+    document.getElementById('replay-signal-rate').textContent = pctText(r.change_rate || 0);
+    document.getElementById('replay-accept-rate').textContent = pctText(r.acceptance_change_rate || 0);
+    document.getElementById('replay-window').textContent =
+      `${r.frames || 0} candles | ${r.start || ''} ate ${r.end || ''} | win rate ${fmt(r.win_rate || 0, 1)}% | DD ${pctText(r.max_drawdown || 0)}`;
+
+    const blocked = ((r.blocked_outcomes || {}).by_reason || []).slice(0, 3)
+      .map(b => `${b.reason}: ${pctText(b.avg_pnl_pct)} avg em ${b.count} sinais`)
+      .join(' | ');
+    if (blocked) {
+      document.getElementById('replay-window').textContent += ` | bloqueados: ${blocked}`;
+    }
+
+    const changes = r.recent_changes || [];
+    document.getElementById('replay-changes').innerHTML = changes.length
+      ? changes.map(c => `
+          <div class="border border-slate-800 rounded p-2">
+            <div class="muted">${(c.timestamp || '').slice(0, 16).replace('T', ' ')}</div>
+            <div>${c.old_signal || '—'} → ${c.new_signal || '—'}</div>
+            <div class="muted">${c.old_reason || 'sem motivo'} | ${c.old_accepted ? 'aceito' : 'rejeitado'} → ${c.new_accepted ? 'aceito' : 'rejeitado'}</div>
+          </div>`).join('')
+      : '<div class="muted">Sem divergencias recentes entre decisao antiga e replay atual.</div>';
+  }
+
+  function updateBotState(t) {
+    if (!t || !Object.keys(t).length) return;
+    document.getElementById('bot-state-card').classList.remove('hidden');
+
+    const sigEl = document.getElementById('st-signal');
+    sigEl.textContent = t.signal || '—';
+
+    const regime = (t.regime || '').replace(/_/g, ' ');
+    const regEl = document.getElementById('st-regime');
+    regEl.textContent = regime || '—';
+    regEl.className = regime.includes('up') ? 'text-sm font-bold up'
+                    : regime.includes('down') ? 'text-sm font-bold down'
+                    : 'text-sm font-bold text-slate-300';
+
+    const confEl = document.getElementById('st-confidence');
+    const conf = t.confidence ?? null;
+    confEl.textContent = conf != null ? `${conf}/100` : '—';
+    confEl.className = conf >= 70 ? 'text-sm font-bold up'
+                     : conf >= 40 ? 'text-sm font-bold text-yellow-400'
+                     : conf != null ? 'text-sm font-bold down' : 'text-sm font-bold';
+
+    const nextEl = document.getElementById('st-next');
+    if (t.next_in_secs != null) {
+      const m = Math.floor(t.next_in_secs / 60);
+      const s = t.next_in_secs % 60;
+      nextEl.textContent = m > 0 ? `${m}m ${s}s` : `${s}s`;
+    } else {
+      nextEl.textContent = '—';
+    }
+
+    const rsiEl = document.getElementById('st-rsi');
+    const rsi = t.rsi ?? null;
+    rsiEl.textContent = rsi != null ? fmt(rsi, 1) : '—';
+    rsiEl.className = rsi != null
+      ? (rsi <= 35 ? 'text-sm up' : rsi >= 65 ? 'text-sm down' : 'text-sm text-slate-300')
+      : 'text-sm';
+
+    const maEl = document.getElementById('st-ma');
+    maEl.textContent = (t.ma_fast != null && t.ma_slow != null)
+      ? `$${fmt(t.ma_fast)} / $${fmt(t.ma_slow)}` : '—';
+    if (t.ma_fast != null && t.ma_slow != null)
+      maEl.className = t.ma_fast > t.ma_slow ? 'text-sm up' : 'text-sm down';
+
+    document.getElementById('st-adx').textContent =
+      [t.adx != null ? `ADX ${fmt(t.adx,1)}` : null,
+       t.volume_ratio != null ? `Vol ${fmt(t.volume_ratio,2)}x` : null]
+      .filter(Boolean).join(' · ') || '—';
+
+    // ATR
+    const atrEl = document.getElementById('st-atr');
+    if (t.atr != null) {
+      atrEl.textContent = `$${fmt(t.atr)}`;
+      atrEl.className   = 'text-sm text-slate-300';
+    } else { atrEl.textContent = '—'; }
+
+    // Breakout score
+    const bkEl = document.getElementById('st-bk');
+    const bk   = t.breakout_score ?? null;
+    bkEl.textContent = bk != null ? `${fmt(bk,0)}/100` : '—';
+    bkEl.className   = bk == null ? 'text-sm font-bold'
+                     : bk >= 60  ? 'text-sm font-bold up'
+                     : bk >= 35  ? 'text-sm font-bold text-yellow-400'
+                     :             'text-sm font-bold down';
+
+    // HV
+    const hvEl = document.getElementById('st-hv');
+    const hv   = t.hv ?? null;
+    hvEl.textContent = hv != null ? `${fmt(hv,0)}% a.a.` : '—';
+    hvEl.className   = hv == null ? 'text-sm'
+                     : hv < 60  ? 'text-sm up'
+                     : hv < 100 ? 'text-sm text-yellow-400'
+                     :             'text-sm down';
+
+    document.getElementById('st-at').textContent = t.last_tick_at || '—';
+
+    const trailEl = document.getElementById('st-trailing');
+    if (t.trailing_stop) {
+      trailEl.textContent = `Trailing stop: ${t.trailing_stop}`;
+      trailEl.classList.remove('hidden');
+    } else {
+      trailEl.classList.add('hidden');
+    }
+  }
+
+  function updateChart(equity) {
+    const empty = document.getElementById('chart-empty');
+    const cont  = document.getElementById('chart-container');
+    if (!equity || equity.length === 0) {
+      empty.classList.remove('hidden');
+      cont.classList.add('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    cont.classList.remove('hidden');
+
+    const labels = equity.map(p => p.t);
+    const values = equity.map(p => p.v);
+
+    if (chart) {
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = values;
+      chart.update();
+      return;
+    }
+
+    chart = new Chart(document.getElementById('equityChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.07)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: values.length > 30 ? 0 : 4,
+          pointHoverRadius: 5,
+          pointBackgroundColor: '#10b981',
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => ` $${fmt(c.parsed.y)}` } }
+        },
+        scales: {
+          x: { ticks: { color:'#64748b', maxTicksLimit:8 }, grid: { color:'#1e293b' } },
+          y: { ticks: { color:'#64748b', callback: v => `$${fmt(v,0)}` }, grid: { color:'#334155' } }
+        }
+      }
+    });
+  }
+
+  function updateTradesTable(trades) {
+    const empty = document.getElementById('trades-empty');
+    const wrap  = document.getElementById('trades-table-wrap');
+    const tbody = document.getElementById('trades-body');
+
+    if (!trades || trades.length === 0) {
+      empty.classList.remove('hidden');
+      wrap.classList.add('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    wrap.classList.remove('hidden');
+
+    tbody.innerHTML = trades.map(t => {
+      const pnl    = t.pnl ?? 0;
+      const pnlPct = t.pnl_pct ?? 0;
+      const cls    = pnl >= 0 ? 'up' : 'down';
+      const signal = (t.signal || 'VENDA').replace(/_/g,' ');
+      return `
+        <tr class="table-row border-b border-slate-800">
+          <td class="py-2 pr-4 muted text-xs">${fmtDate(t.timestamp)}</td>
+          <td class="py-2 pr-4 text-xs">${signal}</td>
+          <td class="py-2 pr-4 text-right text-xs muted">$${fmt(t.buy_price ?? t.price)}</td>
+          <td class="py-2 pr-4 text-right text-xs">$${fmt(t.price)}</td>
+          <td class="py-2 pr-4 text-right text-xs muted">${t.amount ? fmt(t.amount,6) : '—'}</td>
+          <td class="py-2 pr-4 text-right text-xs font-bold ${cls}">${sign(pnl)}$${fmt(pnl)}</td>
+          <td class="py-2 text-right text-xs ${cls}">${sign(pnlPct)}${fmt(pnlPct)}%</td>
+        </tr>`;
+    }).join('');
+  }
+
+  // Countdown + auto-refresh
+  let secs = 60;
+  setInterval(() => {
+    secs--;
+    if (secs <= 0) { secs = 60; refresh(); }
+    document.getElementById('countdown').textContent = secs;
+  }, 1000);
+
+  refresh();
+</script>
+</body>
+</html>
