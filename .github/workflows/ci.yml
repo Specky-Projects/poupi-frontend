@@ -11,6 +11,7 @@ jobs:
     name: Frontend checks
     runs-on: ubuntu-latest
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       NEXT_PUBLIC_API_URL: https://api.example.com
       BACKEND_URL: https://api.example.com
       NEXT_PUBLIC_SITE_URL: https://www.example.com
