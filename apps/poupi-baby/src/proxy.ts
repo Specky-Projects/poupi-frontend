@@ -3,14 +3,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-const PROTECTED_ROUTES = ['/dashboard', '/alertas', '/billing', '/admin'];
+const PROTECTED_ROUTES = ['/dashboard', '/alertas', '/billing', '/conta', '/admin'];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  if (pathname === '/') {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
 
   if (pathname === '/operacional') {
     return NextResponse.redirect(new URL('/admin/dashboard', request.url));
@@ -60,5 +56,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/operacional', '/dashboard/:path*', '/alertas/:path*', '/billing/:path*', '/admin/:path*'],
+  matcher: ['/operacional', '/dashboard/:path*', '/alertas/:path*', '/billing/:path*', '/conta/:path*', '/admin/:path*'],
 };

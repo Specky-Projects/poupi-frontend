@@ -8,6 +8,7 @@ type Profile = {
   email: string;
   phone?: string | null;
   emailVerified: boolean;
+  telegramChatId?: string | null;
 };
 
 export default function AccountPage() {
@@ -19,6 +20,8 @@ export default function AccountPage() {
   const [newPassword, setNewPassword] = useState('');
   const [code, setCode] = useState('');
   const [devCode, setDevCode] = useState<string | null>(null);
+  const [telegramToken, setTelegramToken] = useState<string | null>(null);
+  const [telegramExpiresIn, setTelegramExpiresIn] = useState<number | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -104,6 +107,39 @@ export default function AccountPage() {
     await loadProfile();
   }
 
+  async function generateTelegramToken() {
+    setError(null);
+    setMessage(null);
+    const res = await fetch('/api/account/telegram-link-token', { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setError(data?.message || 'Nao foi possivel gerar o token do Telegram.');
+      return;
+    }
+    setTelegramToken(data.token);
+    setTelegramExpiresIn(data.expiresInSeconds ?? null);
+    setMessage('Token do Telegram gerado.');
+  }
+
+  async function disconnectTelegram() {
+    setError(null);
+    setMessage(null);
+    const res = await fetch('/api/account', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telegramChatId: null }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setError(data?.message || 'Nao foi possivel desconectar o Telegram.');
+      return;
+    }
+    setProfile(data);
+    setTelegramToken(null);
+    setTelegramExpiresIn(null);
+    setMessage('Telegram desconectado.');
+  }
+
   return (
     <main className="min-h-screen bg-[#fbfaf7] px-4 py-8 text-[#201335]">
       <div className="mx-auto max-w-4xl">
@@ -156,6 +192,47 @@ export default function AccountPage() {
                 {devCode && <div className="rounded-lg bg-[#f5efff] px-3 py-2 text-sm text-[#3a176e]">Código de teste: <strong>{devCode}</strong></div>}
                 <input value={code} onChange={(e) => setCode(e.target.value)} className="h-11 rounded-lg border border-[#eadff7] px-3 outline-none focus:border-[#6c2bd9]" placeholder="Digite o código" />
                 <button onClick={confirmEmail} className="rounded-lg bg-[#58bd7a] px-4 py-2 text-sm font-semibold text-white">Confirmar e-mail</button>
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-lg border border-[#eadff7] bg-white p-5 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold">Telegram</h2>
+                <p className="mt-1 text-sm text-[#675b77]">Conecte sua conta para receber alertas no Telegram.</p>
+              </div>
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${profile?.telegramChatId ? 'bg-[#e8f8ee] text-[#2f8a51]' : 'bg-[#fff6de] text-[#9a6a00]'}`}>
+                {profile?.telegramChatId ? 'Conectado' : 'Pendente'}
+              </span>
+            </div>
+
+            {profile?.telegramChatId ? (
+              <div className="mt-5">
+                <p className="text-sm text-[#675b77]">Seu Telegram ja esta pronto para receber alertas de preco.</p>
+                <button onClick={disconnectTelegram} className="mt-4 rounded-lg border border-[#f2dada] px-4 py-2 text-sm font-semibold text-[#b13a3a] hover:bg-[#fff1f1]">
+                  Desconectar Telegram
+                </button>
+              </div>
+            ) : (
+              <div className="mt-5 grid gap-3">
+                <button onClick={generateTelegramToken} className="rounded-lg border border-[#6c2bd9] px-4 py-2 text-sm font-semibold text-[#6c2bd9]">
+                  Gerar token de conexao
+                </button>
+                {telegramToken && (
+                  <div className="rounded-lg bg-[#f5efff] p-3 text-sm text-[#3a176e]">
+                    <p className="font-semibold">Envie este comando para o bot Poupi Baby:</p>
+                    <code className="mt-2 block break-all rounded bg-white px-3 py-2 text-xs text-[#201335]">
+                      /start {telegramToken}
+                    </code>
+                    {telegramExpiresIn && (
+                      <p className="mt-2 text-xs text-[#675b77]">Valido por {Math.round(telegramExpiresIn / 60)} minutos.</p>
+                    )}
+                    <button onClick={loadProfile} className="mt-3 text-xs font-semibold text-[#6c2bd9] hover:underline">
+                      Ja enviei, verificar status
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </section>
