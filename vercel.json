@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm --filter @poupi-frontend/poupi-baby build",
+  "outputDirectory": "apps/poupi-baby/.next",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": "nextjs"
+}
