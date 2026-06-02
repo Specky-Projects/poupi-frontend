@@ -271,10 +271,10 @@ export function DealScoreWidget({ data }: { data: DealScoreData | null | undefin
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#111827' }}>
-            Deal Score
+            💚 Economia Inteligente
           </h3>
           <p style={{ margin: '3px 0 0', fontSize: 12, color: '#9ca3af' }}>
-            Inteligência de compra — {context.pricePoints} pontos de dados · {context.daysMonitored}d monitorados
+            {context.pricePoints} pontos de dados · {context.daysMonitored} dias monitorados
           </p>
         </div>
 
@@ -428,7 +428,7 @@ export function MiniScoreBadge({ score, emoji, label, color }: {
 }) {
   return (
     <div
-      title={`Deal Score: ${score}/100 — ${emoji} ${label}`}
+      title={`💚 Economia Inteligente: ${score}/100 — ${emoji} ${label}`}
       style={{
         display:        'inline-flex',
         alignItems:     'center',

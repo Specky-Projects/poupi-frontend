@@ -100,9 +100,10 @@ export default async function CategoryPage({ params }: Props) {
           </header>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((p) => {
+            {products.map((p, index) => {
               const bestOffer = p.offers[0] ?? null;
               const bestPrice = bestOffer ? Number(bestOffer.currentPrice ?? bestOffer.price) : null;
+              const pricePerUnit = bestOffer?.pricePerUnit ? Number(bestOffer.pricePerUnit) : null;
               const name = p.canonicalName || p.title;
               return (
                 <a
@@ -115,22 +116,27 @@ export default async function CategoryPage({ params }: Props) {
                       ? <img src={p.imageUrl} alt={name} width={56} height={56} className="h-14 w-14 rounded-lg object-contain" />
                       : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-[#EEF2FF] text-2xl">📦</div>}
                     <div className="min-w-0 flex-1">
+                      {index === 0 && (
+                        <span className="mb-1 inline-block rounded-full bg-[#e8f8ee] px-2 py-0.5 text-[11px] font-semibold text-[#2f8a51]">🏆 Melhor preço</span>
+                      )}
                       {p.brand && <p className="text-xs font-semibold text-[#5B4CF0]">{p.brand}</p>}
                       <h2 className="mt-0.5 line-clamp-2 text-sm font-semibold">{name}</h2>
                       {p.variantLabel && <p className="mt-0.5 text-xs text-[#5B607C]">{p.variantLabel}</p>}
                     </div>
                   </div>
-                  <div className="mt-3 flex items-end justify-between">
-                    <div>
-                      {bestPrice
-                        ? <p className="text-lg font-bold text-[#5B4CF0]">{money(bestPrice)}</p>
-                        : <p className="text-sm text-[#8A8FB1]">Indisponível</p>}
-                      {bestOffer?.pricePerUnit && (
-                        <p className="text-xs text-[#5B607C]">{money(Number(bestOffer.pricePerUnit))}/un</p>
-                      )}
-                    </div>
+                  <div className="mt-3">
+                    {pricePerUnit ? (
+                      <>
+                        <p className="text-xl font-black text-[#5B4CF0]">{money(pricePerUnit)}<span className="ml-1 text-xs font-semibold text-[#5B607C]">/un</span></p>
+                        <p className="text-sm text-[#5B607C]">{bestPrice ? money(bestPrice) : ''} total</p>
+                      </>
+                    ) : bestPrice ? (
+                      <p className="text-xl font-black text-[#5B4CF0]">{money(bestPrice)}</p>
+                    ) : (
+                      <p className="text-sm text-[#8A8FB1]">Indisponível</p>
+                    )}
                     {bestOffer?.marketplace?.name && (
-                      <p className="text-xs text-[#8A8FB1]">{bestOffer.marketplace.name}</p>
+                      <p className="mt-1 text-xs text-[#8A8FB1]">🛒 {bestOffer.marketplace.name}</p>
                     )}
                   </div>
                 </a>

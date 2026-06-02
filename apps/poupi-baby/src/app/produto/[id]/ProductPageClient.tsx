@@ -79,6 +79,15 @@ function formatDate(iso?: string | null) {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
+function scrapedStatus(iso?: string | null): string {
+  if (!iso) return '⚠️ Não verificado';
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+  if (days === 0) return '✅ Verificado hoje';
+  if (days <= 2) return `🕐 Verificado há ${days} dia${days > 1 ? 's' : ''}`;
+  if (days <= 7) return `🕐 Verificado há ${days} dias`;
+  return `⚠️ Verificado há ${days} dias`;
+}
+
 function normalizeProductResponse(raw: any): ProductDetail {
   if (raw?.product) {
     return {
@@ -251,13 +260,21 @@ export function ProductPageClient() {
               </div>
 
               <div className="rounded-lg bg-[#EEF2FF] p-4">
-                <div className="text-sm font-medium text-[#5B607C]">Melhor oferta agora</div>
-                <div className="mt-2 text-3xl font-semibold text-[#5B4CF0]">{best ? money(offerPrice(best)) : '-'}</div>
-                <div className="mt-1 text-sm text-[#090A3D]">{best?.marketplace.name ?? 'Sem loja disponivel'}</div>
-                {best?.pricePerUnit && <div className="mt-1 text-xs text-[#5B607C]">{money(Number(best.pricePerUnit))} por unidade</div>}
+                <div className="text-sm font-medium text-[#5B607C]">🏆 Melhor oferta agora</div>
+                {best?.pricePerUnit && (
+                  <div className="mt-2 text-2xl font-black text-[#5B4CF0]">{money(Number(best.pricePerUnit))}<span className="ml-1 text-sm font-semibold text-[#5B607C]">/un</span></div>
+                )}
+                <div className={`${best?.pricePerUnit ? 'mt-1 text-base' : 'mt-2 text-3xl'} font-semibold text-[#090A3D]`}>{best ? money(offerPrice(best)) : '-'} <span className="text-xs font-normal text-[#5B607C]">total</span></div>
+                <div className="mt-1 text-sm text-[#5B607C]">🛒 {best?.marketplace.name ?? 'Sem loja disponível'}</div>
+                {best && <div className="mt-1 text-xs text-[#5B607C]">{scrapedStatus(best.lastValidScrapedAt ?? best.lastScrapedAt)}</div>}
                 <button onClick={() => setShowAlertModal(true)} className="mt-4 w-full rounded-lg bg-[#5B4CF0] px-4 py-2.5 text-sm font-semibold text-white">
-                  Criar alerta
+                  🔔 Criar alerta de preço
                 </button>
+                {best && (
+                  <a href={best.productUrl} target="_blank" rel="noopener noreferrer" className="mt-2 flex w-full items-center justify-center rounded-lg border border-[#5B4CF0] px-4 py-2.5 text-sm font-semibold text-[#5B4CF0] hover:bg-[#f5f3ff]">
+                    Ver oferta →
+                  </a>
+                )}
               </div>
             </div>
           </section>
@@ -335,17 +352,16 @@ export function ProductPageClient() {
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            {index === 0 && <span className="rounded-full bg-[#e8f8ee] px-2 py-1 text-xs font-semibold text-[#2f8a51]">melhor preço</span>}
-                            <span className="font-semibold">{offer.marketplace.name}</span>
-                            {!offer.availability && <span className="rounded-full bg-[#fff1f1] px-2 py-1 text-xs font-semibold text-[#b13a3a]">indisponivel</span>}
-                            {score && <span className="rounded-full bg-[#fff5d8] px-2 py-1 text-xs font-semibold text-[#8a6316]">score {score.score}/100</span>}
+                            {index === 0 && <span className="rounded-full bg-[#e8f8ee] px-2 py-1 text-xs font-semibold text-[#2f8a51]">🏆 Melhor preço</span>}
+                            <span className="font-semibold">🛒 {offer.marketplace.name}</span>
+                            {!offer.availability && <span className="rounded-full bg-[#fff1f1] px-2 py-1 text-xs font-semibold text-[#b13a3a]">indisponível</span>}
+                            {score && <span className="rounded-full bg-[#f0faf3] px-2 py-1 text-xs font-semibold text-[#2f8a51]">💚 Economia Inteligente: {score.score}/100</span>}
                           </div>
                           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#5B607C]">
-                            {offer.pricePerUnit && <span>{money(Number(offer.pricePerUnit))}/un</span>}
+                            {offer.pricePerUnit && <span className="font-semibold text-[#090A3D]">{money(Number(offer.pricePerUnit))}/un</span>}
                             {offer.originalPrice && Number(offer.originalPrice) > offerPrice(offer) && <span>de {money(Number(offer.originalPrice))}</span>}
                             {(offer.city || offer.state) && <span>{[offer.city, offer.state].filter(Boolean).join(' - ')}</span>}
-                            <span>coleta: {formatDate(offer.lastValidScrapedAt ?? offer.lastScrapedAt)}</span>
-                            {offer.scrapingStatus && <span>status: {offer.scrapingStatus}</span>}
+                            <span>{scrapedStatus(offer.lastValidScrapedAt ?? offer.lastScrapedAt)}</span>
                           </div>
                         </div>
                         <div className="flex items-center justify-between gap-3 sm:justify-end">
@@ -374,7 +390,7 @@ export function ProductPageClient() {
               </div>
 
               <div className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
-                <h2 className="mb-3 text-lg font-semibold">Sinal de oportunidade</h2>
+                <h2 className="mb-3 text-lg font-semibold">💚 Economia Inteligente</h2>
                 <DealScoreWidget data={activeScore} />
               </div>
 

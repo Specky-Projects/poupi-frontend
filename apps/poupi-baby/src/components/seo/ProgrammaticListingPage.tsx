@@ -52,6 +52,7 @@ export function ProgrammaticListingPage({
           {products.map((product, index) => {
             const bestOffer = product.offers?.[0] ?? null;
             const price = product.bestPrice ?? (bestOffer ? Number(bestOffer.currentPrice ?? bestOffer.price) : null);
+            const pricePerUnit = product.pricePerUnit ?? bestOffer?.pricePerUnit ?? null;
             const name = product.canonicalName || product.title;
             return (
               <Link key={product.id} href={`/produto/${product.slug}`} className="rounded-lg border border-[#E4E7F2] bg-white p-4 shadow-sm transition hover:border-[#cdb8ef]">
@@ -64,15 +65,27 @@ export function ProgrammaticListingPage({
                     </span>
                   )}
                   <span className="min-w-0 flex-1">
+                    {index === 0 && (
+                      <span className="mb-1 inline-block rounded-full bg-[#e8f8ee] px-2 py-0.5 text-[11px] font-semibold text-[#2f8a51]">🏆 Melhor preço</span>
+                    )}
                     <span className="line-clamp-2 text-sm font-semibold">{name}</span>
                     {(product.brand || product.category) && (
                       <span className="mt-1 block text-xs text-[#5B607C]">{[product.brand, product.category].filter(Boolean).join(' - ')}</span>
                     )}
                   </span>
                 </div>
-                <div className="mt-3 flex items-end justify-between">
-                  {price ? <p className="text-lg font-bold text-[#5B4CF0]">{money(price)}</p> : <p className="text-sm text-[#8A8FB1]">Indisponível</p>}
-                  {bestOffer?.marketplace?.name && <p className="text-xs text-[#8A8FB1]">{bestOffer.marketplace.name}</p>}
+                <div className="mt-3">
+                  {pricePerUnit ? (
+                    <>
+                      <p className="text-xl font-black text-[#5B4CF0]">{money(Number(pricePerUnit))}<span className="ml-1 text-xs font-semibold text-[#5B607C]">/un</span></p>
+                      {price && <p className="text-sm text-[#5B607C]">{money(price)} total</p>}
+                    </>
+                  ) : price ? (
+                    <p className="text-xl font-black text-[#5B4CF0]">{money(price)}</p>
+                  ) : (
+                    <p className="text-sm text-[#8A8FB1]">Indisponível</p>
+                  )}
+                  {bestOffer?.marketplace?.name && <p className="mt-1 text-xs text-[#8A8FB1]">🛒 {bestOffer.marketplace.name}</p>}
                 </div>
               </Link>
             );

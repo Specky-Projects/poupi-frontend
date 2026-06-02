@@ -15,18 +15,18 @@ const categories = [
 ];
 
 const benefits = [
-  { title: 'Comparação em segundos', description: 'Veja onde o mesmo produto está mais barato sem abrir várias abas.', icon: 'ti-clock' },
-  { title: 'Alertas de preço', description: 'Receba aviso quando fraldas, fórmulas ou itens essenciais baixarem.', icon: 'ti-bell-ringing' },
-  { title: 'Histórico de preços', description: 'Entenda se a oferta esta realmente boa antes de comprar.', icon: 'ti-chart-line' },
-  { title: 'Economia real', description: 'Compare preço por unidade e evite promoções que parecem melhores do que são.', icon: 'ti-coin' },
-  { title: 'Centenas de lojas', description: 'Acompanhe ofertas em farmácias, marketplaces e lojas infantis conectadas.', icon: 'ti-building-store' },
+  { title: 'Compare preços de fraldas', description: 'Veja onde o mesmo produto está mais barato sem abrir várias abas.', icon: 'ti-clock' },
+  { title: 'Receba alertas de queda', description: 'Avisamos quando fraldas, fórmulas ou itens essenciais baixarem de preço.', icon: 'ti-bell-ringing' },
+  { title: 'Histórico de preços', description: 'Veja se a oferta é realmente boa — ou se o preço "cheio" é o preço normal.', icon: 'ti-chart-line' },
+  { title: '💚 Economia Inteligente', description: 'Compare preço por unidade e evite promoções que parecem melhores do que são.', icon: 'ti-coin' },
+  { title: 'Monitoramos preços diariamente', description: 'Acompanhe ofertas em farmácias, marketplaces e lojas infantis conectadas.', icon: 'ti-building-store' },
   { title: 'Gratuito', description: 'Comece a buscar e criar alertas sem compromisso.', icon: 'ti-circle-check' },
 ];
 
 const steps = [
-  ['Busque um produto', 'Digite o nome ou cole o link do item que você precisa comprar.'],
-  ['Comparamos os preços', 'O Radar do Berço organiza ofertas, lojas e histórico em uma única tela.'],
-  ['Você economiza', 'Escolha a melhor oferta ou ative um alerta para comprar no momento certo.'],
+  ['Busque o produto', 'Digite "fralda Pampers G" ou o nome do item que você precisa.'],
+  ['Comparamos as lojas', 'Organizamos preços, histórico e custo por unidade em uma tela só.'],
+  ['Você economiza', 'Compre agora na melhor loja ou ative um alerta para o momento certo.'],
 ];
 
 const monitoredStores = [
@@ -91,7 +91,7 @@ export default function Home() {
               </a>
             </div>
             <div className="mt-7 grid gap-3 text-sm font-semibold text-[#17183F] sm:grid-cols-4">
-              {['100% gratuito', 'Comparação em segundos', 'Alertas de preço', 'Cupons e promoções'].map((item) => (
+              {['100% gratuito', 'Compare preços de fraldas', 'Alertas de queda', 'Monitoramos diariamente'].map((item) => (
                 <div key={item} className="flex items-center gap-2">
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF2FF] text-[#5B4CF0]">
                     <i className="ti ti-sparkles" />
