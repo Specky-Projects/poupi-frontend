@@ -3,11 +3,10 @@ import { getBackendUrl } from '@/lib/backend-url';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { CategoryGrid } from '@/components/CategoryGrid';
 
 const BACKEND  = getBackendUrl("3001");
 const SITE_URL = getSiteUrl();
-
-const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 async function fetchCategory(slug: string) {
   try {
@@ -99,64 +98,7 @@ export default async function CategoryPage({ params }: Props) {
             </p>
           </header>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((p, index) => {
-              const bestOffer = p.offers[0] ?? null;
-              const bestPrice = bestOffer ? Number(bestOffer.currentPrice ?? bestOffer.price) : null;
-              const pricePerUnit = bestOffer?.pricePerUnit ? Number(bestOffer.pricePerUnit) : null;
-              const name = p.canonicalName || p.title;
-              const offerHref = bestOffer?.offerUrl || bestOffer?.productUrl || null;
-              const marketplaceName = bestOffer?.marketplaceName || bestOffer?.marketplace?.name;
-              return (
-                <article
-                  key={p.id}
-                  className="rounded-lg border border-[#E4E7F2] bg-white p-4 shadow-sm transition hover:border-[#cdb8ef]"
-                >
-                  <Link href={`/produto/${p.slug}`} className="block">
-                    <div className="flex items-start gap-3">
-                      {p.imageUrl
-                        ? <img src={p.imageUrl} alt={name} width={56} height={56} className="h-14 w-14 rounded-lg object-contain" />
-                        : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-[#EEF2FF] text-2xl">📦</div>}
-                      <div className="min-w-0 flex-1">
-                        {index === 0 && bestPrice !== null && (
-                          <span className="mb-1 inline-block rounded-full bg-[#e8f8ee] px-2 py-0.5 text-[11px] font-semibold text-[#2f8a51]">🏆 Melhor preço</span>
-                        )}
-                        {p.brand && <p className="text-xs font-semibold text-[#5B4CF0]">{p.brand}</p>}
-                        <h2 className="mt-0.5 line-clamp-2 text-sm font-semibold">{name}</h2>
-                        {p.variantLabel && <p className="mt-0.5 text-xs text-[#5B607C]">{p.variantLabel}</p>}
-                      </div>
-                    </div>
-                  </Link>
-                  <div className="mt-3">
-                    {pricePerUnit ? (
-                      <>
-                        <p className="text-xl font-black text-[#5B4CF0]">{money(pricePerUnit)}<span className="ml-1 text-xs font-semibold text-[#5B607C]">/un</span></p>
-                        <p className="text-sm text-[#5B607C]">{bestPrice ? money(bestPrice) : ''} total</p>
-                      </>
-                    ) : bestPrice ? (
-                      <p className="text-xl font-black text-[#5B4CF0]">{money(bestPrice)}</p>
-                    ) : (
-                      <p className="text-sm text-[#8A8FB1]">Indisponível</p>
-                    )}
-                    {marketplaceName && (
-                      <p className="mt-1 text-xs text-[#8A8FB1]">🛒 {marketplaceName}</p>
-                    )}
-                  </div>
-                  {offerHref && (
-                    <a href={offerHref} target="_blank" rel="noopener noreferrer" className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#5B4CF0] px-3 py-2 text-sm font-semibold text-white hover:bg-[#493BD0]">
-                      Ver oferta
-                    </a>
-                  )}
-                </article>
-              );
-            })}
-          </div>
-
-          {pages > 1 && (
-            <p className="text-center text-sm text-[#5B607C]">
-              Mostrando página {page} de {pages} — <a href="/login" className="text-[#5B4CF0] hover:underline">Crie uma conta para monitorar preços</a>
-            </p>
-          )}
+          <CategoryGrid products={products} category={category} />
 
           <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 text-center shadow-sm">
             <h2 className="text-base font-semibold">Quer saber quando {category} entrar em promoção?</h2>
