@@ -5,6 +5,9 @@ import GoogleProvider from 'next-auth/providers/google';
 
 const BACKEND = getBackendUrl();
 const ROLE_REFRESH_MS = 5 * 60_000;
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const googleProviderEnabled = Boolean(googleClientId && googleClientSecret);
 
 async function getTokenFromGoogle(idToken: string) {
   const res = await fetch(`${BACKEND}/auth/google`, {
@@ -55,10 +58,14 @@ export const authOptions: NextAuthOptions = {
         return { id: data.user.id, name: data.user.name, email: data.user.email, role: data.user.role, backendToken: data.token };
       },
     }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
+    ...(googleProviderEnabled
+      ? [
+          GoogleProvider({
+            clientId: googleClientId!,
+            clientSecret: googleClientSecret!,
+          }),
+        ]
+      : []),
   ],
 
   callbacks: {
