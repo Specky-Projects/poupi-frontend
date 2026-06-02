@@ -3,6 +3,7 @@ import { getBackendUrl } from '@/lib/backend-url';
 import { getSiteUrl } from '@/lib/site-url';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { SiteFooter } from '@/components/SiteFooter';
 
 const BACKEND = getBackendUrl('3001');
 const SITE_URL = getSiteUrl();
@@ -25,6 +26,9 @@ type ProductCard = {
   offers: Array<{
     price: number | string;
     currentPrice?: number | string | null;
+    productUrl?: string | null;
+    offerUrl?: string | null;
+    marketplaceName?: string | null;
     marketplace?: { name?: string | null } | null;
   }>;
 };
@@ -85,6 +89,7 @@ export default async function ProdutosPage({
   ]);
 
   return (
+    <>
     <main className="min-h-screen bg-[#F7F8FC] px-4 py-6 text-[#090A3D]">
       <div className="mx-auto max-w-6xl space-y-5">
         <nav className="text-xs text-[#5B607C]">
@@ -131,43 +136,66 @@ export default async function ProdutosPage({
               const bestOffer = product.offers?.[0] ?? null;
               const bestPrice = bestOffer ? Number(bestOffer.currentPrice ?? bestOffer.price) : null;
               const name = product.canonicalName || product.title;
+              const offerHref = bestOffer?.offerUrl || bestOffer?.productUrl || null;
+              const marketplaceName =
+                bestOffer?.marketplaceName || bestOffer?.marketplace?.name || 'Lojas monitoradas';
               return (
-                <Link
+                <article
                   key={product.id}
-                  href={`/produto/${product.slug}`}
                   className="rounded-lg border border-[#E4E7F2] bg-[#FCFDFF] p-3 transition hover:border-[#5B4CF0] hover:bg-white"
                 >
-                  <div className="flex gap-3">
-                    {product.imageUrl ? (
-                      <img src={product.imageUrl} alt={name} className="h-14 w-14 rounded-lg object-contain" />
-                    ) : (
-                      <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-[#EEF2FF] text-[#5B4CF0]">
-                        <i className="ti ti-package text-2xl" />
+                  <Link href={`/produto/${product.slug}`} className="block">
+                    <div className="flex gap-3">
+                      {product.imageUrl ? (
+                        <img src={product.imageUrl} alt={name} className="h-14 w-14 rounded-lg object-contain" />
+                      ) : (
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-[#EEF2FF] text-[#5B4CF0]">
+                          <i className="ti ti-package text-2xl" />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-semibold text-[#5B4CF0]">
+                          {product.brand || product.category || 'Produto'}
+                        </p>
+                        <h3 className="mt-1 line-clamp-2 text-sm font-semibold">{name}</h3>
+                        <p className="mt-1 truncate text-xs text-[#5B607C]">
+                          {marketplaceName}
+                        </p>
                       </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-semibold text-[#5B4CF0]">
-                        {product.brand || product.category || 'Produto'}
-                      </p>
-                      <h3 className="mt-1 line-clamp-2 text-sm font-semibold">{name}</h3>
-                      <p className="mt-1 truncate text-xs text-[#5B607C]">
-                        {bestOffer?.marketplace?.name || 'Lojas monitoradas'}
-                      </p>
                     </div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between">
+                  </Link>
+                  <div className="mt-3 flex items-center justify-between gap-3">
                     <span className="text-xs text-[#5B607C]">Menor preco</span>
                     <span className="text-base font-semibold text-[#5B4CF0]">
                       {bestPrice ? money(bestPrice) : 'Indisponivel'}
                     </span>
                   </div>
-                </Link>
+                  {offerHref ? (
+                    <a
+                      href={offerHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#5B4CF0] px-3 py-2 text-sm font-semibold text-white hover:bg-[#493BD0]"
+                    >
+                      Ver oferta
+                    </a>
+                  ) : (
+                    <Link
+                      href={`/produto/${product.slug}`}
+                      className="mt-3 flex w-full items-center justify-center rounded-lg border border-[#D9DEF0] px-3 py-2 text-sm font-semibold text-[#5B607C] hover:border-[#5B4CF0] hover:text-[#5B4CF0]"
+                    >
+                      Detalhes
+                    </Link>
+                  )}
+                </article>
               );
             })}
           </div>
         </section>
       </div>
     </main>
+    <SiteFooter />
+    </>
   );
 }
 

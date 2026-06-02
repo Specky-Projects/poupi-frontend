@@ -6,12 +6,10 @@ import { track } from '@vercel/analytics';
 import { BrandLogo, CribRadarIcon } from '../components/brand/BrandLogo';
 
 const categories = [
-  { name: 'Fraldas',    slug: 'fraldas',    icon: 'ti-baby-carriage',   tone: 'bg-[#EAF7FF]' },
-  { name: 'Fórmulas',   slug: 'formulas',   icon: 'ti-bottle',          tone: 'bg-[#FFF2CE]' },
-  { name: 'Mamadeiras', slug: 'mamadeiras', icon: 'ti-cup',             tone: 'bg-[#F0EEFF]' },
-  { name: 'Higiene',    slug: 'higiene',    icon: 'ti-droplet',         tone: 'bg-[#FFEAF3]' },
-  { name: 'Brinquedos', slug: 'brinquedos', icon: 'ti-ball-football',   tone: 'bg-[#EAF8E9]' },
-  { name: 'Alimentação',slug: 'alimentacao',icon: 'ti-bowl',            tone: 'bg-[#EEF4FF]' },
+  { name: 'Fraldas',  href: '/categoria/fraldas',           icon: 'ti-baby-carriage', tone: 'bg-[#EAF7FF]' },
+  { name: 'Lenços',   href: '/categoria/lencos-umedecidos', icon: 'ti-wash-machine',  tone: 'bg-[#FFF2CE]' },
+  { name: 'Cuidados', href: '/categoria/cuidados-do-bebe',  icon: 'ti-heart',         tone: 'bg-[#FFEAF3]' },
+  { name: 'Todos',    href: '/produtos',                    icon: 'ti-packages',      tone: 'bg-[#EEF4FF]' },
 ];
 
 const benefits = [
@@ -155,7 +153,7 @@ export default function Home() {
       <section id="categorias" className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
           {categories.map((category) => (
-            <Link key={category.name} href={`/categoria/${category.slug}`} className={`rounded-2xl ${category.tone} p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg`}>
+            <Link key={category.name} href={category.href} className={`rounded-2xl ${category.tone} p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg`}>
               <i className={`ti ${category.icon} text-3xl text-[#5B4CF0]`} />
               <h2 className="mt-5 text-lg font-black">{category.name}</h2>
               <p className="mt-2 text-sm font-semibold text-[#3D4263]">Compare agora</p>

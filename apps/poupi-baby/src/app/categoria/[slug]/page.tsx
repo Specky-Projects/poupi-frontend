@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CategoryGrid } from '@/components/CategoryGrid';
+import { SiteFooter } from '@/components/SiteFooter';
 
 const BACKEND  = getBackendUrl("3001");
 const SITE_URL = getSiteUrl();
@@ -109,6 +110,7 @@ export default async function CategoryPage({ params }: Props) {
           </section>
         </div>
       </main>
+      <SiteFooter />
     </>
   );
 }

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { SeoInternalLinks, type SeoInternalLinkGraph } from './SeoInternalLinks';
 import { PackageComparator } from '@/components/PackageComparator';
 import { resolveUnit, formatPricePerUnit } from '@/lib/unit-label';
+import { SiteFooter } from '@/components/SiteFooter';
 
 const SITE_URL = getSiteUrl();
 
@@ -299,6 +300,7 @@ export const PublicProductPage: FC<{
           <SeoInternalLinks graph={internalLinks} />
         </div>
       </main>
+      <SiteFooter />
     </>
   );
 };

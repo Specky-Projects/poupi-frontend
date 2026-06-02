@@ -3,6 +3,8 @@ import { getBackendUrl } from '@/lib/backend-url';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { resolveUnit } from '@/lib/unit-label';
+import { SiteFooter } from '@/components/SiteFooter';
 
 const BACKEND  = getBackendUrl("3001");
 const SITE_URL = getSiteUrl();
@@ -51,7 +53,7 @@ export default async function BrandPage({ params }: Props) {
     products: Array<{
       id: string; slug: string; canonicalName?: string | null; title: string;
       category?: string | null; imageUrl?: string | null; variantLabel?: string | null;
-      offers: Array<{ price: number; currentPrice?: number | null; pricePerUnit?: number | null; marketplace: { name: string } }>;
+      offers: Array<{ price: number; currentPrice?: number | null; pricePerUnit?: number | null; productUrl?: string | null; offerUrl?: string | null; marketplaceName?: string | null; marketplace: { name: string } }>;
     }>;
     total: number;
   };
@@ -102,36 +104,45 @@ export default async function BrandPage({ params }: Props) {
               const bestOffer = p.offers[0] ?? null;
               const bestPrice = bestOffer ? Number(bestOffer.currentPrice ?? bestOffer.price) : null;
               const name = p.canonicalName || p.title;
+              const offerHref = bestOffer?.offerUrl || bestOffer?.productUrl || null;
+              const marketplaceName = bestOffer?.marketplaceName || bestOffer?.marketplace?.name;
+              const unit = resolveUnit({ category: p.category, title: p.title, variantLabel: p.variantLabel });
               return (
-                <a
+                <article
                   key={p.id}
-                  href={`/produto/${p.slug}`}
                   className="rounded-lg border border-[#E4E7F2] bg-white p-4 shadow-sm transition hover:border-[#cdb8ef]"
                 >
-                  <div className="flex items-start gap-3">
-                    {p.imageUrl
-                      ? <img src={p.imageUrl} alt={name} width={56} height={56} className="h-14 w-14 rounded-lg object-contain" />
-                      : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-[#EEF2FF] text-2xl">📦</div>}
-                    <div className="min-w-0 flex-1">
-                      {p.category && <p className="text-xs font-semibold text-[#2f8a51]">{p.category}</p>}
-                      <h2 className="mt-0.5 line-clamp-2 text-sm font-semibold">{name}</h2>
-                      {p.variantLabel && <p className="mt-0.5 text-xs text-[#5B607C]">{p.variantLabel}</p>}
+                  <Link href={`/produto/${p.slug}`} className="block">
+                    <div className="flex items-start gap-3">
+                      {p.imageUrl
+                        ? <img src={p.imageUrl} alt={name} width={56} height={56} className="h-14 w-14 rounded-lg object-contain" />
+                        : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-[#EEF2FF] text-2xl">📦</div>}
+                      <div className="min-w-0 flex-1">
+                        {p.category && <p className="text-xs font-semibold text-[#2f8a51]">{p.category}</p>}
+                        <h2 className="mt-0.5 line-clamp-2 text-sm font-semibold">{name}</h2>
+                        {p.variantLabel && <p className="mt-0.5 text-xs text-[#5B607C]">{p.variantLabel}</p>}
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                   <div className="mt-3 flex items-end justify-between">
                     <div>
                       {bestPrice
                         ? <p className="text-lg font-bold text-[#5B4CF0]">{money(bestPrice)}</p>
                         : <p className="text-sm text-[#8A8FB1]">Indisponível</p>}
                       {bestOffer?.pricePerUnit && (
-                        <p className="text-xs text-[#5B607C]">{money(Number(bestOffer.pricePerUnit))}/un</p>
+                        <p className="text-xs text-[#5B607C]">{money(Number(bestOffer.pricePerUnit))}/{unit}</p>
                       )}
                     </div>
-                    {bestOffer?.marketplace?.name && (
-                      <p className="text-xs text-[#8A8FB1]">{bestOffer.marketplace.name}</p>
+                    {marketplaceName && (
+                      <p className="text-xs text-[#8A8FB1]">{marketplaceName}</p>
                     )}
                   </div>
-                </a>
+                  {offerHref && (
+                    <a href={offerHref} target="_blank" rel="noopener noreferrer" className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#5B4CF0] px-3 py-2 text-sm font-semibold text-white hover:bg-[#493BD0]">
+                      Ver oferta
+                    </a>
+                  )}
+                </article>
               );
             })}
           </div>
@@ -145,6 +156,7 @@ export default async function BrandPage({ params }: Props) {
           </section>
         </div>
       </main>
+      <SiteFooter />
     </>
   );
 }
