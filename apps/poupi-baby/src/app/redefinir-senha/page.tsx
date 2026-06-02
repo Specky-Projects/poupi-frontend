@@ -28,7 +28,7 @@ function RedefinirSenhaForm() {
     if (password.length < 8) return setError('A senha deve ter pelo menos 8 caracteres.');
     if (password !== confirmPassword) return setError('A confirmacao deve ser igual a senha.');
     setLoading(true);
-    const res = await fetch('/api/auth/reset-password', {
+    const res = await fetch('/api/email-auth/reset-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, password }),

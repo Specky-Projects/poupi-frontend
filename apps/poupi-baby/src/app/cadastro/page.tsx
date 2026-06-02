@@ -25,7 +25,7 @@ export default function CadastroPage() {
     if (password !== confirmPassword) return setError('A confirmacao deve ser igual a senha.');
 
     setLoading(true);
-    const res = await fetch('/api/auth/register', {
+    const res = await fetch('/api/email-auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email: normalizedEmail, password }),
