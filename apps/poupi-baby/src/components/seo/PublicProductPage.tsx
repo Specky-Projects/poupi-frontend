@@ -230,14 +230,15 @@ export const PublicProductPage: FC<{ product: Product; internalLinks?: SeoIntern
                           <p className="text-xs text-[#5B607C]">+ frete {money(Number(offer.freightPrice))}</p>
                         )}
                       </div>
-                      {offer.availability && (
-                        <Link
-                          href={`/login?redirect=${encodeURIComponent(`/produto/${product.slug}`)}`}
+                      {offer.availability && offer.productUrl && (
+                        <a
+                          href={offer.productUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="rounded-lg bg-[#5B4CF0] px-3 py-2 text-sm font-semibold text-white hover:bg-[#493BD0]"
-                          rel="nofollow"
                         >
                           Ver oferta
-                        </Link>
+                        </a>
                       )}
                     </div>
                   </div>
