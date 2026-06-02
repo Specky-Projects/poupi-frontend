@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
+import { getPublicApiUrl } from '@/lib/public-api-url';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -25,7 +26,7 @@ export default function CadastroPage() {
     if (password !== confirmPassword) return setError('A confirmacao deve ser igual a senha.');
 
     setLoading(true);
-    const res = await fetch('/api/email-auth/register', {
+    const res = await fetch(`${getPublicApiUrl()}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email: normalizedEmail, password }),

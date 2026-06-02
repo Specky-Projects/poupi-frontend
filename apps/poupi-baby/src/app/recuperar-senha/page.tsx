@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { getPublicApiUrl } from '@/lib/public-api-url';
 
 export default function RecuperarSenhaPage() {
   const [email, setEmail] = useState('');
@@ -14,7 +15,7 @@ export default function RecuperarSenhaPage() {
     setMessage(null);
     if (!email.trim()) return setError('Informe seu email.');
     setLoading(true);
-    const res = await fetch('/api/email-auth/forgot-password', {
+    const res = await fetch(`${getPublicApiUrl()}/auth/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.trim().toLowerCase() }),
