@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { SeoInternalLinks, type SeoInternalLinkGraph } from './SeoInternalLinks';
+import { resolveUnit } from '@/lib/unit-label';
 
 type ProductCard = {
   id: string;
@@ -53,6 +54,7 @@ export function ProgrammaticListingPage({
             const bestOffer = product.offers?.[0] ?? null;
             const price = (product.bestPrice || null) ?? (bestOffer ? Number(bestOffer.currentPrice ?? bestOffer.price) : null);
             const pricePerUnit = product.pricePerUnit ?? bestOffer?.pricePerUnit ?? null;
+            const unit = resolveUnit({ category: product.category, title: product.title });
             const name = product.canonicalName || product.title;
             return (
               <Link key={product.id} href={`/produto/${product.slug}`} className="rounded-lg border border-[#E4E7F2] bg-white p-4 shadow-sm transition hover:border-[#cdb8ef]">
@@ -77,7 +79,7 @@ export function ProgrammaticListingPage({
                 <div className="mt-3">
                   {pricePerUnit ? (
                     <>
-                      <p className="text-xl font-black text-[#5B4CF0]">{money(Number(pricePerUnit))}<span className="ml-1 text-xs font-semibold text-[#5B607C]">/un</span></p>
+                      <p className="text-xl font-black text-[#5B4CF0]">{money(Number(pricePerUnit))}<span className="ml-1 text-xs font-semibold text-[#5B607C]">/{unit}</span></p>
                       {price && <p className="text-sm text-[#5B607C]">{money(price)} total</p>}
                     </>
                   ) : price ? (

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { resolveUnit, formatPricePerUnit } from '@/lib/unit-label';
 
 const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -21,6 +22,7 @@ type Product = {
   canonicalName?: string | null;
   title: string;
   brand?: string | null;
+  category?: string | null;
   imageUrl?: string | null;
   variantLabel?: string | null;
   offers: Offer[];
@@ -198,6 +200,7 @@ export function CategoryGrid({
             const bestOffer = p.offers[0] ?? null;
             const bestPrice = bestOffer ? Number(bestOffer.currentPrice ?? bestOffer.price) : null;
             const pricePerUnit = bestOffer?.pricePerUnit ? Number(bestOffer.pricePerUnit) : null;
+            const unit = resolveUnit({ category: p.category, title: p.title, variantLabel: p.variantLabel });
             const name = p.canonicalName || p.title;
             const offerHref = bestOffer?.offerUrl || bestOffer?.productUrl || null;
             const marketplaceName = bestOffer?.marketplaceName || bestOffer?.marketplace?.name;
@@ -224,7 +227,7 @@ export function CategoryGrid({
                 <div className="mt-3">
                   {pricePerUnit ? (
                     <>
-                      <p className="text-xl font-black text-[#5B4CF0]">{money(pricePerUnit)}<span className="ml-1 text-xs font-semibold text-[#5B607C]">/un</span></p>
+                      <p className="text-xl font-black text-[#5B4CF0]">{money(pricePerUnit)}<span className="ml-1 text-xs font-semibold text-[#5B607C]">/{unit}</span></p>
                       <p className="text-sm text-[#5B607C]">{bestPrice ? money(bestPrice) : ''} total</p>
                     </>
                   ) : bestPrice ? (

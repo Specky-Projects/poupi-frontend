@@ -58,6 +58,10 @@ async function fetchInternalLinks(slugOrId: string) {
   );
 }
 
+async function fetchVariants(slugOrId: string) {
+  return fetchBackendJson(`/seo/products/${encodeURIComponent(slugOrId)}/variants`, 3600);
+}
+
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -151,5 +155,20 @@ export default async function Page({ params }: Props) {
     if (best) dealScore = { score: best.score, emoji: best.emoji, label: best.label, labelColor: best.labelColor };
   } catch { /* non-critical */ }
 
-  return <PublicProductPage product={product} internalLinks={internalLinks} dealScore={dealScore} />;
+  // Fetch family variants for package comparator (non-critical)
+  let variants: unknown[] = [];
+  if (product.productFamilySlug) {
+    try {
+      variants = (await fetchVariants(id)) ?? [];
+    } catch { /* non-critical */ }
+  }
+
+  return (
+    <PublicProductPage
+      product={product}
+      internalLinks={internalLinks}
+      dealScore={dealScore}
+      variants={variants}
+    />
+  );
 }

@@ -2,6 +2,8 @@
 import type { FC } from 'react';
 import Link from 'next/link';
 import { SeoInternalLinks, type SeoInternalLinkGraph } from './SeoInternalLinks';
+import { PackageComparator } from '@/components/PackageComparator';
+import { resolveUnit, formatPricePerUnit } from '@/lib/unit-label';
 
 const SITE_URL = getSiteUrl();
 
@@ -42,8 +44,14 @@ function offerPrice(o: Offer) {
 
 type DealScoreBadge = { score: number; emoji: string; label: string; labelColor: string };
 
-export const PublicProductPage: FC<{ product: Product; internalLinks?: SeoInternalLinkGraph | null; dealScore?: DealScoreBadge | null }> = ({ product, internalLinks, dealScore }) => {
+export const PublicProductPage: FC<{
+  product: Product;
+  internalLinks?: SeoInternalLinkGraph | null;
+  dealScore?: DealScoreBadge | null;
+  variants?: unknown[];
+}> = ({ product, internalLinks, dealScore, variants }) => {
   const name = product.canonicalName || product.title;
+  const unit = resolveUnit({ category: product.category, title: product.title, variantLabel: product.variantLabel });
   const available = product.offers.filter((o) => o.availability).sort((a, b) => offerPrice(a) - offerPrice(b));
   const unavailable = product.offers.filter((o) => !o.availability);
   const allOffers = [...available, ...unavailable];
@@ -165,7 +173,7 @@ export const PublicProductPage: FC<{ product: Product; internalLinks?: SeoIntern
                 <p className="mt-2 text-3xl font-bold text-[#5B4CF0]">{best ? money(offerPrice(best)) : '—'}</p>
                 {best && <p className="mt-1 text-sm text-[#090A3D]">{best.marketplace.name}</p>}
                 {best?.pricePerUnit && (
-                  <p className="mt-1 text-xs text-[#5B607C]">{money(Number(best.pricePerUnit))} por unidade</p>
+                  <p className="mt-1 text-xs text-[#5B607C]">{formatPricePerUnit(Number(best.pricePerUnit), unit)}</p>
                 )}
                 {dealScore && (
                   <div title={`DealScore Radar do Berço: ${dealScore.label}`} style={{ background: dealScore.labelColor + '18', borderColor: dealScore.labelColor + '44', color: dealScore.labelColor }} className="mt-3 flex items-center justify-between rounded-lg border px-3 py-2 text-sm font-semibold">
@@ -217,7 +225,7 @@ export const PublicProductPage: FC<{ product: Product; internalLinks?: SeoIntern
                         )}
                       </div>
                       {offer.pricePerUnit && (
-                        <p className="mt-1 text-xs text-[#5B607C]">{money(Number(offer.pricePerUnit))} por unidade</p>
+                        <p className="mt-1 text-xs text-[#5B607C]">{formatPricePerUnit(Number(offer.pricePerUnit), unit)}</p>
                       )}
                       {offer.originalPrice && Number(offer.originalPrice) > offerPrice(offer) && (
                         <p className="mt-1 text-xs text-[#5B607C] line-through">de {money(Number(offer.originalPrice))}</p>
@@ -246,6 +254,16 @@ export const PublicProductPage: FC<{ product: Product; internalLinks?: SeoIntern
               ))}
             </div>
           </section>
+
+          {/* Comparador de pacotes */}
+          {variants && variants.length > 0 && (
+            <PackageComparator
+              currentId={product.id}
+              variants={variants as Parameters<typeof PackageComparator>[0]['variants']}
+              category={product.category}
+              title={product.title}
+            />
+          )}
 
           {/* CTA informativo — contexto dinâmico quando dealScore dispoNível */}
           <section className="rounded-lg border border-[#E4E7F2] bg-white p-6 text-center shadow-sm">
