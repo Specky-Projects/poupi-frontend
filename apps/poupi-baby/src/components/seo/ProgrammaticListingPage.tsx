@@ -51,7 +51,7 @@ export function ProgrammaticListingPage({
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product, index) => {
             const bestOffer = product.offers?.[0] ?? null;
-            const price = product.bestPrice ?? (bestOffer ? Number(bestOffer.currentPrice ?? bestOffer.price) : null);
+            const price = (product.bestPrice || null) ?? (bestOffer ? Number(bestOffer.currentPrice ?? bestOffer.price) : null);
             const pricePerUnit = product.pricePerUnit ?? bestOffer?.pricePerUnit ?? null;
             const name = product.canonicalName || product.title;
             return (
