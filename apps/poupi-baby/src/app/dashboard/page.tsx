@@ -146,7 +146,7 @@ export default function DashboardPage() {
     const data = await res.json().catch(() => ({}));
     setLoading(false);
     if (!res.ok) {
-      setError(data?.error || data?.message || 'Nao foi possivel adicionar o produto.');
+      setError(data?.error || data?.message || 'Não foi possível adicionar o produto.');
       return;
     }
     setUrl('');
@@ -169,7 +169,7 @@ export default function DashboardPage() {
     return stores.size;
   }, [products]);
   const displayName = profile?.name || session?.user?.name || '';
-  const greeting = displayName ? `Ola, ${displayName.split(' ')[0]}` : 'Ola';
+  const greeting = displayName ? `Olá, ${displayName.split(' ')[0]}` : 'Olá';
 
   const sortedProducts = useMemo(() => {
     const filtered = products.filter((p) => p.title.toLowerCase().includes(query.toLowerCase()));
@@ -216,7 +216,7 @@ export default function DashboardPage() {
           <header className="rounded-3xl bg-[#5B4CF0] p-6 text-white shadow-sm">
             <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
               <div>
-                <p className="text-sm text-white/75">{displayName ? 'Que bom ter voce por aqui.' : 'Atualize seu perfil para personalizar sua experiencia.'}</p>
+                <p className="text-sm text-white/75">{displayName ? 'Que bom ter você por aqui.' : 'Atualize seu perfil para personalizar sua experiência.'}</p>
                 <h1 className="mt-1 text-3xl font-semibold tracking-tight">{greeting} <span aria-hidden>ðŸ‘‹</span></h1>
                 {!profile?.emailVerified && (
                   <Link href="/conta" className="mt-4 inline-flex rounded-lg bg-white/15 px-3 py-2 text-sm font-medium text-white">
@@ -235,8 +235,8 @@ export default function DashboardPage() {
           </header>
 
           <div className="mt-5 grid gap-4 md:grid-cols-4">
-            <Metric label="Produtos monitorados" value={products.length} hint={quota?.unlimited ? 'Ilimitado no seu plano' : quota ? `${Math.max(0, quota.max - quota.current)} espacos restantes` : 'Monitorados por voce'} icon="ti-package" />
-            <Metric label="Ofertas comparadas" value={offerCount} hint="Farmacias e lojas vinculadas" icon="ti-tags" />
+            <Metric label="Produtos monitorados" value={products.length} hint={quota?.unlimited ? 'Ilimitado no seu plano' : quota ? `${Math.max(0, quota.max - quota.current)} espaços restantes` : 'Monitorados por você'} icon="ti-package" />
+            <Metric label="Ofertas comparadas" value={offerCount} hint="Farmácias e lojas vinculadas" icon="ti-tags" />
             <Metric label="Lojas cobertas" value={storeCount} hint="Quantidade real nas suas ofertas" icon="ti-building-store" />
             <Metric label="Premium" value={typeof daysRemaining === 'number' ? daysRemaining : '-'} hint={typeof daysRemaining === 'number' ? 'dias restantes' : `${activeAlerts.length} alertas ativos`} icon="ti-crown" />
           </div>
@@ -254,7 +254,7 @@ export default function DashboardPage() {
                 {loading ? 'Comparando...' : 'Monitorar produto'}
               </button>
             </div>
-            <p className="mt-2 text-xs text-[#8A8FB1]">Se o link trouxer varias farmácias, o Radar do Berço salva uma unica ficha do produto com todas as ofertas encontradas.</p>
+            <p className="mt-2 text-xs text-[#8A8FB1]">Se o link trouxer várias farmácias, o Radar do Berço salva uma única ficha do produto com todas as ofertas encontradas.</p>
             {error && <div className="mt-3 rounded-lg border border-[#f0a5a5] bg-[#fff1f1] px-4 py-3 text-sm text-[#9f2828]">{error}</div>}
           </section>
 

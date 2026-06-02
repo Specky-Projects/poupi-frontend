@@ -113,7 +113,7 @@ export default function AccountPage() {
     const res = await fetch('/api/account/telegram-link-token', { method: 'POST' });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setError(data?.message || 'Nao foi possivel gerar o token do Telegram.');
+      setError(data?.message || 'Não foi possível gerar o token do Telegram.');
       return;
     }
     setTelegramToken(data.token);
@@ -131,7 +131,7 @@ export default function AccountPage() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setError(data?.message || 'Nao foi possivel desconectar o Telegram.');
+      setError(data?.message || 'Não foi possível desconectar o Telegram.');
       return;
     }
     setProfile(data);

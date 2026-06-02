@@ -71,7 +71,7 @@ export function ProgrammaticListingPage({
                   </span>
                 </div>
                 <div className="mt-3 flex items-end justify-between">
-                  {price ? <p className="text-lg font-bold text-[#5B4CF0]">{money(price)}</p> : <p className="text-sm text-[#8A8FB1]">Indisponivel</p>}
+                  {price ? <p className="text-lg font-bold text-[#5B4CF0]">{money(price)}</p> : <p className="text-sm text-[#8A8FB1]">Indisponível</p>}
                   {bestOffer?.marketplace?.name && <p className="text-xs text-[#8A8FB1]">{bestOffer.marketplace.name}</p>}
                 </div>
               </Link>

@@ -8,7 +8,7 @@ import { BrandLogo } from '../../components/brand/BrandLogo';
 const products = [
   { name: 'Fralda Pampers Premium', price: '89,90', change: '-23%', icon: 'ti-baby-carriage' },
   { name: 'Fórmula Nan Supreme', price: '64,50', change: '-17%', icon: 'ti-bottle' },
-  { name: 'Lenco Huggies One Done', price: '18,90', change: '-31%', icon: 'ti-droplet' },
+  { name: 'Lenço Huggies One Done', price: '18,90', change: '-31%', icon: 'ti-droplet' },
 ];
 
 export default function LoginPage() {
@@ -42,7 +42,7 @@ export default function LoginPage() {
     setLoginLoading(false);
 
     if (result?.error) {
-      setLoginError('Email ou senha invalidos.');
+      setLoginError('Email ou senha inválidos.');
     } else if (result?.url) {
       window.location.href = result.url;
     }
@@ -68,7 +68,7 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-6 flex flex-col gap-3 xl:mt-8">
-              {['Precos em tempo real', 'Alertas gratuitos', 'Centenas de lojas'].map((item) => (
+              {['Preços em tempo real', 'Alertas gratuitos', 'Centenas de lojas'].map((item) => (
                 <div
                   key={item}
                   className="flex w-fit items-center gap-3 rounded-full border border-white/20 bg-white/10 px-5 py-2 backdrop-blur-md"
@@ -126,7 +126,7 @@ export default function LoginPage() {
         />
 
         <div className="relative z-10 w-full max-w-[480px] rounded-[32px] bg-white px-6 py-8 shadow-[0_20px_60px_rgba(91,76,240,0.12)] ring-1 ring-[#E4E7F2] sm:px-10 sm:py-10 xl:px-12 xl:py-12">
-          <p className="text-center text-xs font-bold tracking-[5px] text-[#5B4CF0]">RADAR DO BERCO</p>
+          <p className="text-center text-xs font-bold tracking-[5px] text-[#5B4CF0]">RADAR DO BERÇO</p>
           <h1 className="mt-3 text-center text-4xl font-black text-[#090A3D] sm:text-5xl xl:text-6xl">Entrar</h1>
           <p className="mt-3 text-center text-base leading-7 text-[#5B607C] sm:text-lg xl:text-xl xl:leading-8">
             Acesse sua conta e monitore produtos infantis.
@@ -190,7 +190,7 @@ export default function LoginPage() {
             </button>
 
             <p className="mt-7 text-center text-sm text-[#5B607C] sm:mt-8 sm:text-base">
-              Nao tem conta?{' '}
+              Não tem conta?{' '}
               <button
                 onClick={() => signIn('google', { callbackUrl: callbackUrl() })}
                 className="font-bold text-[#5B4CF0] hover:underline"
@@ -200,7 +200,7 @@ export default function LoginPage() {
             </p>
           </div>
           <div className="mt-7 text-center">
-            <Link href="/" className="text-sm font-semibold text-[#5B607C] hover:text-[#5B4CF0]">Voltar para a pagina inicial</Link>
+            <Link href="/" className="text-sm font-semibold text-[#5B607C] hover:text-[#5B4CF0]">Voltar para a página inicial</Link>
           </div>
         </div>
       </section>

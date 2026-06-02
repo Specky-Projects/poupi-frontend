@@ -14,7 +14,7 @@ const categories = [
 ];
 
 const benefits = [
-  ['Comparação em segundos', 'Veja onde o mesmo produto esta mais barato sem abrir varias abas.'],
+  ['Comparação em segundos', 'Veja onde o mesmo produto está mais barato sem abrir várias abas.'],
   ['Alertas de preço', 'Receba aviso quando fraldas, fórmulas ou itens essenciais baixarem.'],
   ['Histórico de preços', 'Entenda se a oferta esta realmente boa antes de comprar.'],
   ['Economia real', 'Compare preço por unidade e evite promoções que parecem melhores do que são.'],
@@ -23,9 +23,9 @@ const benefits = [
 ];
 
 const steps = [
-  ['Busque um produto', 'Digite o nome ou cole o link do item que voce precisa comprar.'],
-  ['Comparamos os preços', 'O Radar do Berço organiza ofertas, lojas e histórico em uma unica tela.'],
-  ['Voce economiza', 'Escolha a melhor oferta ou ative um alerta para comprar no momento certo.'],
+  ['Busque um produto', 'Digite o nome ou cole o link do item que você precisa comprar.'],
+  ['Comparamos os preços', 'O Radar do Berço organiza ofertas, lojas e histórico em uma única tela.'],
+  ['Você economiza', 'Escolha a melhor oferta ou ative um alerta para comprar no momento certo.'],
 ];
 
 const monitoredStores = ['Amazon', 'Magalu', 'Mercado Livre', 'Shopee', 'Americanas', 'Drogasil', 'Raia'];
@@ -73,7 +73,7 @@ export default function Home() {
             <div className="mt-7 flex max-w-2xl flex-col gap-3 rounded-3xl bg-white p-2 shadow-[0_18px_60px_rgba(91,76,240,0.13)] ring-1 ring-[#E3E7F5] sm:flex-row">
               <div className="flex min-h-12 flex-1 items-center gap-3 px-4 text-[#8A8FB1]">
                 <i className="ti ti-search text-xl text-[#5B4CF0]" />
-                <span>O que voce precisa hoje?</span>
+                <span>O que você precisa hoje?</span>
               </div>
               <Link href="/dashboard" className="rounded-2xl bg-[#5B4CF0] px-6 py-3 text-center text-sm font-bold text-white hover:bg-[#493BD0]">
                 Buscar preços
@@ -107,7 +107,7 @@ export default function Home() {
                   <i className="ti ti-pig-money text-4xl" />
                 </span>
                 <div>
-                  <h2 className="text-xl font-black">Economize todo mes sem esforco</h2>
+                  <h2 className="text-xl font-black">Economize todo mês sem esforço</h2>
                   <p className="mt-2 text-sm leading-6 text-[#3D4263]">Encontre o melhor preço e receba alertas quando baixar ainda mais.</p>
                 </div>
               </div>

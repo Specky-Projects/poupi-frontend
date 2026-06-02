@@ -237,7 +237,7 @@ export function ProductPageClient() {
                 </div>
                 <h1 className="mt-3 text-2xl font-semibold tracking-tight">{product.canonicalName || product.title}</h1>
                 <p className="mt-2 text-sm text-[#5B607C]">
-                  Acompanhamento por produto canonico: varias lojas, um histórico de decisao e comparação de preço por unidade.
+                  Acompanhamento por produto canônico: várias lojas, um histórico de decisão e comparação de preço por unidade.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
                   {product.productFamilyName && <span className="rounded-full bg-[#fff5d8] px-2.5 py-1 text-[#8a6316]">Familia: {product.productFamilyName}</span>}
@@ -316,7 +316,7 @@ export function ProductPageClient() {
                 </div>
                 <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="h-10 rounded-lg border border-[#E4E7F2] bg-white px-3 text-sm outline-none focus:border-[#5B4CF0]">
                   <option value="price">Menor preço</option>
-                  <option value="unit">Preco por unidade</option>
+                  <option value="unit">Preço por unidade</option>
                   <option value="store">Loja</option>
                 </select>
               </div>
