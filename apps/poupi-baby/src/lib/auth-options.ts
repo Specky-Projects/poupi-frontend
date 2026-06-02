@@ -7,7 +7,12 @@ const BACKEND = getBackendUrl();
 const ROLE_REFRESH_MS = 5 * 60_000;
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-const googleProviderEnabled = Boolean(googleClientId && googleClientSecret);
+const hasRealValue = (value?: string) => Boolean(value && !value.startsWith('<') && !value.endsWith('>'));
+const googleProviderEnabled = Boolean(
+  hasRealValue(googleClientId) &&
+  googleClientId?.endsWith('.apps.googleusercontent.com') &&
+  hasRealValue(googleClientSecret),
+);
 
 async function getTokenFromGoogle(idToken: string) {
   const res = await fetch(`${BACKEND}/auth/google`, {
