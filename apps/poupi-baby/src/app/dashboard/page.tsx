@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { signOut, useSession } from 'next-auth/react';
 import { useEffect, useMemo, useState } from 'react';
+import { track } from '@vercel/analytics';
 import { BrandLogo } from '../../components/brand/BrandLogo';
 
 type Offer = {
@@ -149,6 +150,7 @@ export default function DashboardPage() {
       setError(data?.error || data?.message || 'Não foi possível adicionar o produto.');
       return;
     }
+    track('product_added', { is_first: products.length === 0 });
     setUrl('');
     await refresh();
   }
@@ -237,7 +239,7 @@ export default function DashboardPage() {
               <p className="flex-1 text-sm font-medium text-[#92400E]">
                 ⚠️ Confirme seu e-mail para receber alertas de preço. Sem confirmação, as notificações não chegam.
               </p>
-              <Link href="/conta" className="shrink-0 rounded-lg bg-[#F59E0B] px-4 py-2 text-xs font-bold text-white hover:bg-[#D97706]">
+              <Link href="/conta" onClick={() => track('email_verify_banner_clicked')} className="shrink-0 rounded-lg bg-[#F59E0B] px-4 py-2 text-xs font-bold text-white hover:bg-[#D97706]">
                 Confirmar agora →
               </Link>
             </div>
@@ -341,7 +343,7 @@ export default function DashboardPage() {
                         ))}
                       </div>
                       <button
-                        onClick={() => document.querySelector<HTMLInputElement>('input[placeholder*="URL"]')?.focus()}
+                        onClick={() => { track('onboarding_cta_clicked'); document.querySelector<HTMLInputElement>('input[placeholder*="URL"]')?.focus(); }}
                         className="mt-6 rounded-xl bg-[#5B4CF0] px-6 py-3 text-sm font-bold text-white shadow-[0_8px_24px_rgba(91,76,240,0.3)] hover:bg-[#493BD0]"
                       >
                         Adicionar primeiro produto →

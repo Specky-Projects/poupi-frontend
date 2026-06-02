@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { track } from '@vercel/analytics';
 
 type Props = {
   productId: string;
@@ -40,6 +41,7 @@ export function AlertModal({ productId, productTitle, currentPrice, onClose, onC
       return;
     }
 
+    track('alert_created');
     onCreated();
     onClose();
   }

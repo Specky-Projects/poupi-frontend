@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
+import { track } from '@vercel/analytics';
 import { BrandLogo, CribRadarIcon } from '../components/brand/BrandLogo';
 
 const categories = [
@@ -47,7 +48,7 @@ export default function Home() {
               <i className="ti ti-bell mr-2 text-[#5B4CF0]" />Alertas
             </Link>
             <button
-              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+              onClick={() => { track('login_cta_clicked', { source: 'home' }); signIn('google', { callbackUrl: '/dashboard' }); }}
               className="rounded-full bg-[#5B4CF0] px-5 py-2.5 text-sm font-bold text-white shadow-[0_12px_30px_rgba(91,76,240,0.28)] transition hover:bg-[#493BD0]"
             >
               Entrar / Cadastrar

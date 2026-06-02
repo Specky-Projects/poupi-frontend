@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { track } from '@vercel/analytics';
 
 type Plan = {
   id: string;
@@ -42,6 +43,7 @@ export default function BillingPage() {
 
   async function subscribe(planId: string) {
     if (planId === 'free') return;
+    track('checkout_initiated', { plan: planId });
     setLoadingPlan(planId);
     setError(null);
     setMessage(null);

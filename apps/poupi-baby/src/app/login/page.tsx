@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
+import { track } from '@vercel/analytics';
 import { BrandLogo } from '../../components/brand/BrandLogo';
 
 const products = [
@@ -29,6 +30,7 @@ export default function LoginPage() {
       return;
     }
 
+    track('login_attempted', { method: 'email' });
     setLoginLoading(true);
     setLoginError(null);
 
@@ -177,7 +179,7 @@ export default function LoginPage() {
             </div>
 
             <button
-              onClick={() => signIn('google', { callbackUrl: callbackUrl() })}
+              onClick={() => { track('login_attempted', { method: 'google' }); signIn('google', { callbackUrl: callbackUrl() }); }}
               className="flex h-[56px] w-full items-center justify-center gap-3 rounded-2xl border border-[#E4E7F2] bg-white text-base font-semibold text-[#111827] transition hover:bg-[#FAFBFF] sm:h-[64px] sm:text-lg"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="h-5 w-5 sm:h-6 sm:w-6">
@@ -192,7 +194,7 @@ export default function LoginPage() {
             <p className="mt-7 text-center text-sm text-[#5B607C] sm:mt-8 sm:text-base">
               Não tem conta?{' '}
               <button
-                onClick={() => signIn('google', { callbackUrl: callbackUrl() })}
+                onClick={() => { track('login_attempted', { method: 'google' }); signIn('google', { callbackUrl: callbackUrl() }); }}
                 className="font-bold text-[#5B4CF0] hover:underline"
               >
                 Criar conta grátis com Google
