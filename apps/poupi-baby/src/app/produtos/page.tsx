@@ -5,8 +5,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 const BACKEND = getBackendUrl('3001');
-const LOCAL_BACKEND = 'http://localhost:3001';
 const SITE_URL = getSiteUrl();
+
+function getLocalBackendUrl() {
+  if (process.env.NODE_ENV === 'production') return null;
+  const host = 'localhost';
+  return `http://${host}:3001`;
+}
 
 type Taxonomy = { name: string; slug: string; count: number };
 type ProductCard = {
@@ -28,13 +33,14 @@ const money = (value: number) =>
   value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 async function fetchJson<T>(path: string, fallback: T): Promise<T> {
+  const localBackend = getLocalBackendUrl();
   try {
     let res = await fetch(`${BACKEND}${path}`, {
       next: { revalidate: 300 },
       signal: AbortSignal.timeout(4_000),
     });
-    if ((res.status === 401 || res.status === 404) && BACKEND !== LOCAL_BACKEND) {
-      res = await fetch(`${LOCAL_BACKEND}${path}`, {
+    if ((res.status === 401 || res.status === 404) && localBackend && BACKEND !== localBackend) {
+      res = await fetch(`${localBackend}${path}`, {
         next: { revalidate: 300 },
         signal: AbortSignal.timeout(4_000),
       });
@@ -42,9 +48,9 @@ async function fetchJson<T>(path: string, fallback: T): Promise<T> {
     if (!res.ok) return fallback;
     return (await res.json()) as T;
   } catch {
-    if (BACKEND !== LOCAL_BACKEND) {
+    if (localBackend && BACKEND !== localBackend) {
       try {
-        const res = await fetch(`${LOCAL_BACKEND}${path}`, {
+        const res = await fetch(`${localBackend}${path}`, {
           next: { revalidate: 300 },
           signal: AbortSignal.timeout(4_000),
         });

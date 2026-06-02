@@ -2,7 +2,12 @@ import { getBackendUrl } from '@/lib/backend-url';
 import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND = getBackendUrl('3001');
-const LOCAL_BACKEND = 'http://localhost:3001';
+
+function getLocalBackendUrl() {
+  if (process.env.NODE_ENV === 'production') return null;
+  const host = 'localhost';
+  return `http://${host}:3001`;
+}
 
 type BackendSearchResult = {
   id: string;
@@ -34,6 +39,7 @@ export async function GET(req: NextRequest) {
   if (q.length < 2) return NextResponse.json({ query: q, results: [] });
 
   const params = new URLSearchParams({ q, limit, sort: 'best_price' });
+  const localBackend = getLocalBackendUrl();
   let res: Response;
   try {
     res = await fetch(`${BACKEND}/products/search?${params.toString()}`, {
@@ -41,14 +47,15 @@ export async function GET(req: NextRequest) {
       signal: AbortSignal.timeout(4_000),
     });
   } catch {
-    res = await fetch(`${LOCAL_BACKEND}/products/search?${params.toString()}`, {
+    if (!localBackend) throw new Error('Search backend unavailable');
+    res = await fetch(`${localBackend}/products/search?${params.toString()}`, {
       next: { revalidate: 120 },
       signal: AbortSignal.timeout(4_000),
     });
   }
 
-  if ((res.status === 401 || res.status === 404) && BACKEND !== LOCAL_BACKEND) {
-    res = await fetch(`${LOCAL_BACKEND}/products/search?${params.toString()}`, {
+  if ((res.status === 401 || res.status === 404) && localBackend && BACKEND !== localBackend) {
+    res = await fetch(`${localBackend}/products/search?${params.toString()}`, {
       next: { revalidate: 120 },
       signal: AbortSignal.timeout(4_000),
     });

@@ -6,19 +6,25 @@ import { ProductPageClient } from './ProductPageClient';
 import { PublicProductPage } from '@/components/seo/PublicProductPage';
 
 const BACKEND = getBackendUrl("3001");
-const LOCAL_BACKEND = 'http://localhost:3001';
 const SITE_URL = getSiteUrl();
+
+function getLocalBackendUrl() {
+  if (process.env.NODE_ENV === 'production') return null;
+  const host = 'localhost';
+  return `http://${host}:3001`;
+}
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function fetchBackendJson(path: string, revalidate: number) {
+  const localBackend = getLocalBackendUrl();
   try {
     let res = await fetch(`${BACKEND}${path}`, {
       next: { revalidate },
       signal: AbortSignal.timeout(4_000),
     });
-    if ((res.status === 401 || res.status === 404) && BACKEND !== LOCAL_BACKEND) {
-      res = await fetch(`${LOCAL_BACKEND}${path}`, {
+    if ((res.status === 401 || res.status === 404) && localBackend && BACKEND !== localBackend) {
+      res = await fetch(`${localBackend}${path}`, {
         next: { revalidate },
         signal: AbortSignal.timeout(4_000),
       });
@@ -26,9 +32,9 @@ async function fetchBackendJson(path: string, revalidate: number) {
     if (!res.ok) return null;
     return res.json();
   } catch {
-    if (BACKEND !== LOCAL_BACKEND) {
+    if (localBackend && BACKEND !== localBackend) {
       try {
-        const res = await fetch(`${LOCAL_BACKEND}${path}`, {
+        const res = await fetch(`${localBackend}${path}`, {
           next: { revalidate },
           signal: AbortSignal.timeout(4_000),
         });
