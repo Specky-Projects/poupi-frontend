@@ -10,11 +10,15 @@ const SITE_URL = getSiteUrl();
 const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 async function fetchProduct(slug: string) {
-  const res = await fetch(`${BACKEND}/seo/products/${encodeURIComponent(slug)}`, {
-    next: { revalidate: 3600 },
-  });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(`${BACKEND}/seo/products/${encodeURIComponent(slug)}`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 /** Parse slug format: produto-a-vs-produto-b */

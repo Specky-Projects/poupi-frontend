@@ -11,15 +11,19 @@ const MIN_PRODUCTS = 8;
 type Props = { params: Promise<{ slug: string }> };
 
 async function fetchCategory(slug: string) {
-  const res = await fetch(`${BACKEND}/seo/categories/${encodeURIComponent(slug)}?limit=36`, { next: { revalidate: 1800 } });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(`${BACKEND}/seo/categories/${encodeURIComponent(slug)}?limit=36`, { next: { revalidate: 1800 } });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
 }
 
 async function fetchLinks(slug: string) {
-  const res = await fetch(`${BACKEND}/seo/categories/${encodeURIComponent(slug)}/internal-links`, { next: { revalidate: 3600 } });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(`${BACKEND}/seo/categories/${encodeURIComponent(slug)}/internal-links`, { next: { revalidate: 3600 } });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

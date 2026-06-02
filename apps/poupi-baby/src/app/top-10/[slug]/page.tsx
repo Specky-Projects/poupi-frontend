@@ -11,9 +11,13 @@ const MIN_PRODUCTS = 10;
 type Props = { params: Promise<{ slug: string }> };
 
 async function fetchCategory(slug: string) {
-  const res = await fetch(`${BACKEND}/seo/categories/${encodeURIComponent(slug)}?limit=10`, { next: { revalidate: 3600 } });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(`${BACKEND}/seo/categories/${encodeURIComponent(slug)}?limit=10`, { next: { revalidate: 3600 } });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

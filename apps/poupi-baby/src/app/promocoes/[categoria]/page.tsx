@@ -14,11 +14,15 @@ function deSlug(slug: string) {
 }
 
 async function fetchCategoryData(slug: string) {
-  const res = await fetch(`${BACKEND}/seo/categories/${encodeURIComponent(slug)}?limit=24`, {
-    next: { revalidate: 1800 },
-  });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(`${BACKEND}/seo/categories/${encodeURIComponent(slug)}?limit=24`, {
+      next: { revalidate: 1800 },
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 type Props = { params: Promise<{ categoria: string }> };

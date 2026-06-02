@@ -10,11 +10,15 @@ const SITE_URL = getSiteUrl();
 const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 async function fetchMarketplace(slug: string) {
-  const res = await fetch(`${BACKEND}/seo/marketplaces/${encodeURIComponent(slug)}?limit=24`, {
-    next: { revalidate: 3600 },
-  });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(`${BACKEND}/seo/marketplaces/${encodeURIComponent(slug)}?limit=24`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 type Props = { params: Promise<{ slug: string }> };

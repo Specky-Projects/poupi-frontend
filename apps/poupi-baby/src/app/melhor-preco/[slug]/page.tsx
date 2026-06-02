@@ -10,11 +10,15 @@ const SITE_URL = getSiteUrl();
 const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 async function fetchBestPrice(slug: string) {
-  const res = await fetch(`${BACKEND}/seo/products/${encodeURIComponent(slug)}/best-price`, {
-    next: { revalidate: 1800 },
-  });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(`${BACKEND}/seo/products/${encodeURIComponent(slug)}/best-price`, {
+      next: { revalidate: 1800 },
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 type Props = { params: Promise<{ slug: string }> };
