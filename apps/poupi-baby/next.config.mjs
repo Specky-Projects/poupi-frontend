@@ -13,10 +13,24 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
+      // Marketplaces gerais
       { protocol: 'https', hostname: '**.amazon.com.br' },
       { protocol: 'https', hostname: '**.mlstatic.com' },
       { protocol: 'https', hostname: '**.kabum.com.br' },
       { protocol: 'https', hostname: '**.magazineluiza.com.br' },
+      // Farmácias brasileiras
+      { protocol: 'https', hostname: '**.drogasil.com.br' },
+      { protocol: 'https', hostname: '**.drogaraia.com.br' },
+      { protocol: 'https', hostname: '**.drogariasaopaulo.com.br' },
+      { protocol: 'https', hostname: '**.drogariapacheco.com.br' },
+      { protocol: 'https', hostname: '**.consularemedios.com.br' },
+      { protocol: 'https', hostname: '**.farma22.com.br' },
+      { protocol: 'https', hostname: '**.extrafarma.com.br' },
+      { protocol: 'https', hostname: '**.ultrafarma.com.br' },
+      { protocol: 'https', hostname: '**.netfarma.com.br' },
+      { protocol: 'https', hostname: '**.farmaciaindiana.com.br' },
+      { protocol: 'https', hostname: '**.panvel.com' },
+      { protocol: 'https', hostname: '**.drogaleste.com.br' },
     ],
   },
 };

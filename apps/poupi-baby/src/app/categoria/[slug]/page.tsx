@@ -1,10 +1,11 @@
+﻿import { getSiteUrl } from '@/lib/site-url';
 import { getBackendUrl } from '@/lib/backend-url';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 const BACKEND  = getBackendUrl("3001");
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL   || 'https://poupi.com.br';
+const SITE_URL = getSiteUrl();
 
 const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -21,17 +22,17 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await fetchCategory(slug);
-  if (!data?.category) return { title: 'Categoria | Poupi', robots: { index: false } };
+  if (!data?.category) return { title: 'Categoria | Radar do Berço', robots: { index: false } };
 
-  const title = `${data.category} — Melhores Preços | Poupi`;
-  const description = `Compare preços de ${data.category} nas principais farmácias e drogarias. ${data.total} produtos monitorados com histórico de preço e alertas automáticos.`;
+  const title = `${data.category} â€” Melhores PreÃ§os | Radar do Berço`;
+  const description = `Compare preÃ§os de ${data.category} nas principais farmÃ¡cias e drogarias. ${data.total} produtos monitorados com histÃ³rico de preÃ§o e alertas automÃ¡ticos.`;
   const url = `${SITE_URL}/categoria/${slug}`;
 
   return {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, type: 'website', siteName: 'Poupi', locale: 'pt_BR' },
+    openGraph: { title, description, url, type: 'website', siteName: 'Radar do Berço', locale: 'pt_BR' },
     twitter: { card: 'summary', title, description },
   };
 }
@@ -55,9 +56,9 @@ export default async function CategoryPage({ params }: Props) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: `${category} — Melhores Preços`,
+    name: `${category} â€” Melhores PreÃ§os`,
     url: `${SITE_URL}/categoria/${slug}`,
-    description: `Compare preços de ${category} nas principais farmácias. ${total} produtos.`,
+    description: `Compare preÃ§os de ${category} nas principais farmÃ¡cias. ${total} produtos.`,
     numberOfItems: total,
   };
 
@@ -65,7 +66,7 @@ export default async function CategoryPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Poupi', item: SITE_URL },
+      { '@type': 'ListItem', position: 1, name: 'Radar do Berço', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: category, item: `${SITE_URL}/categoria/${slug}` },
     ],
   };
@@ -75,22 +76,22 @@ export default async function CategoryPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <main className="min-h-screen bg-[#fbfaf7] px-4 py-6 text-[#201335]">
+      <main className="min-h-screen bg-[#F7F8FC] px-4 py-6 text-[#090A3D]">
         <div className="mx-auto max-w-5xl space-y-5">
 
-          <nav className="text-xs text-[#675b77]">
+          <nav className="text-xs text-[#5B607C]">
             <ol className="flex flex-wrap items-center gap-1">
-              <li><Link href="/" className="hover:text-[#6c2bd9]">Poupi</Link></li>
+              <li><Link href="/" className="hover:text-[#5B4CF0]">Radar do Berço</Link></li>
               <li aria-hidden>/</li>
-              <li className="font-medium text-[#201335]">{category}</li>
+              <li className="font-medium text-[#090A3D]">{category}</li>
             </ol>
           </nav>
 
           <header>
-            <h1 className="text-2xl font-semibold tracking-tight">{category} — Melhores Preços</h1>
-            <p className="mt-1 text-sm text-[#675b77]">
-              {total} produto{total !== 1 ? 's' : ''} monitorado{total !== 1 ? 's' : ''} nas principais farmácias.
-              Preços atualizados automaticamente pelo Poupi.
+            <h1 className="text-2xl font-semibold tracking-tight">{category} â€” Melhores PreÃ§os</h1>
+            <p className="mt-1 text-sm text-[#5B607C]">
+              {total} produto{total !== 1 ? 's' : ''} monitorado{total !== 1 ? 's' : ''} nas principais farmÃ¡cias.
+              PreÃ§os atualizados automaticamente pelo Radar do Berço.
             </p>
           </header>
 
@@ -103,29 +104,29 @@ export default async function CategoryPage({ params }: Props) {
                 <a
                   key={p.id}
                   href={`/produto/${p.slug}`}
-                  className="rounded-lg border border-[#eadff7] bg-white p-4 shadow-sm transition hover:border-[#cdb8ef]"
+                  className="rounded-lg border border-[#E4E7F2] bg-white p-4 shadow-sm transition hover:border-[#cdb8ef]"
                 >
                   <div className="flex items-start gap-3">
                     {p.imageUrl
                       ? <img src={p.imageUrl} alt={name} width={56} height={56} className="h-14 w-14 rounded-lg object-contain" />
-                      : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-[#f5efff] text-2xl">📦</div>}
+                      : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-[#EEF2FF] text-2xl">ðŸ“¦</div>}
                     <div className="min-w-0 flex-1">
-                      {p.brand && <p className="text-xs font-semibold text-[#6c2bd9]">{p.brand}</p>}
+                      {p.brand && <p className="text-xs font-semibold text-[#5B4CF0]">{p.brand}</p>}
                       <h2 className="mt-0.5 line-clamp-2 text-sm font-semibold">{name}</h2>
-                      {p.variantLabel && <p className="mt-0.5 text-xs text-[#675b77]">{p.variantLabel}</p>}
+                      {p.variantLabel && <p className="mt-0.5 text-xs text-[#5B607C]">{p.variantLabel}</p>}
                     </div>
                   </div>
                   <div className="mt-3 flex items-end justify-between">
                     <div>
                       {bestPrice
-                        ? <p className="text-lg font-bold text-[#6c2bd9]">{money(bestPrice)}</p>
-                        : <p className="text-sm text-[#8a7f98]">Indisponível</p>}
+                        ? <p className="text-lg font-bold text-[#5B4CF0]">{money(bestPrice)}</p>
+                        : <p className="text-sm text-[#8A8FB1]">IndisponÃ­vel</p>}
                       {bestOffer?.pricePerUnit && (
-                        <p className="text-xs text-[#675b77]">{money(Number(bestOffer.pricePerUnit))}/un</p>
+                        <p className="text-xs text-[#5B607C]">{money(Number(bestOffer.pricePerUnit))}/un</p>
                       )}
                     </div>
                     {bestOffer?.marketplace?.name && (
-                      <p className="text-xs text-[#8a7f98]">{bestOffer.marketplace.name}</p>
+                      <p className="text-xs text-[#8A8FB1]">{bestOffer.marketplace.name}</p>
                     )}
                   </div>
                 </a>
@@ -134,16 +135,16 @@ export default async function CategoryPage({ params }: Props) {
           </div>
 
           {pages > 1 && (
-            <p className="text-center text-sm text-[#675b77]">
-              Mostrando página {page} de {pages} — <a href="/login" className="text-[#6c2bd9] hover:underline">Crie uma conta para monitorar preços</a>
+            <p className="text-center text-sm text-[#5B607C]">
+              Mostrando pÃ¡gina {page} de {pages} â€” <a href="/login" className="text-[#5B4CF0] hover:underline">Crie uma conta para monitorar preÃ§os</a>
             </p>
           )}
 
-          <section className="rounded-lg border border-[#eadff7] bg-white p-5 text-center shadow-sm">
-            <h2 className="text-base font-semibold">Quer saber quando {category} entrar em promoção?</h2>
-            <p className="mt-1 text-sm text-[#675b77]">O Poupi monitora preços 24h e envia alertas automáticos.</p>
-            <a href="/login" className="mt-3 inline-block rounded-lg bg-[#6c2bd9] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#5a21c0]">
-              Criar conta grátis
+          <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 text-center shadow-sm">
+            <h2 className="text-base font-semibold">Quer saber quando {category} entrar em promoÃ§Ã£o?</h2>
+            <p className="mt-1 text-sm text-[#5B607C]">O Radar do Berço monitora preÃ§os 24h e envia alertas automÃ¡ticos.</p>
+            <a href="/login" className="mt-3 inline-block rounded-lg bg-[#5B4CF0] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#493BD0]">
+              Criar conta grÃ¡tis
             </a>
           </section>
         </div>

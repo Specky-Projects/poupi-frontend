@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAdminApi } from '../components/admin-api';
@@ -54,7 +54,7 @@ export default function AdminAnalyticsPage() {
     <section className="space-y-5">
       <PageHeader
         title="Analytics"
-        description="Indicadores de uso, monitoramento e comportamento de preco sem carregar graficos pesados no admin."
+        description="Indicadores de uso, monitoramento e comportamento de preço sem carregar graficos pesados no admin."
         actions={(
           <>
             <select value={days} onChange={(event) => setDays(Number(event.target.value))} className="h-10 rounded-md border border-slate-800 bg-[#080b12] px-3 text-sm">
@@ -73,7 +73,7 @@ export default function AdminAnalyticsPage() {
         <MetricCard label="Usuarios ativos" value={data?.activeUsers ?? '-'} hint={`${data?.days ?? days} dias`} />
         <MetricCard label="Eventos" value={totalEvents || '-'} hint={topEvent ? `${topEvent.eventType ?? topEvent.type ?? 'evento'} lidera` : 'sem eventos'} />
         <MetricCard label="Produtos monitorados" value={data?.topProducts?.length ?? '-'} hint="top produtos no periodo" />
-        <MetricCard label="Promocoes recentes" value={data?.promotions?.length ?? '-'} tone={(data?.promotions?.length ?? 0) ? 'info' : 'default'} />
+        <MetricCard label="Promoções recentes" value={data?.promotions?.length ?? '-'} tone={(data?.promotions?.length ?? 0) ? 'info' : 'default'} />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
@@ -100,7 +100,7 @@ export default function AdminAnalyticsPage() {
         </Panel>
       </div>
 
-      <Panel title="Produtos mais volateis" subtitle="Variacao recente de preco por produto">
+      <Panel title="Produtos mais volateis" subtitle="Variacao recente de preço por produto">
         <DataTable
           rows={data?.volatileProducts ?? []}
           columns={[
@@ -113,7 +113,7 @@ export default function AdminAnalyticsPage() {
         />
       </Panel>
 
-      <Panel title="Promocoes recentes" subtitle="Ultimas capturas que podem representar oportunidades">
+      <Panel title="Promoções recentes" subtitle="Ultimas capturas que podem representar oportunidades">
         <DataTable
           rows={data?.promotions ?? []}
           columns={[

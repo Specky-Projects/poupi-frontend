@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -22,9 +22,9 @@ type BillingStatus = {
 };
 
 const FALLBACK_PLANS: Plan[] = [
-  { id: 'free', name: 'Free', priceBrl: 0, description: 'Para começar a acompanhar preços.' },
-  { id: 'plus', name: 'Plus', priceBrl: 14.9, description: 'Mais produtos, alertas ilimitados e histórico ampliado.', highlight: true },
-  { id: 'pro', name: 'Pro', priceBrl: 39.9, description: 'Recursos avançados para quem acompanha muitas compras.' },
+  { id: 'free', name: 'Free', priceBrl: 0, description: 'Para comeÃ§ar a acompanhar preÃ§os.' },
+  { id: 'plus', name: 'Plus', priceBrl: 14.9, description: 'Mais produtos, alertas ilimitados e histÃ³rico ampliado.', highlight: true },
+  { id: 'pro', name: 'Pro', priceBrl: 39.9, description: 'Recursos avanÃ§ados para quem acompanha muitas compras.' },
 ];
 
 export default function BillingPage() {
@@ -53,7 +53,7 @@ export default function BillingPage() {
     const data = await res.json().catch(() => ({}));
     setLoadingPlan(null);
     if (!res.ok) {
-      setError(data?.error || data?.message || 'Não foi possível iniciar a assinatura.');
+      setError(data?.error || data?.message || 'NÃ£o foi possÃ­vel iniciar a assinatura.');
       return;
     }
     if (data?.checkoutUrl) window.location.href = data.checkoutUrl;
@@ -64,7 +64,7 @@ export default function BillingPage() {
   }
 
   async function cancel() {
-    if (!confirm('Cancelar sua assinatura? O acesso permanece até o fim do período pago.')) return;
+    if (!confirm('Cancelar sua assinatura? O acesso permanece atÃ© o fim do perÃ­odo pago.')) return;
     setError(null);
     const res = await fetch('/api/billing/cancel', {
       method: 'POST',
@@ -73,10 +73,10 @@ export default function BillingPage() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setError(data?.error || data?.message || 'Não foi possível cancelar.');
+      setError(data?.error || data?.message || 'NÃ£o foi possÃ­vel cancelar.');
       return;
     }
-    setMessage('Assinatura cancelada. Seu acesso permanece até o fim do período.');
+    setMessage('Assinatura cancelada. Seu acesso permanece atÃ© o fim do perÃ­odo.');
     await loadStatus();
   }
 
@@ -85,16 +85,16 @@ export default function BillingPage() {
   const days = status?.daysRemaining;
 
   return (
-    <main className="min-h-screen bg-[#fbfaf7] px-4 py-8 text-[#201335]">
+    <main className="min-h-screen bg-[#F7F8FC] px-4 py-8 text-[#090A3D]">
       <div className="mx-auto max-w-6xl">
-        <Link href="/dashboard" className="text-sm font-medium text-[#6c2bd9]">Voltar ao painel</Link>
-        <header className="mt-5 rounded-lg bg-white p-6 shadow-sm ring-1 ring-[#eadff7]">
+        <Link href="/dashboard" className="text-sm font-medium text-[#5B4CF0]">Voltar ao painel</Link>
+        <header className="mt-5 rounded-lg bg-white p-6 shadow-sm ring-1 ring-[#E4E7F2]">
           <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight">Planos Poupi Baby</h1>
-              <p className="mt-2 max-w-2xl text-sm text-[#675b77]">Escolha o nível de acompanhamento ideal para economizar com menos esforço.</p>
+              <h1 className="text-3xl font-semibold tracking-tight">Planos Radar do Berço</h1>
+              <p className="mt-2 max-w-2xl text-sm text-[#5B607C]">Escolha o nÃ­vel de acompanhamento ideal para economizar com menos esforÃ§o.</p>
             </div>
-            <div className="rounded-lg bg-[#f5efff] p-4 text-[#3a176e]">
+            <div className="rounded-lg bg-[#EEF2FF] p-4 text-[#3a176e]">
               <div className="text-sm">Seu plano atual</div>
               <div className="mt-1 text-2xl font-semibold">{status?.planName ?? currentPlan}</div>
               <div className="mt-1 text-sm">{typeof days === 'number' ? `${days} dias de Premium restantes` : 'Sem Premium ativo'}</div>
@@ -109,28 +109,28 @@ export default function BillingPage() {
           {plans.map((plan) => {
             const isCurrent = plan.id === currentPlan;
             return (
-              <article key={plan.id} className={`relative rounded-lg border bg-white p-5 shadow-sm ${isCurrent ? 'border-[#6c2bd9] ring-2 ring-[#eadff7]' : 'border-[#eadff7]'} ${plan.highlight ? 'lg:-mt-3' : ''}`}>
+              <article key={plan.id} className={`relative rounded-lg border bg-white p-5 shadow-sm ${isCurrent ? 'border-[#5B4CF0] ring-2 ring-[#E4E7F2]' : 'border-[#E4E7F2]'} ${plan.highlight ? 'lg:-mt-3' : ''}`}>
                 {plan.highlight && <span className="absolute right-4 top-4 rounded-full bg-[#e8f8ee] px-3 py-1 text-xs font-semibold text-[#2f8a51]">Mais escolhido</span>}
-                {isCurrent && <span className="absolute left-4 top-4 rounded-full bg-[#f5efff] px-3 py-1 text-xs font-semibold text-[#6c2bd9]">Plano atual</span>}
+                {isCurrent && <span className="absolute left-4 top-4 rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-semibold text-[#5B4CF0]">Plano atual</span>}
                 <div className="pt-8">
                   <h2 className="text-2xl font-semibold">{plan.name}</h2>
-                  <p className="mt-2 min-h-10 text-sm text-[#675b77]">{plan.description}</p>
+                  <p className="mt-2 min-h-10 text-sm text-[#5B607C]">{plan.description}</p>
                   <div className="mt-6">
-                    <span className="text-3xl font-semibold">{plan.priceBrl === 0 ? 'Grátis' : plan.priceBrl.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                    {plan.priceBrl > 0 && <span className="text-sm text-[#675b77]">/mês</span>}
+                    <span className="text-3xl font-semibold">{plan.priceBrl === 0 ? 'GrÃ¡tis' : plan.priceBrl.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    {plan.priceBrl > 0 && <span className="text-sm text-[#5B607C]">/mÃªs</span>}
                   </div>
                   <ul className="mt-6 grid gap-3 text-sm text-[#3d314f]">
                     {(plan.id === 'free'
-                      ? ['Até 10 produtos', '1 alerta ativo', 'Histórico de 7 dias']
+                      ? ['AtÃ© 10 produtos', '1 alerta ativo', 'HistÃ³rico de 7 dias']
                       : plan.id === 'plus'
-                      ? ['Até 200 produtos', 'Alertas ilimitados', 'Histórico de 90 dias', 'Prioridade de sincronização']
-                      : ['Produtos ilimitados', 'Alertas ilimitados', 'Histórico completo', 'Recursos avançados']
+                      ? ['AtÃ© 200 produtos', 'Alertas ilimitados', 'HistÃ³rico de 90 dias', 'Prioridade de sincronizaÃ§Ã£o']
+                      : ['Produtos ilimitados', 'Alertas ilimitados', 'HistÃ³rico completo', 'Recursos avanÃ§ados']
                     ).map((item) => <li key={item}><i className="ti ti-check mr-2 text-[#58bd7a]" />{item}</li>)}
                   </ul>
                   <button
                     onClick={() => subscribe(plan.id)}
                     disabled={isCurrent || loadingPlan === plan.id}
-                    className={`mt-7 w-full rounded-lg px-4 py-3 text-sm font-semibold ${isCurrent ? 'border border-[#58bd7a] bg-white text-[#2f8a51]' : 'bg-[#6c2bd9] text-white'} disabled:opacity-70`}
+                    className={`mt-7 w-full rounded-lg px-4 py-3 text-sm font-semibold ${isCurrent ? 'border border-[#58bd7a] bg-white text-[#2f8a51]' : 'bg-[#5B4CF0] text-white'} disabled:opacity-70`}
                   >
                     {isCurrent ? 'Plano atual' : loadingPlan === plan.id ? 'Processando...' : plan.id === 'free' ? 'Plano gratuito' : `Assinar ${plan.name}`}
                   </button>
@@ -141,22 +141,22 @@ export default function BillingPage() {
         </section>
 
         {currentPlan !== 'free' && (
-          <section className="mt-6 rounded-lg border border-[#eadff7] bg-white p-5 shadow-sm">
+          <section className="mt-6 rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
               <div>
                 <h2 className="text-lg font-semibold">Gerenciar assinatura</h2>
-                <p className="mt-1 text-sm text-[#675b77]">
-                  {status?.expiresAt ? `Seu acesso atual vai até ${new Date(status.expiresAt).toLocaleDateString('pt-BR')}.` : 'Você possui uma assinatura ativa.'}
+                <p className="mt-1 text-sm text-[#5B607C]">
+                  {status?.expiresAt ? `Seu acesso atual vai atÃ© ${new Date(status.expiresAt).toLocaleDateString('pt-BR')}.` : 'VocÃª possui uma assinatura ativa.'}
                 </p>
               </div>
               <button onClick={cancel} className="rounded-lg border border-[#f2dada] px-4 py-2 text-sm font-semibold text-[#b13a3a] hover:bg-[#fff1f1]">Cancelar assinatura</button>
             </div>
           </section>
         )}
-        <footer className="mt-8 flex flex-wrap gap-4 text-sm text-[#675b77]">
-          <Link href="/faq" className="hover:text-[#6c2bd9]">FAQ</Link>
-          <Link href="/privacidade" className="hover:text-[#6c2bd9]">Política de Privacidade</Link>
-          <Link href="/termos" className="hover:text-[#6c2bd9]">Termos de Uso</Link>
+        <footer className="mt-8 flex flex-wrap gap-4 text-sm text-[#5B607C]">
+          <Link href="/faq" className="hover:text-[#5B4CF0]">FAQ</Link>
+          <Link href="/privacidade" className="hover:text-[#5B4CF0]">PolÃ­tica de Privacidade</Link>
+          <Link href="/termos" className="hover:text-[#5B4CF0]">Termos de Uso</Link>
         </footer>
       </div>
     </main>

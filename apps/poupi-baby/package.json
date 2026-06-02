@@ -1,37 +1,39 @@
 {
-    "name":  "@poupi-frontend/poupi-baby",
-    "version":  "0.1.0",
-    "private":  true,
-    "scripts":  {
-                    "dev":  "next dev",
-                    "build":  "next build",
-                    "start":  "next start",
-                    "lint":  "eslint",
-                    "typecheck":  "tsc --noEmit"
-                },
-    "dependencies":  {
-                         "@auth/core":  "^0.34.3",
-                         "@sentry/nextjs":  "^10.52.0",
-                         "next":  "16.2.6",
-                         "next-auth":  "^4.24.14",
-                         "react":  "19.2.4",
-                         "react-dom":  "19.2.4",
-                         "react-hot-toast":  "^2.6.0",
-                         "recharts":  "^3.8.1",
-                         "@poupi-frontend/api-client":  "workspace:*",
-                         "@poupi-frontend/types":  "workspace:*",
-                         "@poupi-frontend/ui":  "workspace:*",
-                         "@poupi-frontend/utils":  "workspace:*"
-                     },
-    "devDependencies":  {
-                            "@tailwindcss/postcss":  "^4",
-                            "@types/node":  "^20",
-                            "@types/react":  "^19",
-                            "@types/react-dom":  "^19",
-                            "eslint":  "^9",
-                            "eslint-config-next":  "16.2.6",
-                            "tailwindcss":  "^4",
-                            "typescript":  "^5",
-                            "@poupi-frontend/config":  "workspace:*"
-                        }
+    "name": "@poupi-frontend/poupi-baby",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "eslint",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@auth/core": "^0.34.3",
+        "@poupi-frontend/api-client": "workspace:*",
+        "@poupi-frontend/types": "workspace:*",
+        "@poupi-frontend/ui": "workspace:*",
+        "@poupi-frontend/utils": "workspace:*",
+        "@sentry/nextjs": "^10.52.0",
+        "@vercel/analytics": "^2.0.1",
+        "@vercel/speed-insights": "^2.0.0",
+        "next": "16.2.6",
+        "next-auth": "^4.24.14",
+        "react": "19.2.4",
+        "react-dom": "19.2.4",
+        "react-hot-toast": "^2.6.0",
+        "recharts": "^3.8.1"
+    },
+    "devDependencies": {
+        "@poupi-frontend/config": "workspace:*",
+        "@tailwindcss/postcss": "^4",
+        "@types/node": "^20",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^9",
+        "eslint-config-next": "16.2.6",
+        "tailwindcss": "^4",
+        "typescript": "^5"
+    }
 }

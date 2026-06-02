@@ -21,9 +21,19 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const token = await getToken({ req, secret: SECRET });
   if (!token?.backendToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const res = await bFetch(`/products/${id}`, token.backendToken as string);
+  const bt = token.backendToken as string;
+  const [res, intelRes] = await Promise.all([
+    bFetch(`/products/${id}`, bt),
+    bFetch(`/products/${id}/price-intelligence`, bt),
+  ]);
+
   if (!res.ok) return NextResponse.json({ error: 'Produto nao encontrado' }, { status: res.status });
-  return NextResponse.json(await res.json());
+
+  const data = await res.json();
+  // Enrich with price intelligence — non-critical, silently skip on failure
+  const intelligence = intelRes.ok ? await intelRes.json().catch(() => null) : null;
+
+  return NextResponse.json({ ...data, priceIntelligence: intelligence ?? null });
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

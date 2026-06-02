@@ -1,7 +1,8 @@
+﻿import { getSiteUrl } from '@/lib/site-url';
 import { getBackendUrl } from '@/lib/backend-url';
 import type { MetadataRoute } from 'next';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://poupi.com.br';
+const SITE_URL = getSiteUrl();
 const BACKEND  = getBackendUrl("3001");
 
 async function fetchJson<T>(path: string): Promise<T | null> {

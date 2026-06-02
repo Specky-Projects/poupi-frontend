@@ -1,3 +1,4 @@
+﻿import { getSiteUrl } from '@/lib/site-url';
 import { getBackendUrl } from '@/lib/backend-url';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -5,7 +6,7 @@ import { ProductPageClient } from './ProductPageClient';
 import { PublicProductPage } from '@/components/seo/PublicProductPage';
 
 const BACKEND = getBackendUrl("3001");
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://poupi.com.br';
+const SITE_URL = getSiteUrl();
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -40,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await fetchPublicProduct(id);
 
   if (!product) {
-    return { title: 'Produto | Poupi', robots: { index: false } };
+    return { title: 'Produto | Radar do Berço', robots: { index: false } };
   }
 
   const name = product.canonicalName || product.title;
@@ -52,17 +53,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = [
     name,
     product.brand ? `Marca: ${product.brand}` : '',
-    price ? `Menor preço: R$ ${price.toFixed(2).replace('.', ',')}` : '',
+    price ? `Menor preÃ§o: R$ ${price.toFixed(2).replace('.', ',')}` : '',
     store ? `em ${store}` : '',
     product.category ? `| ${product.category}` : '',
-    '| Poupi Monitor de Preços',
+    '| Radar do Berço Monitor de PreÃ§os',
   ].filter(Boolean).join(' ');
 
   const productJsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name,
-    description: `Compare preços de ${name} nas principais farmácias. Histórico de preço, score Poupi e alertas automáticos.`,
+    description: `Compare preÃ§os de ${name} nas principais farmÃ¡cias. HistÃ³rico de preÃ§o, score Radar do Berço e alertas automÃ¡ticos.`,
     brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
     sku: product.ean ?? undefined,
     image: product.imageUrl ?? undefined,
@@ -81,21 +82,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${name} — Melhor Preço | Poupi`,
+    title: `${name} â€” Melhor PreÃ§o | Radar do Berço`,
     description,
     alternates: { canonical: canonicalUrl },
     openGraph: {
-      title: `${name} — Melhor Preço`,
+      title: `${name} â€” Melhor PreÃ§o`,
       description,
       url: canonicalUrl,
       type: 'website',
       images: product.imageUrl ? [{ url: product.imageUrl, alt: name }] : [],
-      siteName: 'Poupi',
+      siteName: 'Radar do Berço',
       locale: 'pt_BR',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${name} — Melhor Preço | Poupi`,
+      title: `${name} â€” Melhor PreÃ§o | Radar do Berço`,
       description,
       images: product.imageUrl ? [product.imageUrl] : [],
     },
@@ -118,5 +119,18 @@ export default async function Page({ params }: Props) {
   ]);
   if (!product) notFound();
 
-  return <PublicProductPage product={product} internalLinks={internalLinks} />;
+  // Fetch deal score â€” endpoint is now public (no auth required)
+  let dealScore: { score: number; emoji: string; label: string; labelColor: string } | null = null;
+  try {
+    const dsRes = await fetch(`${BACKEND}/deal-score/product/${product.id}`, {
+      next: { revalidate: 900 },
+    });
+    if (dsRes.ok) {
+      const dsData = await dsRes.json();
+      const best = dsData?.best?.score;
+      if (best) dealScore = { score: best.score, emoji: best.emoji, label: best.label, labelColor: best.labelColor };
+    }
+  } catch { /* non-critical */ }
+
+  return <PublicProductPage product={product} internalLinks={internalLinks} dealScore={dealScore} />;
 }

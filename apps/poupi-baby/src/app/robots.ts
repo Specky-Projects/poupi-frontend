@@ -1,6 +1,7 @@
+﻿import { getSiteUrl } from '@/lib/site-url';
 import type { MetadataRoute } from 'next';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://poupi.com.br';
+const SITE_URL = getSiteUrl();
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -35,6 +36,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: [`${SITE_URL}/sitemap.xml`, `${SITE_URL}/sitemap-index.xml`],
+    sitemap: [`${SITE_URL}/sitemap.xml`],
   };
 }

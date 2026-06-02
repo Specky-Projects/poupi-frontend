@@ -1,120 +1,221 @@
-'use client';
+﻿'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
+import { BrandLogo, CribRadarIcon } from '../components/brand/BrandLogo';
 
-const examples = [
-  {
-    name: 'Pampers Confort Sec XG',
-    price: 'R$ 151,99',
-    detail: 'R$ 1,65 por unidade',
-    image: '/images/pampers.jpg',
-  },
-  {
-    name: 'Nan Supreme 800g',
-    price: 'R$ 64,50',
-    detail: 'alerta quando baixar',
-    image: '/images/nan.jpg',
-  },
-  {
-    name: 'Huggies Rosto e Corpo',
-    price: 'R$ 18,90',
-    detail: 'comparacao por farmacia',
-    image: '/images/huggies.jpg',
-  },
+const categories = [
+  { name: 'Fraldas', icon: 'ti-baby-carriage', tone: 'bg-[#EAF7FF]' },
+  { name: 'Fórmulas', icon: 'ti-bottle', tone: 'bg-[#FFF2CE]' },
+  { name: 'Mamadeiras', icon: 'ti-cup', tone: 'bg-[#F0EEFF]' },
+  { name: 'Higiene', icon: 'ti-droplet', tone: 'bg-[#FFEAF3]' },
+  { name: 'Brinquedos', icon: 'ti-ball-football', tone: 'bg-[#EAF8E9]' },
+  { name: 'Alimentação', icon: 'ti-bowl', tone: 'bg-[#EEF4FF]' },
 ];
 
 const benefits = [
-  'Compare ofertas de farmacias em um so lugar',
-  'Veja preco por unidade para nao cair em falsa promocao',
-  'Receba alerta quando um produto chegar no preco desejado',
+  ['Comparação em segundos', 'Veja onde o mesmo produto esta mais barato sem abrir varias abas.'],
+  ['Alertas de preço', 'Receba aviso quando fraldas, fórmulas ou itens essenciais baixarem.'],
+  ['Histórico de preços', 'Entenda se a oferta esta realmente boa antes de comprar.'],
+  ['Economia real', 'Compare preço por unidade e evite promoções que parecem melhores do que são.'],
+  ['Centenas de lojas', 'Acompanhe ofertas em farmácias, marketplaces e lojas infantis conectadas.'],
+  ['Gratuito', 'Comece a buscar e criar alertas sem compromisso.'],
 ];
+
+const steps = [
+  ['Busque um produto', 'Digite o nome ou cole o link do item que voce precisa comprar.'],
+  ['Comparamos os preços', 'O Radar do Berço organiza ofertas, lojas e histórico em uma unica tela.'],
+  ['Voce economiza', 'Escolha a melhor oferta ou ative um alerta para comprar no momento certo.'],
+];
+
+const monitoredStores = ['Amazon', 'Magalu', 'Mercado Livre', 'Shopee', 'Americanas', 'Drogasil', 'Raia'];
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#fbfaf7] text-[#201335]">
-      <header className="border-b border-[#eadff7] bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="text-2xl font-semibold text-[#6c2bd9]">
-            Poupi <span className="text-[#58bd7a]">baby</span>
+    <main className="min-h-screen bg-[#F7F8FC] text-[#090A3D]">
+      <header className="sticky top-0 z-30 border-b border-white/70 bg-white/85 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
+          <BrandLogo compact />
+          <nav className="hidden items-center gap-7 text-sm font-semibold text-[#17183F] md:flex">
+            <a href="#como-funciona" className="hover:text-[#5B4CF0]">Como funciona</a>
+            <a href="#categorias" className="hover:text-[#5B4CF0]">Categorias</a>
+            <a href="#alertas" className="hover:text-[#5B4CF0]">Alertas de preço</a>
+            <Link href="/faq" className="hover:text-[#5B4CF0]">FAQ</Link>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Link href="/alertas" className="hidden rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#17183F] shadow-sm ring-1 ring-[#E4E7F2] sm:inline-flex">
+              <i className="ti ti-bell mr-2 text-[#5B4CF0]" />Alertas
+            </Link>
+            <button
+              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+              className="rounded-full bg-[#5B4CF0] px-5 py-2.5 text-sm font-bold text-white shadow-[0_12px_30px_rgba(91,76,240,0.28)] transition hover:bg-[#493BD0]"
+            >
+              Entrar / Cadastrar
+            </button>
           </div>
-          <Link href="/login" className="text-sm font-semibold text-[#6c2bd9] hover:underline">
-            Entrar
-          </Link>
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#6c2bd9]">
-            Beta fechado
-          </p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
-            Economize em fraldas, formulas e produtos baby sem ficar garimpando preco.
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-[#675b77]">
-            O Poupi Baby monitora produtos essenciais, compara farmacias e avisa quando o preco
-            chega na sua meta. Feito para compras recorrentes de familia, nao para cupom aleatorio.
-          </p>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <button
-              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
-              className="rounded-lg bg-[#6c2bd9] px-5 py-3 text-sm font-bold text-white hover:bg-[#5a21c0]"
-            >
-              Criar conta com Google
-            </button>
-            <Link
-              href="/login"
-              className="rounded-lg border border-[#d9c8ef] bg-white px-5 py-3 text-center text-sm font-semibold text-[#6c2bd9] hover:bg-[#f7f2ee]"
-            >
-              Ja tenho conta
-            </Link>
+      <section className="relative overflow-hidden bg-[linear-gradient(112deg,#F7FAFF_0%,#FFFFFF_42%,#F3F0FF_100%)]">
+        <div className="absolute inset-y-0 right-0 hidden w-[54%] bg-[url('/images/radar-berco-hero.svg')] bg-cover bg-center lg:block" />
+        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 pb-12 pt-10 lg:min-h-[720px] lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:py-12">
+          <div className="relative z-10">
+            <BrandLogo href="/" />
+            <p className="mt-10 inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-[#5B4CF0] shadow-sm ring-1 ring-[#E2E5F4]">
+              Menos tempo procurando. Mais tempo cuidando.
+            </p>
+            <h1 className="mt-5 max-w-3xl text-5xl font-black leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
+              O menor preço para tudo o que seu bebê precisa
+            </h1>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-[#3D4263]">
+              Compare preços de fraldas, fórmulas, mamadeiras, higiene, brinquedos e muito mais em centenas de lojas.
+            </p>
+            <div className="mt-7 flex max-w-2xl flex-col gap-3 rounded-3xl bg-white p-2 shadow-[0_18px_60px_rgba(91,76,240,0.13)] ring-1 ring-[#E3E7F5] sm:flex-row">
+              <div className="flex min-h-12 flex-1 items-center gap-3 px-4 text-[#8A8FB1]">
+                <i className="ti ti-search text-xl text-[#5B4CF0]" />
+                <span>O que voce precisa hoje?</span>
+              </div>
+              <Link href="/dashboard" className="rounded-2xl bg-[#5B4CF0] px-6 py-3 text-center text-sm font-bold text-white hover:bg-[#493BD0]">
+                Buscar preços
+              </Link>
+              <a href="#como-funciona" className="rounded-2xl px-6 py-3 text-center text-sm font-bold text-[#5B4CF0] hover:bg-[#F2F0FF]">
+                Como funciona
+              </a>
+            </div>
+            <div className="mt-7 grid gap-3 text-sm font-semibold text-[#17183F] sm:grid-cols-4">
+              {['100% gratuito', 'Comparação em segundos', 'Alertas de preço', 'Cupons e promoções'].map((item) => (
+                <div key={item} className="flex items-center gap-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF2FF] text-[#5B4CF0]">
+                    <i className="ti ti-sparkles" />
+                  </span>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 rounded-3xl bg-white/90 p-5 shadow-sm ring-1 ring-[#E3E7F5]">
+              <p className="text-center text-sm font-semibold text-[#3D4263]">Comparamos preços de:</p>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-lg font-black text-[#17183F]">
+                {monitoredStores.map((store) => <span key={store}>{store}</span>)}
+              </div>
+            </div>
+          </div>
+
+          <div className="relative z-10 lg:min-h-[640px]">
+            <div className="mx-auto max-w-lg rounded-[2rem] bg-white/88 p-5 shadow-[0_28px_80px_rgba(17,24,39,0.18)] ring-1 ring-white/80 backdrop-blur lg:absolute lg:right-4 lg:top-28">
+              <div className="flex items-center gap-4">
+                <span className="flex h-20 w-20 items-center justify-center rounded-full bg-[#EEF2FF] text-[#5B4CF0]">
+                  <i className="ti ti-pig-money text-4xl" />
+                </span>
+                <div>
+                  <h2 className="text-xl font-black">Economize todo mes sem esforco</h2>
+                  <p className="mt-2 text-sm leading-6 text-[#3D4263]">Encontre o melhor preço e receba alertas quando baixar ainda mais.</p>
+                </div>
+              </div>
+            </div>
+            <div className="mx-auto mt-8 max-w-[330px] rounded-[2.2rem] border-[10px] border-[#111827] bg-white p-4 shadow-[0_30px_90px_rgba(17,24,39,0.22)] lg:absolute lg:bottom-0 lg:right-8">
+              <div className="mb-4 flex items-center justify-between">
+                <BrandLogo compact href="/" />
+                <i className="ti ti-bell text-xl text-[#5B4CF0]" />
+              </div>
+              <div className="rounded-2xl bg-[#F5F7FF] px-4 py-3 text-sm text-[#8A8FB1]">
+                <i className="ti ti-search mr-2 text-[#5B4CF0]" />Buscar produto
+              </div>
+              <p className="mt-5 text-sm font-bold">Ofertas em destaque</p>
+              <div className="mt-3 grid grid-cols-3 gap-3">
+                {['Fralda Pampers', 'Fórmula Aptamil', 'Mamadeira'].map((item, index) => (
+                  <div key={item} className="rounded-2xl bg-[#F7F8FC] p-2">
+                    <div className="flex aspect-square items-center justify-center rounded-xl bg-white text-[#5B4CF0]">
+                      <i className={`ti ${index === 0 ? 'ti-baby-carriage' : index === 1 ? 'ti-bottle' : 'ti-cup'} text-2xl`} />
+                    </div>
+                    <p className="mt-2 line-clamp-2 text-[10px] font-semibold">{item}</p>
+                    <p className="mt-1 text-xs font-black text-[#5B4CF0]">R$ {index === 0 ? '89,90' : index === 1 ? '119,90' : '49,90'}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 rounded-2xl bg-[#EEF2FF] p-4 text-sm font-semibold text-[#5B4CF0]">
+                <i className="ti ti-bell-ringing mr-2" />Alerta de preço ativo
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="rounded-lg border border-[#eadff7] bg-white p-4 shadow-sm">
-          <div className="rounded-lg bg-[#f5efff] p-4">
-            <p className="text-sm font-semibold text-[#6c2bd9]">Exemplos monitorados</p>
-            <p className="mt-1 text-xs text-[#675b77]">Amostra do que o beta ja acompanha.</p>
+      <section id="categorias" className="mx-auto max-w-7xl px-4 py-12">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+          {categories.map((category) => (
+            <Link key={category.name} href="/dashboard" className={`rounded-2xl ${category.tone} p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg`}>
+              <i className={`ti ${category.icon} text-3xl text-[#5B4CF0]`} />
+              <h2 className="mt-5 text-lg font-black">{category.name}</h2>
+              <p className="mt-2 text-sm font-semibold text-[#3D4263]">Compare agora</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section id="como-funciona" className="bg-white py-14">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="max-w-2xl">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#5B4CF0]">Como funciona</p>
+            <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Da busca ao melhor preço em poucos passos</h2>
           </div>
-          <div className="mt-4 grid gap-3">
-            {examples.map((item) => (
-              <div key={item.name} className="flex items-center gap-3 rounded-lg border border-[#f1e9fb] p-3">
-                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-[#f8f3ff]">
-                  <Image src={item.image} alt={item.name} fill sizes="56px" className="object-cover" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="line-clamp-1 text-sm font-semibold">{item.name}</p>
-                  <p className="mt-1 text-xs text-[#675b77]">{item.detail}</p>
-                </div>
-                <p className="text-sm font-bold text-[#6c2bd9]">{item.price}</p>
-              </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {steps.map(([title, description], index) => (
+              <article key={title} className="rounded-3xl border border-[#E4E7F2] bg-[#FBFCFF] p-6">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#5B4CF0] text-lg font-black text-white">{index + 1}</span>
+                <h3 className="mt-5 text-xl font-black">{title}</h3>
+                <p className="mt-3 text-sm leading-6 text-[#3D4263]">{description}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-y border-[#eadff7] bg-white">
-        <div className="mx-auto grid max-w-6xl gap-4 px-4 py-8 md:grid-cols-3">
-          {benefits.map((item) => (
-            <div key={item} className="rounded-lg border border-[#eadff7] p-4">
-              <div className="mb-3 h-2 w-10 rounded-full bg-[#58bd7a]" />
-              <p className="text-sm font-medium leading-6">{item}</p>
-            </div>
+      <section className="mx-auto max-w-7xl px-4 py-14">
+        <div className="grid gap-4 md:grid-cols-3">
+          {benefits.map(([title, description]) => (
+            <article key={title} className="rounded-3xl border border-[#E4E7F2] bg-white p-6 shadow-sm">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEF2FF] text-[#5B4CF0]">
+                <i className="ti ti-circle-check text-xl" />
+              </span>
+              <h3 className="mt-5 text-lg font-black">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-[#3D4263]">{description}</p>
+            </article>
           ))}
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-8">
-        <div className="rounded-lg bg-[#201335] p-6 text-white">
-          <h2 className="text-xl font-semibold">Preparado para o beta fechado</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">
-            Entre com Google, adicione produtos pelo painel, crie alertas e conecte o Telegram pela
-            pagina da conta para receber notificacoes.
-          </p>
+      <section id="alertas" className="mx-auto max-w-7xl px-4 pb-16">
+        <div className="grid overflow-hidden rounded-[2rem] bg-[#090A3D] text-white shadow-[0_24px_80px_rgba(9,10,61,0.24)] lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="p-8 sm:p-10">
+            <span className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white/12 text-white">
+              <CribRadarIcon className="h-10 w-10" />
+            </span>
+            <h2 className="mt-6 text-3xl font-black tracking-tight">Receba alertas quando o preço baixar</h2>
+            <p className="mt-4 max-w-xl text-base leading-7 text-white/75">
+              Ative alertas por WhatsApp, Telegram ou e-mail e acompanhe os produtos essenciais da sua família sem gastar tempo procurando.
+            </p>
+          </div>
+          <div className="flex flex-col justify-center gap-4 bg-[#5B4CF0] p-8 sm:p-10">
+            <Link href="/dashboard" className="rounded-2xl bg-white px-6 py-4 text-center text-sm font-black text-[#5B4CF0] hover:bg-[#F4F6FF]">
+              Buscar preços
+            </Link>
+            <Link href="/alertas" className="rounded-2xl border border-white/25 px-6 py-4 text-center text-sm font-black text-white hover:bg-white/10">
+              Ver meus alertas
+            </Link>
+          </div>
         </div>
       </section>
+
+      <footer className="border-t border-[#E4E7F2] bg-white">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 md:flex-row md:items-center md:justify-between">
+          <BrandLogo compact />
+          <div className="flex flex-wrap gap-4 text-sm font-semibold text-[#3D4263]">
+            <Link href="/privacidade" className="hover:text-[#5B4CF0]">Privacidade</Link>
+            <Link href="/termos" className="hover:text-[#5B4CF0]">Termos</Link>
+            <Link href="/faq" className="hover:text-[#5B4CF0]">FAQ</Link>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

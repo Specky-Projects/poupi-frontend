@@ -37,12 +37,12 @@ export function ProgrammaticSeoPage({ payload, breadcrumb }: { payload: Programm
         internalLinks={payload.internalLinks}
       />
       {payload.content.length > 0 && (
-        <section className="bg-[#fbfaf7] px-4 pb-8 text-[#201335]">
+        <section className="bg-[#F7F8FC] px-4 pb-8 text-[#090A3D]">
           <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-2">
             {payload.content.map((block) => (
-              <article key={`${block.type}:${block.title}`} className="rounded-lg border border-[#eadff7] bg-white p-5 shadow-sm">
+              <article key={`${block.type}:${block.title}`} className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
                 <h2 className="text-base font-semibold">{block.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-[#675b77]">{block.body}</p>
+                <p className="mt-2 text-sm leading-6 text-[#5B607C]">{block.body}</p>
               </article>
             ))}
           </div>

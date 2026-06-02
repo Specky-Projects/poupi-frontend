@@ -1,10 +1,11 @@
+﻿import { getSiteUrl } from '@/lib/site-url';
 import { getBackendUrl } from '@/lib/backend-url';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import type { ProgrammaticSeoPayload } from '@/components/seo/ProgrammaticSeoPage';
 
 const BACKEND = getBackendUrl("3001");
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://poupi.com.br';
+const SITE_URL = getSiteUrl();
 
 export async function fetchSeoPayload(path: string): Promise<ProgrammaticSeoPayload | null> {
   try {
@@ -20,11 +21,11 @@ export function metadataFromPayload(payload: ProgrammaticSeoPayload | null, fall
   if (!payload) return { title: fallbackTitle, robots: { index: false, follow: true } };
   const url = `${SITE_URL}${payload.canonicalPath}`;
   return {
-    title: `${payload.title} | Poupi`,
+    title: `${payload.title} | Radar do Berço`,
     description: payload.description,
     alternates: { canonical: url },
     robots: payload.robots.index ? { index: true, follow: true } : { index: false, follow: true },
-    openGraph: { title: payload.title, description: payload.description, url, type: 'website', siteName: 'Poupi', locale: 'pt_BR' },
+    openGraph: { title: payload.title, description: payload.description, url, type: 'website', siteName: 'Radar do Berço', locale: 'pt_BR' },
     twitter: { card: 'summary', title: payload.title, description: payload.description },
   };
 }

@@ -1,5 +1,5 @@
-# Poupi Baby
+# Radar do Berço
 
-Frontend principal do Poupi Baby migrado do projeto `poupi`.
+Frontend principal do Radar do Berço.
 
 Este app deve consumir o Data Core/backend por API. Nao coloque acesso direto a banco nem scraping no frontend.

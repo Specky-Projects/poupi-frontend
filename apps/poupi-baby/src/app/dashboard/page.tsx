@@ -1,8 +1,9 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { signOut, useSession } from 'next-auth/react';
 import { useEffect, useMemo, useState } from 'react';
+import { BrandLogo } from '../../components/brand/BrandLogo';
 
 type Offer = {
   id: string;
@@ -55,6 +56,8 @@ type Profile = {
   emailVerified?: boolean;
 };
 
+type ScoreBadge = { score: number; emoji: string; label: string; labelColor: string } | null;
+
 const money = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const offerPrice = (offer?: Offer | null) => Number(offer?.currentPrice ?? offer?.price ?? 0);
 
@@ -89,7 +92,8 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [url, setUrl] = useState('');
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<'discount' | 'price' | 'recent'>('discount');
+  const [sort, setSort] = useState<'discount' | 'price' | 'recent' | 'score'>('score');
+  const [scores, setScores] = useState<Record<string, ScoreBadge>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -101,11 +105,31 @@ export default function DashboardPage() {
       fetch('/api/billing/status'),
       fetch('/api/account'),
     ]);
-    if (productRes.ok) setProducts(await productRes.json());
+    const productsData: Product[] = productRes.ok ? await productRes.json() : [];
+    if (productRes.ok) setProducts(productsData);
     if (alertRes.ok) setAlerts(await alertRes.json());
     if (quotaRes.ok) setQuota(await quotaRes.json());
     if (billingRes.ok) setBilling(await billingRes.json());
     if (accountRes.ok) setProfile(await accountRes.json());
+
+    // Fetch deal scores in parallel for all products
+    if (productsData.length > 0) {
+      const scoreEntries = await Promise.all(
+        productsData.map(async (p) => {
+          try {
+            const res = await fetch(`/api/deal-score/${p.id}`);
+            if (!res.ok) return [p.id, null] as [string, ScoreBadge];
+            const data = await res.json();
+            const best = data?.best?.score;
+            if (!best) return [p.id, null] as [string, ScoreBadge];
+            return [p.id, { score: best.score, emoji: best.emoji, label: best.label, labelColor: best.labelColor }] as [string, ScoreBadge];
+          } catch {
+            return [p.id, null] as [string, ScoreBadge];
+          }
+        }),
+      );
+      setScores(Object.fromEntries(scoreEntries));
+    }
   }
 
   useEffect(() => { refresh(); }, []);
@@ -152,41 +176,51 @@ export default function DashboardPage() {
     return [...filtered].sort((a, b) => {
       if (sort === 'price') return offerPrice(bestOffer(a)) - offerPrice(bestOffer(b));
       if (sort === 'discount') return productDiscount(b) - productDiscount(a);
+      if (sort === 'score') return (scores[b.id]?.score ?? 0) - (scores[a.id]?.score ?? 0);
       return 0;
     });
   }, [products, query, sort]);
+
+  // Top 3 products by deal score for the "Melhores Oportunidades" section
+  const topOpportunities = useMemo(() => {
+    return products
+      .map((p) => ({ product: p, badge: scores[p.id] }))
+      .filter((item): item is { product: Product; badge: NonNullable<ScoreBadge> } => !!item.badge && item.badge.score >= 60)
+      .sort((a, b) => b.badge.score - a.badge.score)
+      .slice(0, 3);
+  }, [products, scores]);
 
   const planName = billing?.planName || quota?.planName || quota?.plan || billing?.currentPlan || 'Free';
   const daysRemaining = billing?.daysRemaining;
   const offerCount = products.reduce((sum, product) => sum + (product.offers?.length ?? 0), 0);
 
   return (
-    <main className="min-h-screen bg-[#fbfaf7] text-[#201335]">
+    <main className="min-h-screen bg-[#F7F8FC] text-[#090A3D]">
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6">
         <aside className="hidden w-64 shrink-0 lg:block">
-          <div className="sticky top-6 rounded-lg border border-[#eadff7] bg-white p-4 shadow-sm">
-            <div className="text-2xl font-semibold text-[#6c2bd9]">Poupi <span className="text-[#58bd7a]">baby</span></div>
+          <div className="sticky top-6 rounded-2xl border border-[#E4E7F2] bg-white p-4 shadow-sm">
+            <BrandLogo compact />
             <nav className="mt-6 grid gap-1 text-sm font-medium">
-              <Link className="rounded-lg bg-[#f5efff] px-3 py-2 text-[#6c2bd9]" href="/dashboard"><i className="ti ti-layout-dashboard mr-2" />Inicio</Link>
-              <a className="rounded-lg px-3 py-2 text-[#675b77] hover:bg-[#f7f2ee]" href="#produtos"><i className="ti ti-tags mr-2" />Produtos</a>
-              <Link className="rounded-lg px-3 py-2 text-[#675b77] hover:bg-[#f7f2ee]" href="/alertas"><i className="ti ti-bell mr-2" />Alertas</Link>
-              <Link className="rounded-lg px-3 py-2 text-[#675b77] hover:bg-[#f7f2ee]" href="/billing"><i className="ti ti-crown mr-2" />Planos</Link>
-              <Link className="rounded-lg px-3 py-2 text-[#675b77] hover:bg-[#f7f2ee]" href="/conta"><i className="ti ti-user-circle mr-2" />Conta</Link>
-              {session?.user?.role === 'admin' && <Link className="rounded-lg px-3 py-2 text-[#675b77] hover:bg-[#f7f2ee]" href="/admin/dashboard"><i className="ti ti-shield-lock mr-2" />Admin</Link>}
+              <Link className="rounded-lg bg-[#EEF2FF] px-3 py-2 text-[#5B4CF0]" href="/dashboard"><i className="ti ti-layout-dashboard mr-2" />Inicio</Link>
+              <a className="rounded-lg px-3 py-2 text-[#5B607C] hover:bg-[#F2F4FF]" href="#produtos"><i className="ti ti-tags mr-2" />Produtos</a>
+              <Link className="rounded-lg px-3 py-2 text-[#5B607C] hover:bg-[#F2F4FF]" href="/alertas"><i className="ti ti-bell mr-2" />Alertas</Link>
+              <Link className="rounded-lg px-3 py-2 text-[#5B607C] hover:bg-[#F2F4FF]" href="/billing"><i className="ti ti-crown mr-2" />Planos</Link>
+              <Link className="rounded-lg px-3 py-2 text-[#5B607C] hover:bg-[#F2F4FF]" href="/conta"><i className="ti ti-user-circle mr-2" />Conta</Link>
+              {session?.user?.role === 'admin' && <Link className="rounded-lg px-3 py-2 text-[#5B607C] hover:bg-[#F2F4FF]" href="/admin/dashboard"><i className="ti ti-shield-lock mr-2" />Admin</Link>}
             </nav>
-            <button onClick={() => signOut({ callbackUrl: '/login' })} className="mt-6 w-full rounded-lg border border-[#eadff7] px-3 py-2 text-sm font-medium text-[#675b77] hover:bg-[#f7f2ee]">Sair</button>
+            <button onClick={() => signOut({ callbackUrl: '/login' })} className="mt-6 w-full rounded-lg border border-[#E4E7F2] px-3 py-2 text-sm font-medium text-[#5B607C] hover:bg-[#F2F4FF]">Sair</button>
           </div>
         </aside>
 
         <section className="min-w-0 flex-1">
-          <header className="rounded-lg bg-[#6c2bd9] p-6 text-white shadow-sm">
+          <header className="rounded-3xl bg-[#5B4CF0] p-6 text-white shadow-sm">
             <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
               <div>
                 <p className="text-sm text-white/75">{displayName ? 'Que bom ter voce por aqui.' : 'Atualize seu perfil para personalizar sua experiencia.'}</p>
-                <h1 className="mt-1 text-3xl font-semibold tracking-tight">{greeting} <span aria-hidden>👋</span></h1>
+                <h1 className="mt-1 text-3xl font-semibold tracking-tight">{greeting} <span aria-hidden>ðŸ‘‹</span></h1>
                 {!profile?.emailVerified && (
                   <Link href="/conta" className="mt-4 inline-flex rounded-lg bg-white/15 px-3 py-2 text-sm font-medium text-white">
-                    Confirme seu e-mail para garantir o recebimento dos alertas de preco.
+                    Confirme seu e-mail para garantir o recebimento dos alertas de preço.
                   </Link>
                 )}
               </div>
@@ -207,69 +241,109 @@ export default function DashboardPage() {
             <Metric label="Premium" value={typeof daysRemaining === 'number' ? daysRemaining : '-'} hint={typeof daysRemaining === 'number' ? 'dias restantes' : `${activeAlerts.length} alertas ativos`} icon="ti-crown" />
           </div>
 
-          <section className="mt-5 rounded-lg border border-[#eadff7] bg-white p-4 shadow-sm">
+          <section className="mt-5 rounded-lg border border-[#E4E7F2] bg-white p-4 shadow-sm">
             <div className="flex flex-col gap-3 md:flex-row">
               <input
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addProduct()}
-                className="h-12 flex-1 rounded-lg border border-[#eadff7] px-4 text-sm outline-none focus:border-[#6c2bd9]"
+                className="h-12 flex-1 rounded-lg border border-[#E4E7F2] px-4 text-sm outline-none focus:border-[#5B4CF0]"
                 placeholder="Cole a URL do produto ou agregador para comparar lojas"
               />
-              <button onClick={addProduct} disabled={loading} className="rounded-lg bg-[#6c2bd9] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">
+              <button onClick={addProduct} disabled={loading} className="rounded-lg bg-[#5B4CF0] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">
                 {loading ? 'Comparando...' : 'Monitorar produto'}
               </button>
             </div>
-            <p className="mt-2 text-xs text-[#8a7f98]">Se o link trouxer varias farmacias, a Poupi Baby salva uma unica ficha do produto com todas as ofertas encontradas.</p>
+            <p className="mt-2 text-xs text-[#8A8FB1]">Se o link trouxer varias farmácias, o Radar do Berço salva uma unica ficha do produto com todas as ofertas encontradas.</p>
             {error && <div className="mt-3 rounded-lg border border-[#f0a5a5] bg-[#fff1f1] px-4 py-3 text-sm text-[#9f2828]">{error}</div>}
           </section>
 
-          <section id="produtos" className="mt-5 rounded-lg border border-[#eadff7] bg-white shadow-sm">
-            <div className="border-b border-[#eadff7] p-4">
+          {topOpportunities.length > 0 && (
+            <section className="mt-5 rounded-lg border border-[#d5f0de] bg-[#f6fdf8] p-4 shadow-sm">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-[#2f8a51]"><i className="ti ti-sparkles" />Melhores oportunidades agora</h2>
+              <p className="mt-1 text-xs text-[#4a7a5e]">Produtos da sua lista com o melhor DealScore no momento.</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                {topOpportunities.map(({ product, badge }) => {
+                  const offer = bestOffer(product);
+                  return (
+                    <Link key={product.id} href={`/produto/${product.id}`} className="flex flex-col gap-2 rounded-lg border border-[#c0ecd0] bg-white p-3 transition hover:border-[#2f8a51] hover:shadow-md">
+                      <div className="flex items-center gap-2">
+                        {product.imageUrl ? <img src={product.imageUrl} alt={product.title} className="h-10 w-10 rounded object-contain" /> : <div className="flex h-10 w-10 items-center justify-center rounded bg-[#EEF2FF]"><i className="ti ti-package text-[#5B4CF0]" /></div>}
+                        <span className="min-w-0 flex-1 truncate text-sm font-medium">{product.title}</span>
+                      </div>
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <div className="text-xs text-[#5B607C]">melhor preço</div>
+                          <div className="text-base font-semibold text-[#090A3D]">{offer ? money(offerPrice(offer)) : '-'}</div>
+                        </div>
+                        <span style={{ background: badge.labelColor + '22', color: badge.labelColor }} className="rounded-full px-2 py-0.5 text-sm font-bold">{badge.emoji} {badge.score}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          <section id="produtos" className="mt-5 rounded-lg border border-[#E4E7F2] bg-white shadow-sm">
+            <div className="border-b border-[#E4E7F2] p-4">
               <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
                 <div>
                   <h2 className="text-xl font-semibold">Central de oportunidades</h2>
-                  <p className="mt-1 text-sm text-[#675b77]">Produtos unificados com melhor preco, lojas monitoradas e economia entre ofertas.</p>
+                  <p className="mt-1 text-sm text-[#5B607C]">Produtos unificados com melhor preço, lojas monitoradas e economia entre ofertas.</p>
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row">
-                  <input value={query} onChange={(e) => setQuery(e.target.value)} className="h-10 rounded-lg border border-[#eadff7] px-3 text-sm outline-none focus:border-[#6c2bd9]" placeholder="Filtrar produtos" />
-                  <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="h-10 rounded-lg border border-[#eadff7] bg-white px-3 text-sm">
+                  <input value={query} onChange={(e) => setQuery(e.target.value)} className="h-10 rounded-lg border border-[#E4E7F2] px-3 text-sm outline-none focus:border-[#5B4CF0]" placeholder="Filtrar produtos" />
+                  <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="h-10 rounded-lg border border-[#E4E7F2] bg-white px-3 text-sm">
+                    <option value="score">Melhor DealScore</option>
                     <option value="discount">Maior economia</option>
-                    <option value="price">Menor preco</option>
+                    <option value="price">Menor preço</option>
                     <option value="recent">Recentes</option>
                   </select>
                 </div>
               </div>
             </div>
-            <div className="divide-y divide-[#f1e9fb]">
+            <div className="divide-y divide-[#EDF0FB]">
               {sortedProducts.length === 0 ? (
-                <div className="p-10 text-center text-sm text-[#8a7f98]">Nenhuma oportunidade encontrada. Adicione um produto para comecar.</div>
+                <div className="p-10 text-center">
+                  <i className="ti ti-package text-4xl text-[#b9aec8]" />
+                  <h3 className="mt-3 text-base font-semibold text-[#090A3D]">Nenhum produto monitorado ainda</h3>
+                  <p className="mt-2 mx-auto max-w-sm text-sm text-[#5B607C]">
+                    Cole o link de qualquer produto de farmÃ¡cia acima. O Radar do Berço compara preÃ§os entre lojas e te avisa quando cair.
+                  </p>
+                  <div className="mt-4 mx-auto max-w-sm rounded-lg bg-[#EEF2FF] px-4 py-3 text-left text-xs text-[#5B607C]">
+                    <span className="font-semibold text-[#5B4CF0]">Exemplo:</span>{' '}
+                    <span className="break-all">https://www.drogasil.com.br/produto/fraldas-pampers...</span>
+                  </div>
+                </div>
               ) : sortedProducts.map((product) => {
                 const offer = bestOffer(product);
                 const discount = productDiscount(product);
                 const savings = productSavings(product);
                 const stores = offerStores(product);
                 const availableOffers = product.offers?.filter((o) => o.availability).length ?? 0;
+                const scoreBadge = scores[product.id];
                 return (
                   <article key={product.id} className="flex flex-col gap-4 p-4 transition hover:bg-[#fffcf7] md:flex-row md:items-center">
                     <Link href={`/produto/${product.id}`} className="flex min-w-0 flex-1 items-center gap-4">
-                      {product.imageUrl ? <img src={product.imageUrl} alt={product.title} className="h-16 w-16 rounded-lg object-contain" /> : <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-[#f5efff] text-[#6c2bd9]"><i className="ti ti-package text-2xl" /></div>}
+                      {product.imageUrl ? <img src={product.imageUrl} alt={product.title} className="h-16 w-16 rounded-lg object-contain" /> : <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-[#EEF2FF] text-[#5B4CF0]"><i className="ti ti-package text-2xl" /></div>}
                       <div className="min-w-0">
                         <h3 className="truncate text-sm font-semibold">{product.title}</h3>
-                        <p className="mt-1 truncate text-xs text-[#675b77]">{stores.join(' • ') || 'Sem ofertas ativas'}</p>
+                        <p className="mt-1 truncate text-xs text-[#5B607C]">{stores.join(' â€¢ ') || 'Sem ofertas ativas'}</p>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {discount > 0 && <span className="rounded-full bg-[#e8f8ee] px-2.5 py-1 text-xs font-semibold text-[#2f8a51]">{discount}% abaixo da maior oferta</span>}
-                          {savings > 0 && <span className="rounded-full bg-[#fff5d8] px-2.5 py-1 text-xs font-semibold text-[#8a6316]">economia ate {money(savings)}</span>}
-                          <span className="rounded-full bg-[#f5efff] px-2.5 py-1 text-xs font-semibold text-[#6c2bd9]">{availableOffers}/{product.offers?.length ?? 0} ofertas ativas</span>
-                          {offer?.pricePerUnit && <span className="rounded-full bg-[#f7f2ee] px-2.5 py-1 text-xs font-semibold text-[#675b77]">{money(Number(offer.pricePerUnit))}/un</span>}
+                          {savings > 0 && <span className="rounded-full bg-[#fff5d8] px-2.5 py-1 text-xs font-semibold text-[#8a6316]">economia até {money(savings)}</span>}
+                          <span className="rounded-full bg-[#EEF2FF] px-2.5 py-1 text-xs font-semibold text-[#5B4CF0]">{availableOffers}/{product.offers?.length ?? 0} ofertas ativas</span>
+                          {offer?.pricePerUnit && <span className="rounded-full bg-[#F2F4FF] px-2.5 py-1 text-xs font-semibold text-[#5B607C]">{money(Number(offer.pricePerUnit))}/un</span>}
+                          {scoreBadge && <span title={`DealScore: ${scoreBadge.label}`} style={{ background: scoreBadge.labelColor + '22', color: scoreBadge.labelColor, borderColor: scoreBadge.labelColor + '55' }} className="rounded-full border px-2.5 py-1 text-xs font-semibold">{scoreBadge.emoji} {scoreBadge.score} Â· {scoreBadge.label}</span>}
                         </div>
                       </div>
                     </Link>
                     <div className="flex items-center justify-between gap-4 md:justify-end">
                       <div className="text-right">
-                        <div className="text-xs font-medium text-[#2f8a51]">melhor preco</div>
+                        <div className="text-xs font-medium text-[#2f8a51]">melhor preço</div>
                         <div className="text-lg font-semibold">{offer ? money(offerPrice(offer)) : '-'}</div>
-                        <div className="text-xs text-[#675b77]">{offer?.marketplace?.name ?? 'Sem loja'}</div>
+                        <div className="text-xs text-[#5B607C]">{offer?.marketplace?.name ?? 'Sem loja'}</div>
                       </div>
                       <button onClick={() => removeProduct(product.id)} className="rounded-lg border border-[#f2dada] px-3 py-2 text-sm font-medium text-[#b13a3a] hover:bg-[#fff1f1]">Remover</button>
                     </div>
@@ -278,10 +352,10 @@ export default function DashboardPage() {
               })}
             </div>
           </section>
-          <footer className="mt-8 flex flex-wrap gap-4 pb-4 text-sm text-[#675b77]">
-            <Link href="/faq" className="hover:text-[#6c2bd9]">FAQ</Link>
-            <Link href="/privacidade" className="hover:text-[#6c2bd9]">Politica de Privacidade</Link>
-            <Link href="/termos" className="hover:text-[#6c2bd9]">Termos de Uso</Link>
+          <footer className="mt-8 flex flex-wrap gap-4 pb-4 text-sm text-[#5B607C]">
+            <Link href="/faq" className="hover:text-[#5B4CF0]">FAQ</Link>
+            <Link href="/privacidade" className="hover:text-[#5B4CF0]">Politica de Privacidade</Link>
+            <Link href="/termos" className="hover:text-[#5B4CF0]">Termos de Uso</Link>
           </footer>
         </section>
       </div>
@@ -291,10 +365,10 @@ export default function DashboardPage() {
 
 function Metric({ label, value, hint, icon }: { label: string; value: number | string; hint: string; icon: string }) {
   return (
-    <div className="rounded-lg border border-[#eadff7] bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-2 text-sm font-medium text-[#675b77]"><i className={`ti ${icon} text-[#6c2bd9]`} />{label}</div>
-      <div className="mt-3 text-3xl font-semibold tracking-tight text-[#201335]">{value}</div>
-      <div className="mt-1 text-xs text-[#8a7f98]">{hint}</div>
+    <div className="rounded-lg border border-[#E4E7F2] bg-white p-4 shadow-sm">
+      <div className="flex items-center gap-2 text-sm font-medium text-[#5B607C]"><i className={`ti ${icon} text-[#5B4CF0]`} />{label}</div>
+      <div className="mt-3 text-3xl font-semibold tracking-tight text-[#090A3D]">{value}</div>
+      <div className="mt-1 text-xs text-[#8A8FB1]">{hint}</div>
     </div>
   );
 }

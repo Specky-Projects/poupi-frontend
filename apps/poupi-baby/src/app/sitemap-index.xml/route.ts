@@ -1,6 +1,7 @@
+﻿import { getSiteUrl } from '@/lib/site-url';
 import { getBackendUrl } from '@/lib/backend-url';
 const BACKEND = getBackendUrl("3001");
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://poupi.com.br';
+const SITE_URL = getSiteUrl();
 
 export async function GET() {
   const res = await fetch(`${BACKEND}/seo/sitemaps/partitions`, { next: { revalidate: 3600 } });

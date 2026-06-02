@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -50,7 +50,7 @@ export default function AccountPage() {
     const data = await res.json().catch(() => ({}));
     setSaving(false);
     if (!res.ok) {
-      setError(data?.message || 'Não foi possível salvar seus dados.');
+      setError(data?.message || 'NÃ£o foi possÃ­vel salvar seus dados.');
       return;
     }
     setProfile(data);
@@ -67,7 +67,7 @@ export default function AccountPage() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setError(data?.message || 'Não foi possível alterar a senha.');
+      setError(data?.message || 'NÃ£o foi possÃ­vel alterar a senha.');
       return;
     }
     setCurrentPassword('');
@@ -81,11 +81,11 @@ export default function AccountPage() {
     const res = await fetch('/api/account/email-confirmation', { method: 'POST' });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setError(data?.message || 'Não foi possível gerar o código.');
+      setError(data?.message || 'NÃ£o foi possÃ­vel gerar o cÃ³digo.');
       return;
     }
     setDevCode(data.devCode ?? null);
-    setMessage('Código de confirmação gerado.');
+    setMessage('CÃ³digo de confirmaÃ§Ã£o gerado.');
   }
 
   async function confirmEmail() {
@@ -98,7 +98,7 @@ export default function AccountPage() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setError(data?.message || 'Código inválido.');
+      setError(data?.message || 'CÃ³digo invÃ¡lido.');
       return;
     }
     setCode('');
@@ -141,13 +141,13 @@ export default function AccountPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#fbfaf7] px-4 py-8 text-[#201335]">
+    <main className="min-h-screen bg-[#F7F8FC] px-4 py-8 text-[#090A3D]">
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 flex items-center justify-between gap-4">
           <div>
-            <Link href="/dashboard" className="text-sm font-medium text-[#6c2bd9]">Voltar ao painel</Link>
+            <Link href="/dashboard" className="text-sm font-medium text-[#5B4CF0]">Voltar ao painel</Link>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight">Minha conta</h1>
-            <p className="mt-1 text-sm text-[#675b77]">Mantenha seus dados atualizados para receber alertas com segurança.</p>
+            <p className="mt-1 text-sm text-[#5B607C]">Mantenha seus dados atualizados para receber alertas com seguranÃ§a.</p>
           </div>
         </div>
 
@@ -155,32 +155,32 @@ export default function AccountPage() {
         {error && <div className="mb-4 rounded-lg border border-[#f0a5a5] bg-[#fff1f1] px-4 py-3 text-sm text-[#9f2828]">{error}</div>}
 
         <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-          <section className="rounded-lg border border-[#eadff7] bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Dados básicos</h2>
+          <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
+            <h2 className="text-lg font-semibold">Dados bÃ¡sicos</h2>
             <div className="mt-5 grid gap-4">
               <label className="grid gap-1 text-sm font-medium">
                 Nome
-                <input value={name} onChange={(e) => setName(e.target.value)} className="h-11 rounded-lg border border-[#eadff7] px-3 outline-none focus:border-[#6c2bd9]" />
+                <input value={name} onChange={(e) => setName(e.target.value)} className="h-11 rounded-lg border border-[#E4E7F2] px-3 outline-none focus:border-[#5B4CF0]" />
               </label>
               <label className="grid gap-1 text-sm font-medium">
                 E-mail
-                <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" className="h-11 rounded-lg border border-[#eadff7] px-3 outline-none focus:border-[#6c2bd9]" />
+                <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" className="h-11 rounded-lg border border-[#E4E7F2] px-3 outline-none focus:border-[#5B4CF0]" />
               </label>
               <label className="grid gap-1 text-sm font-medium">
                 Telefone
-                <input value={phone} onChange={(e) => setPhone(e.target.value)} className="h-11 rounded-lg border border-[#eadff7] px-3 outline-none focus:border-[#6c2bd9]" placeholder="Opcional" />
+                <input value={phone} onChange={(e) => setPhone(e.target.value)} className="h-11 rounded-lg border border-[#E4E7F2] px-3 outline-none focus:border-[#5B4CF0]" placeholder="Opcional" />
               </label>
             </div>
-            <button onClick={saveProfile} disabled={saving} className="mt-5 rounded-lg bg-[#6c2bd9] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
-              {saving ? 'Salvando...' : 'Salvar alterações'}
+            <button onClick={saveProfile} disabled={saving} className="mt-5 rounded-lg bg-[#5B4CF0] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
+              {saving ? 'Salvando...' : 'Salvar alteraÃ§Ãµes'}
             </button>
           </section>
 
-          <section className="rounded-lg border border-[#eadff7] bg-white p-5 shadow-sm">
+          <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold">Confirmação de e-mail</h2>
-                <p className="mt-1 text-sm text-[#675b77]">Confirme seu e-mail para garantir o recebimento dos alertas de preço.</p>
+                <h2 className="text-lg font-semibold">ConfirmaÃ§Ã£o de e-mail</h2>
+                <p className="mt-1 text-sm text-[#5B607C]">Confirme seu e-mail para garantir o recebimento dos alertas de preÃ§o.</p>
               </div>
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${profile?.emailVerified ? 'bg-[#e8f8ee] text-[#2f8a51]' : 'bg-[#fff6de] text-[#9a6a00]'}`}>
                 {profile?.emailVerified ? 'Confirmado' : 'Pendente'}
@@ -188,19 +188,19 @@ export default function AccountPage() {
             </div>
             {!profile?.emailVerified && (
               <div className="mt-5 grid gap-3">
-                <button onClick={requestCode} className="rounded-lg border border-[#6c2bd9] px-4 py-2 text-sm font-semibold text-[#6c2bd9]">Gerar código</button>
-                {devCode && <div className="rounded-lg bg-[#f5efff] px-3 py-2 text-sm text-[#3a176e]">Código de teste: <strong>{devCode}</strong></div>}
-                <input value={code} onChange={(e) => setCode(e.target.value)} className="h-11 rounded-lg border border-[#eadff7] px-3 outline-none focus:border-[#6c2bd9]" placeholder="Digite o código" />
+                <button onClick={requestCode} className="rounded-lg border border-[#5B4CF0] px-4 py-2 text-sm font-semibold text-[#5B4CF0]">Gerar cÃ³digo</button>
+                {devCode && <div className="rounded-lg bg-[#EEF2FF] px-3 py-2 text-sm text-[#3a176e]">CÃ³digo de teste: <strong>{devCode}</strong></div>}
+                <input value={code} onChange={(e) => setCode(e.target.value)} className="h-11 rounded-lg border border-[#E4E7F2] px-3 outline-none focus:border-[#5B4CF0]" placeholder="Digite o cÃ³digo" />
                 <button onClick={confirmEmail} className="rounded-lg bg-[#58bd7a] px-4 py-2 text-sm font-semibold text-white">Confirmar e-mail</button>
               </div>
             )}
           </section>
 
-          <section className="rounded-lg border border-[#eadff7] bg-white p-5 shadow-sm">
+          <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold">Telegram</h2>
-                <p className="mt-1 text-sm text-[#675b77]">Conecte sua conta para receber alertas no Telegram.</p>
+                <p className="mt-1 text-sm text-[#5B607C]">Conecte sua conta para receber alertas no Telegram.</p>
               </div>
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${profile?.telegramChatId ? 'bg-[#e8f8ee] text-[#2f8a51]' : 'bg-[#fff6de] text-[#9a6a00]'}`}>
                 {profile?.telegramChatId ? 'Conectado' : 'Pendente'}
@@ -209,26 +209,26 @@ export default function AccountPage() {
 
             {profile?.telegramChatId ? (
               <div className="mt-5">
-                <p className="text-sm text-[#675b77]">Seu Telegram ja esta pronto para receber alertas de preco.</p>
+                <p className="text-sm text-[#5B607C]">Seu Telegram ja esta pronto para receber alertas de preço.</p>
                 <button onClick={disconnectTelegram} className="mt-4 rounded-lg border border-[#f2dada] px-4 py-2 text-sm font-semibold text-[#b13a3a] hover:bg-[#fff1f1]">
                   Desconectar Telegram
                 </button>
               </div>
             ) : (
               <div className="mt-5 grid gap-3">
-                <button onClick={generateTelegramToken} className="rounded-lg border border-[#6c2bd9] px-4 py-2 text-sm font-semibold text-[#6c2bd9]">
+                <button onClick={generateTelegramToken} className="rounded-lg border border-[#5B4CF0] px-4 py-2 text-sm font-semibold text-[#5B4CF0]">
                   Gerar token de conexao
                 </button>
                 {telegramToken && (
-                  <div className="rounded-lg bg-[#f5efff] p-3 text-sm text-[#3a176e]">
-                    <p className="font-semibold">Envie este comando para o bot Poupi Baby:</p>
-                    <code className="mt-2 block break-all rounded bg-white px-3 py-2 text-xs text-[#201335]">
+                  <div className="rounded-lg bg-[#EEF2FF] p-3 text-sm text-[#3a176e]">
+                    <p className="font-semibold">Envie este comando para o bot Radar do Berço:</p>
+                    <code className="mt-2 block break-all rounded bg-white px-3 py-2 text-xs text-[#090A3D]">
                       /start {telegramToken}
                     </code>
                     {telegramExpiresIn && (
-                      <p className="mt-2 text-xs text-[#675b77]">Valido por {Math.round(telegramExpiresIn / 60)} minutos.</p>
+                      <p className="mt-2 text-xs text-[#5B607C]">Valido por {Math.round(telegramExpiresIn / 60)} minutos.</p>
                     )}
-                    <button onClick={loadProfile} className="mt-3 text-xs font-semibold text-[#6c2bd9] hover:underline">
+                    <button onClick={loadProfile} className="mt-3 text-xs font-semibold text-[#5B4CF0] hover:underline">
                       Ja enviei, verificar status
                     </button>
                   </div>
@@ -237,25 +237,25 @@ export default function AccountPage() {
             )}
           </section>
 
-          <section className="rounded-lg border border-[#eadff7] bg-white p-5 shadow-sm lg:col-span-2">
+          <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm lg:col-span-2">
             <h2 className="text-lg font-semibold">Alterar senha</h2>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <label className="grid gap-1 text-sm font-medium">
                 Senha atual
-                <input value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} type="password" className="h-11 rounded-lg border border-[#eadff7] px-3 outline-none focus:border-[#6c2bd9]" />
+                <input value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} type="password" className="h-11 rounded-lg border border-[#E4E7F2] px-3 outline-none focus:border-[#5B4CF0]" />
               </label>
               <label className="grid gap-1 text-sm font-medium">
                 Nova senha
-                <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" className="h-11 rounded-lg border border-[#eadff7] px-3 outline-none focus:border-[#6c2bd9]" />
+                <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" className="h-11 rounded-lg border border-[#E4E7F2] px-3 outline-none focus:border-[#5B4CF0]" />
               </label>
             </div>
-            <button onClick={changePassword} className="mt-5 rounded-lg bg-[#201335] px-4 py-2.5 text-sm font-semibold text-white">Atualizar senha</button>
+            <button onClick={changePassword} className="mt-5 rounded-lg bg-[#090A3D] px-4 py-2.5 text-sm font-semibold text-white">Atualizar senha</button>
           </section>
         </div>
-        <footer className="mt-8 flex flex-wrap gap-4 text-sm text-[#675b77]">
-          <Link href="/faq" className="hover:text-[#6c2bd9]">FAQ</Link>
-          <Link href="/privacidade" className="hover:text-[#6c2bd9]">Política de Privacidade</Link>
-          <Link href="/termos" className="hover:text-[#6c2bd9]">Termos de Uso</Link>
+        <footer className="mt-8 flex flex-wrap gap-4 text-sm text-[#5B607C]">
+          <Link href="/faq" className="hover:text-[#5B4CF0]">FAQ</Link>
+          <Link href="/privacidade" className="hover:text-[#5B4CF0]">PolÃ­tica de Privacidade</Link>
+          <Link href="/termos" className="hover:text-[#5B4CF0]">Termos de Uso</Link>
         </footer>
       </div>
     </main>

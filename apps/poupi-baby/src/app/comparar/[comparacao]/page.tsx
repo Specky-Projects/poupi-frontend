@@ -1,10 +1,11 @@
+﻿import { getSiteUrl } from '@/lib/site-url';
 import { getBackendUrl } from '@/lib/backend-url';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 const BACKEND  = getBackendUrl("3001");
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://poupi.com.br';
+const SITE_URL = getSiteUrl();
 
 const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -17,33 +18,33 @@ async function fetchProduct(slug: string) {
 }
 
 /** Parse slug format: produto-a-vs-produto-b */
-function parseComparacao(comparacao: string): [string, string] | null {
-  const idx = comparacao.indexOf('-vs-');
+function parseComparação(comparação: string): [string, string] | null {
+  const idx = comparação.indexOf('-vs-');
   if (idx === -1) return null;
-  return [comparacao.slice(0, idx), comparacao.slice(idx + 4)];
+  return [comparação.slice(0, idx), comparação.slice(idx + 4)];
 }
 
 function canonicalComparison(slugs: [string, string]) {
   return [...slugs].sort().join('-vs-');
 }
 
-type Props = { params: Promise<{ comparacao: string }> };
+type Props = { params: Promise<{ comparação: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { comparacao } = await params;
-  const slugs = parseComparacao(comparacao);
-  if (!slugs) return { title: 'Comparador | Poupi', robots: { index: false } };
+  const { comparação } = await params;
+  const slugs = parseComparação(comparação);
+  if (!slugs) return { title: 'Comparador | Radar do Berço', robots: { index: false } };
   const canonicalSlug = canonicalComparison(slugs);
-  if (slugs[0] === slugs[1]) return { title: 'Comparador | Poupi', robots: { index: false } };
+  if (slugs[0] === slugs[1]) return { title: 'Comparador | Radar do Berço', robots: { index: false } };
 
   const [a, b] = await Promise.all([fetchProduct(slugs[0]), fetchProduct(slugs[1])]);
-  if (!a || !b) return { title: 'Comparador | Poupi', robots: { index: false } };
+  if (!a || !b) return { title: 'Comparador | Radar do Berço', robots: { index: false } };
 
   const nameA = a.canonicalName || a.title;
   const nameB = b.canonicalName || b.title;
   const url = `${SITE_URL}/comparar/${canonicalSlug}`;
-  const title = `${nameA} vs ${nameB} — Qual é Melhor? | Poupi`;
-  const description = `Compare ${nameA} e ${nameB}: preço atual, histórico, custo por unidade e qual tem o melhor custo-benefício agora.`;
+  const title = `${nameA} vs ${nameB} â€” Qual Ã© Melhor? | Radar do Berço`;
+  const description = `Compare ${nameA} e ${nameB}: preÃ§o atual, histÃ³rico, custo por unidade e qual tem o melhor custo-benefÃ­cio agora.`;
 
   return {
     title,
@@ -54,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url,
       type: 'website',
-      siteName: 'Poupi',
+      siteName: 'Radar do Berço',
       locale: 'pt_BR',
       images: a.imageUrl || b.imageUrl ? [{ url: a.imageUrl || b.imageUrl, alt: `${nameA} vs ${nameB}` }] : [],
     },
@@ -63,12 +64,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function CompararPage({ params }: Props) {
-  const { comparacao } = await params;
-  const slugs = parseComparacao(comparacao);
+  const { comparação } = await params;
+  const slugs = parseComparação(comparação);
   if (!slugs) notFound();
   const canonicalSlug = canonicalComparison(slugs);
   if (slugs[0] === slugs[1]) notFound();
-  if (comparacao !== canonicalSlug) redirect(`/comparar/${canonicalSlug}`);
+  if (comparação !== canonicalSlug) redirect(`/comparar/${canonicalSlug}`);
 
   const [prodA, prodB] = await Promise.all([fetchProduct(slugs[0]), fetchProduct(slugs[1])]);
   if (!prodA || !prodB) notFound();
@@ -100,8 +101,8 @@ export default async function CompararPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: `${nameA} vs ${nameB}`,
-    url: `${SITE_URL}/comparar/${comparacao}`,
-    description: `Comparação de preços entre ${nameA} e ${nameB}.`,
+    url: `${SITE_URL}/comparar/${comparação}`,
+    description: `ComparaÃ§Ã£o de preÃ§os entre ${nameA} e ${nameB}.`,
   };
 
   const faqJsonLd = {
@@ -110,26 +111,26 @@ export default async function CompararPage({ params }: Props) {
     mainEntity: [
       {
         '@type': 'Question',
-        name: `Qual é mais barato, ${nameA} ou ${nameB}?`,
+        name: `Qual Ã© mais barato, ${nameA} ou ${nameB}?`,
         acceptedAnswer: {
           '@type': 'Answer',
           text: winnerByPrice === 'A'
-            ? `${nameA} está mais barato: ${priceA ? money(priceA) : '–'} vs ${priceB ? money(priceB) : '–'}.`
+            ? `${nameA} estÃ¡ mais barato: ${priceA ? money(priceA) : 'â€“'} vs ${priceB ? money(priceB) : 'â€“'}.`
             : winnerByPrice === 'B'
-            ? `${nameB} está mais barato: ${priceB ? money(priceB) : '–'} vs ${priceA ? money(priceA) : '–'}.`
-            : `${nameA} e ${nameB} estão com preços iguais no momento.`,
+            ? `${nameB} estÃ¡ mais barato: ${priceB ? money(priceB) : 'â€“'} vs ${priceA ? money(priceA) : 'â€“'}.`
+            : `${nameA} e ${nameB} estÃ£o com preÃ§os iguais no momento.`,
         },
       },
       ...(winnerByPpu ? [{
         '@type': 'Question',
-        name: `Qual tem melhor custo-benefício por unidade?`,
+        name: `Qual tem melhor custo-benefÃ­cio por unidade?`,
         acceptedAnswer: {
           '@type': 'Answer',
           text: winnerByPpu === 'A'
-            ? `${nameA} tem menor custo por unidade: ${ppuA ? money(ppuA) : '–'}/un vs ${ppuB ? money(ppuB) : '–'}/un.`
+            ? `${nameA} tem menor custo por unidade: ${ppuA ? money(ppuA) : 'â€“'}/un vs ${ppuB ? money(ppuB) : 'â€“'}/un.`
             : winnerByPpu === 'B'
-            ? `${nameB} tem menor custo por unidade: ${ppuB ? money(ppuB) : '–'}/un vs ${ppuA ? money(ppuA) : '–'}/un.`
-            : 'Ambos têm o mesmo custo por unidade.',
+            ? `${nameB} tem menor custo por unidade: ${ppuB ? money(ppuB) : 'â€“'}/un vs ${ppuA ? money(ppuA) : 'â€“'}/un.`
+            : 'Ambos tÃªm o mesmo custo por unidade.',
         },
       }] : []),
     ],
@@ -140,21 +141,21 @@ export default async function CompararPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <main className="min-h-screen bg-[#fbfaf7] px-4 py-6 text-[#201335]">
+      <main className="min-h-screen bg-[#F7F8FC] px-4 py-6 text-[#090A3D]">
         <div className="mx-auto max-w-4xl space-y-5">
 
-          <nav className="text-xs text-[#675b77]">
+          <nav className="text-xs text-[#5B607C]">
             <ol className="flex flex-wrap items-center gap-1">
-              <li><Link href="/" className="hover:text-[#6c2bd9]">Poupi</Link></li>
+              <li><Link href="/" className="hover:text-[#5B4CF0]">Radar do Berço</Link></li>
               <li aria-hidden>/</li>
-              <li className="font-medium text-[#201335]">Comparar</li>
+              <li className="font-medium text-[#090A3D]">Comparar</li>
             </ol>
           </nav>
 
-          <h1 className="text-2xl font-semibold tracking-tight">{nameA} <span className="text-[#6c2bd9]">vs</span> {nameB}</h1>
-          <p className="text-sm text-[#675b77]">Comparação de preço, custo por unidade e disponibilidade nas farmácias.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{nameA} <span className="text-[#5B4CF0]">vs</span> {nameB}</h1>
+          <p className="text-sm text-[#5B607C]">ComparaÃ§Ã£o de preÃ§o, custo por unidade e disponibilidade nas farmÃ¡cias.</p>
 
-          {/* Cards de comparação */}
+          {/* Cards de comparaÃ§Ã£o */}
           <div className="grid gap-4 sm:grid-cols-2">
             {([
               { product: prodA, offer: offerA, price: priceA, ppu: ppuA, slug: slugs[0], winner: winnerByPpu === 'A' || winnerByPrice === 'A', label: nameA },
@@ -163,42 +164,42 @@ export default async function CompararPage({ params }: Props) {
               <a
                 key={p.id}
                 href={`/produto/${slug}`}
-                className={`rounded-lg border bg-white p-5 shadow-sm transition hover:border-[#cdb8ef] ${winner ? 'border-[#6c2bd9] ring-1 ring-[#6c2bd9]' : 'border-[#eadff7]'}`}
+                className={`rounded-lg border bg-white p-5 shadow-sm transition hover:border-[#cdb8ef] ${winner ? 'border-[#5B4CF0] ring-1 ring-[#5B4CF0]' : 'border-[#E4E7F2]'}`}
               >
                 {winner && (
                   <div className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#e8f8ee] px-2.5 py-1 text-xs font-bold text-[#2f8a51]">
-                    ✓ Melhor opção
+                    âœ“ Melhor opÃ§Ã£o
                   </div>
                 )}
                 <div className="flex items-center gap-3">
                   {p.imageUrl
                     ? <img src={p.imageUrl} alt={label} width={64} height={64} className="h-16 w-16 rounded-lg object-contain" />
-                    : <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-[#f5efff] text-3xl">📦</div>}
+                    : <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-[#EEF2FF] text-3xl">ðŸ“¦</div>}
                   <div>
-                    {p.brand && <p className="text-xs font-semibold text-[#6c2bd9]">{p.brand}</p>}
+                    {p.brand && <p className="text-xs font-semibold text-[#5B4CF0]">{p.brand}</p>}
                     <h2 className="font-semibold">{label}</h2>
-                    {p.variantLabel && <p className="text-xs text-[#675b77]">{p.variantLabel}</p>}
+                    {p.variantLabel && <p className="text-xs text-[#5B607C]">{p.variantLabel}</p>}
                   </div>
                 </div>
-                <div className="mt-4 space-y-2 border-t border-[#eadff7] pt-4">
+                <div className="mt-4 space-y-2 border-t border-[#E4E7F2] pt-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-[#675b77]">Menor preço</span>
-                    <span className="font-bold text-[#6c2bd9]">{price ? money(price) : '—'}</span>
+                    <span className="text-[#5B607C]">Menor preÃ§o</span>
+                    <span className="font-bold text-[#5B4CF0]">{price ? money(price) : 'â€”'}</span>
                   </div>
                   {ppu && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-[#675b77]">Por unidade</span>
+                      <span className="text-[#5B607C]">Por unidade</span>
                       <span className="font-semibold">{money(ppu)}</span>
                     </div>
                   )}
                   {o?.marketplace && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-[#675b77]">Farmácia</span>
+                      <span className="text-[#5B607C]">FarmÃ¡cia</span>
                       <span>{o.marketplace.name}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
-                    <span className="text-[#675b77]">Lojas</span>
+                    <span className="text-[#5B607C]">Lojas</span>
                     <span>{(p.offers ?? []).length}</span>
                   </div>
                 </div>
@@ -206,37 +207,37 @@ export default async function CompararPage({ params }: Props) {
             ))}
           </div>
 
-          {/* FAQ Schema visível */}
+          {/* FAQ Schema visÃ­vel */}
           {winnerByPrice && (
-            <section className="rounded-lg border border-[#eadff7] bg-white p-5 shadow-sm">
-              <h2 className="mb-3 text-base font-semibold">Qual é mais barato?</h2>
-              <p className="text-sm text-[#675b77]">
+            <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
+              <h2 className="mb-3 text-base font-semibold">Qual Ã© mais barato?</h2>
+              <p className="text-sm text-[#5B607C]">
                 {winnerByPrice === 'A'
-                  ? `${nameA} está mais barato: ${priceA ? money(priceA) : '–'} vs ${priceB ? money(priceB) : '–'}.`
+                  ? `${nameA} estÃ¡ mais barato: ${priceA ? money(priceA) : 'â€“'} vs ${priceB ? money(priceB) : 'â€“'}.`
                   : winnerByPrice === 'B'
-                  ? `${nameB} está mais barato: ${priceB ? money(priceB) : '–'} vs ${priceA ? money(priceA) : '–'}.`
-                  : 'Ambos estão com o mesmo preço no momento.'}
+                  ? `${nameB} estÃ¡ mais barato: ${priceB ? money(priceB) : 'â€“'} vs ${priceA ? money(priceA) : 'â€“'}.`
+                  : 'Ambos estÃ£o com o mesmo preÃ§o no momento.'}
               </p>
               {winnerByPpu && (
                 <div className="mt-3">
                   <h3 className="text-sm font-semibold">Custo por unidade</h3>
-                  <p className="mt-1 text-sm text-[#675b77]">
+                  <p className="mt-1 text-sm text-[#5B607C]">
                     {winnerByPpu === 'A'
-                      ? `${nameA} tem menor custo por unidade: ${ppuA ? money(ppuA) : '–'}/un.`
+                      ? `${nameA} tem menor custo por unidade: ${ppuA ? money(ppuA) : 'â€“'}/un.`
                       : winnerByPpu === 'B'
-                      ? `${nameB} tem menor custo por unidade: ${ppuB ? money(ppuB) : '–'}/un.`
-                      : 'Custo por unidade idêntico.'}
+                      ? `${nameB} tem menor custo por unidade: ${ppuB ? money(ppuB) : 'â€“'}/un.`
+                      : 'Custo por unidade idÃªntico.'}
                   </p>
                 </div>
               )}
             </section>
           )}
 
-          <section className="rounded-lg border border-[#eadff7] bg-white p-5 text-center shadow-sm">
-            <h2 className="text-base font-semibold">Monitore os dois e compre na promoção</h2>
-            <p className="mt-1 text-sm text-[#675b77]">Crie alertas gratuitos e receba notificação quando o preço baixar.</p>
-            <a href="/login" className="mt-3 inline-block rounded-lg bg-[#6c2bd9] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#5a21c0]">
-              Criar alertas grátis
+          <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 text-center shadow-sm">
+            <h2 className="text-base font-semibold">Monitore os dois e compre na promoÃ§Ã£o</h2>
+            <p className="mt-1 text-sm text-[#5B607C]">Crie alertas gratuitos e receba notificaÃ§Ã£o quando o preÃ§o baixar.</p>
+            <a href="/login" className="mt-3 inline-block rounded-lg bg-[#5B4CF0] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#493BD0]">
+              Criar alertas grÃ¡tis
             </a>
           </section>
         </div>

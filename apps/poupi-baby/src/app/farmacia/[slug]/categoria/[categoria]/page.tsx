@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import { ProgrammaticSeoPage } from '@/components/seo/ProgrammaticSeoPage';
 import { assertSeoPayload, fetchSeoPayload, metadataFromPayload } from '@/app/programmatic-seo-helpers';
 
@@ -6,7 +6,7 @@ type Props = { params: Promise<{ slug: string; categoria: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, categoria } = await params;
-  return metadataFromPayload(await fetchSeoPayload(`/seo/pages/marketplaces/${slug}/categories/${categoria}`), 'Farmacia por categoria | Poupi');
+  return metadataFromPayload(await fetchSeoPayload(`/seo/pages/marketplaces/${slug}/categories/${categoria}`), 'Farmacia por categoria | Radar do Berço');
 }
 
 export default async function Page({ params }: Props) {
@@ -15,5 +15,5 @@ export default async function Page({ params }: Props) {
     await fetchSeoPayload(`/seo/pages/marketplaces/${slug}/categories/${categoria}`),
     `/farmacia/${slug}/categoria/${categoria}`,
   );
-  return <ProgrammaticSeoPage payload={payload} breadcrumb={[{ label: 'Poupi', href: '/' }, { label: payload.title }]} />;
+  return <ProgrammaticSeoPage payload={payload} breadcrumb={[{ label: 'Radar do Berço', href: '/' }, { label: payload.title }]} />;
 }
