@@ -1,0 +1,5 @@
+node_modules
+.git
+.next/cache
+apps/*/node_modules
+packages/*/node_modules
