@@ -97,6 +97,11 @@ export function PackageComparator({
           return pa - pb;
         });
         const bestId = sorted[0]?.id;
+        const bestUnitPrice = bestPricePerUnit(sorted[0]) ?? null;
+        const highestUnitPrice = sorted
+          .map(bestPricePerUnit)
+          .filter((price): price is number => price !== null)
+          .sort((a, b) => b - a)[0] ?? null;
 
         return (
           <div key={gi} className="space-y-2">
@@ -108,14 +113,24 @@ export function PackageComparator({
               const qty = extractQty(v.variantLabel);
               const marketplace = v.offers[0]?.marketplace?.name ?? null;
               const name = v.canonicalName || v.title;
+              const unitDiff = ppu !== null && bestUnitPrice !== null ? ppu - bestUnitPrice : null;
+              const percentDiff = ppu !== null && bestUnitPrice !== null && ppu > bestUnitPrice
+                ? Math.round(((ppu - bestUnitPrice) / ppu) * 100)
+                : 0;
+              const totalDiff = unitDiff !== null && qty !== null ? unitDiff * qty : null;
+              const bestSavings = isBest && highestUnitPrice !== null && bestUnitPrice !== null && highestUnitPrice > bestUnitPrice
+                ? Math.round(((highestUnitPrice - bestUnitPrice) / highestUnitPrice) * 100)
+                : 0;
 
               return (
                 <div
                   key={v.id}
                   className={`rounded-lg border p-3 transition ${
-                    isCurrent
-                      ? 'border-[#5B4CF0] bg-[#faf7ff]'
-                      : 'border-[#E4E7F2] hover:border-[#cdb8ef]'
+                    isBest
+                      ? 'border-[#2f8a51] bg-[#f3fbf6]'
+                      : isCurrent
+                        ? 'border-[#5B4CF0] bg-[#faf7ff]'
+                        : 'border-[#E4E7F2] hover:border-[#cdb8ef]'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -138,6 +153,17 @@ export function PackageComparator({
                       )}
                       {marketplace && (
                         <p className="text-xs text-[#8A8FB1]">{marketplace}</p>
+                      )}
+                      {isBest && bestSavings > 0 && (
+                        <p className="mt-1 text-xs font-semibold text-[#2f8a51]">
+                          Economiza ate {bestSavings}% por {unit} contra o pacote mais caro.
+                        </p>
+                      )}
+                      {!isBest && percentDiff > 0 && unitDiff !== null && (
+                        <p className="mt-1 text-xs text-[#8A8FB1]">
+                          {percentDiff}% mais caro por {unit} ({formatPricePerUnit(unitDiff, unit)} a mais)
+                          {totalDiff !== null ? `, ${money(totalDiff)} nesta embalagem` : ''}.
+                        </p>
                       )}
                     </div>
                     <div className="shrink-0 text-right">

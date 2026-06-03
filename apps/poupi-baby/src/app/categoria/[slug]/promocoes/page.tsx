@@ -29,17 +29,17 @@ async function fetchLinks(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await fetchCategory(slug);
-  if (!data?.category) return { title: 'Promoções | Radar do Berço', robots: { index: false } };
+  if (!data?.category) return { title: 'Promoções | Nuvii Baby', robots: { index: false } };
   const weak = Number(data.total ?? 0) < MIN_PRODUCTS;
   const url = `${SITE_URL}/categoria/${slug}/promocoes`;
-  const title = `Promoções de ${data.category} | Radar do Berço`;
-  const description = `Ofertas e promoções de ${data.category} nas farmácias monitoradas pelo Radar do Berço.`;
+  const title = `Promoções de ${data.category} | Nuvii Baby`;
+  const description = `Ofertas e promoções de ${data.category} nas farmácias monitoradas pelo Nuvii Baby.`;
   return {
     title,
     description,
     alternates: { canonical: url },
     robots: weak ? { index: false, follow: true } : undefined,
-    openGraph: { title, description, url, type: 'website', siteName: 'Radar do Berço', locale: 'pt_BR' },
+    openGraph: { title, description, url, type: 'website', siteName: 'Nuvii Baby', locale: 'pt_BR' },
     twitter: { card: 'summary', title, description },
   };
 }
@@ -52,7 +52,7 @@ export default async function Page({ params }: Props) {
     <ProgrammaticListingPage
       title={`Promoções de ${data.category}`}
       description={`${data.total} produtos monitorados com disponibilidade recente nas principais farmácias.`}
-      breadcrumb={[{ label: 'Radar do Berço', href: '/' }, { label: data.category, href: `/categoria/${slug}` }, { label: 'Promoções' }]}
+      breadcrumb={[{ label: 'Nuvii Baby', href: '/' }, { label: data.category, href: `/categoria/${slug}` }, { label: 'Promoções' }]}
       products={data.products}
       internalLinks={internalLinks}
     />

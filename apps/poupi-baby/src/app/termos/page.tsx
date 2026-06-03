@@ -6,7 +6,7 @@ export default function TermsPage() {
       <article className="mx-auto max-w-3xl rounded-lg border border-[#E4E7F2] bg-white p-8 shadow-sm">
         <Link href="/dashboard" className="text-sm font-medium text-[#5B4CF0]">Voltar</Link>
         <h1 className="mt-5 text-3xl font-semibold tracking-tight">Termos de Uso</h1>
-        <p className="mt-4 text-[#5B607C]">Estes termos explicam o uso simples e transparente do Radar do Berço.</p>
+        <p className="mt-4 text-[#5B607C]">Estes termos explicam o uso simples e transparente do Nuvii Baby.</p>
         {[
           ['Uso da plataforma', 'Você pode cadastrar produtos, acompanhar preços e configurar alertas dentro dos limites do seu plano.'],
           ['Informações de Preço', 'Os preços são coletados de lojas monitoradas e podem mudar rapidamente. Sempre confirme a oferta na loja antes de comprar.'],

@@ -21,11 +21,11 @@ export function metadataFromPayload(payload: ProgrammaticSeoPayload | null, fall
   if (!payload) return { title: fallbackTitle, robots: { index: false, follow: true } };
   const url = `${SITE_URL}${payload.canonicalPath}`;
   return {
-    title: `${payload.title} | Radar do Berço`,
+    title: `${payload.title} | Nuvii Baby`,
     description: payload.description,
     alternates: { canonical: url },
     robots: payload.robots.index ? { index: true, follow: true } : { index: false, follow: true },
-    openGraph: { title: payload.title, description: payload.description, url, type: 'website', siteName: 'Radar do Berço', locale: 'pt_BR' },
+    openGraph: { title: payload.title, description: payload.description, url, type: 'website', siteName: 'Nuvii Baby', locale: 'pt_BR' },
     twitter: { card: 'summary', title: payload.title, description: payload.description },
   };
 }

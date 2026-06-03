@@ -29,17 +29,17 @@ async function fetchLinks(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await fetchMarketplace(slug);
-  if (!data?.marketplace) return { title: 'Promoções de farmacia | Radar do Berço', robots: { index: false } };
+  if (!data?.marketplace) return { title: 'Promoções de farmacia | Nuvii Baby', robots: { index: false } };
   const weak = Number(data.total ?? 0) < MIN_PRODUCTS;
   const url = `${SITE_URL}/farmacia/${slug}/promocoes`;
-  const title = `Promoções ${data.marketplace.name} | Radar do Berço`;
-  const description = `Promoções e menores preços da ${data.marketplace.name} monitorados pelo Radar do Berço.`;
+  const title = `Promoções ${data.marketplace.name} | Nuvii Baby`;
+  const description = `Promoções e menores preços da ${data.marketplace.name} monitorados pelo Nuvii Baby.`;
   return {
     title,
     description,
     alternates: { canonical: url },
     robots: weak ? { index: false, follow: true } : undefined,
-    openGraph: { title, description, url, type: 'website', siteName: 'Radar do Berço', locale: 'pt_BR' },
+    openGraph: { title, description, url, type: 'website', siteName: 'Nuvii Baby', locale: 'pt_BR' },
     twitter: { card: 'summary', title, description },
   };
 }
@@ -52,7 +52,7 @@ export default async function Page({ params }: Props) {
     <ProgrammaticListingPage
       title={`Promoções ${data.marketplace.name}`}
       description={`${data.total} ofertas monitoradas com revalidacao rapida para capturar mudancas de preço.`}
-      breadcrumb={[{ label: 'Radar do Berço', href: '/' }, { label: data.marketplace.name, href: `/farmacia/${slug}` }, { label: 'Promoções' }]}
+      breadcrumb={[{ label: 'Nuvii Baby', href: '/' }, { label: data.marketplace.name, href: `/farmacia/${slug}` }, { label: 'Promoções' }]}
       products={data.products}
       internalLinks={internalLinks}
     />

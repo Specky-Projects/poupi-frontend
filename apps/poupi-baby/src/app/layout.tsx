@@ -7,10 +7,10 @@ import Provider from '../providers/session-provider';
 import { getSiteUrl } from '../lib/site-url';
 
 const SITE_URL = getSiteUrl();
-const SITE_NAME = 'Radar do Berço';
-const SITE_TITLE = 'Radar do Berço | Compare preços de produtos para bebês';
+const SITE_NAME = 'Nuvii Baby';
+const SITE_TITLE = 'Nuvii Baby | Seu copiloto nas compras do bebê';
 const SITE_DESCRIPTION =
-  'Compare preços de fraldas, fórmulas, mamadeiras e produtos infantis. Economize tempo e dinheiro com o Radar do Berço.';
+  'Eu te aviso quando for a hora certa de comprar. Compare preços de fraldas, fórmulas, mamadeiras e produtos infantis com inteligência.';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -29,13 +29,13 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     url: SITE_URL,
-    images: [{ url: '/images/radar-berco-hero.svg', width: 1200, height: 630, alt: SITE_NAME }],
+    images: [{ url: '/images/nuvii-baby-hero.svg', width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: {
     card: 'summary_large_image',
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: ['/images/radar-berco-hero.svg'],
+    images: ['/images/nuvii-baby-hero.svg'],
   },
 };
 
@@ -49,8 +49,8 @@ export default function RootLayout({
     '@type': 'Organization',
     name: SITE_NAME,
     url: SITE_URL,
-    slogan: 'Menos tempo procurando. Mais tempo cuidando.',
-    description: 'Comparador inteligente de preços para produtos infantis.',
+    slogan: 'Seu copiloto nas compras do bebê',
+    description: 'Copiloto inteligente de compras para produtos infantis. Alertas de preço, Deal Score e histórico de preços.',
   };
 
   const websiteJsonLd = {

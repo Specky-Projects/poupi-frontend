@@ -1,7 +1,7 @@
 ﻿import Link from 'next/link';
 
 const items = [
-  ['Como funcionam os alertas?', 'Você adiciona um produto e define uma meta. O Radar do Berço acompanha as ofertas e avisa quando o Preço chega ao valor desejado.'],
+  ['Como funcionam os alertas?', 'Você adiciona um produto e define uma meta. O Nuvii Baby acompanha as ofertas e avisa quando o Preço chega ao valor desejado.'],
   ['O que muda no Premium?', 'O Premium aumenta limites, libera mais histórico e melhora a prioridade de acompanhamento, conforme o plano escolhido.'],
   ['Como recebo notificações?', 'As notificações dependem do e-mail confirmado. Por isso recomendamos confirmar seu e-mail na página Minha conta.'],
   ['Quais pagamentos são aceitos?', 'Os pagamentos são realizados com segurança por cartão de crédito. Você pode cancelar sua assinatura a qualquer momento sem burocracia.'],

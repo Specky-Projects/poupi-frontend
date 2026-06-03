@@ -33,14 +33,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const categoryName = data?.category ?? deSlug(categoria);
   const url = `${SITE_URL}/promocoes/${categoria}`;
 
-  const title = `promoção ${categoryName} — Ofertas Hoje | Radar do Berço`;
-  const description = `As melhores promoções de ${categoryName} nas farmácias. Produtos com Preço abaixo da média histórica, rastreados em tempo real pelo Radar do Berço.`;
+  const title = `promoção ${categoryName} — Ofertas Hoje | Nuvii Baby`;
+  const description = `As melhores promoções de ${categoryName} nas farmácias. Produtos com Preço abaixo da média histórica, rastreados em tempo real pelo Nuvii Baby.`;
 
   return {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, type: 'website', siteName: 'Radar do Berço', locale: 'pt_BR' },
+    openGraph: { title, description, url, type: 'website', siteName: 'Nuvii Baby', locale: 'pt_BR' },
     twitter: { card: 'summary', title, description },
   };
 }
@@ -90,7 +90,7 @@ export default async function PromoçõesPage({ params }: Props) {
 
           <nav className="text-xs text-[#5B607C]">
             <ol className="flex flex-wrap items-center gap-1">
-              <li><Link href="/" className="hover:text-[#5B4CF0]">Radar do Berço</Link></li>
+              <li><Link href="/" className="hover:text-[#5B4CF0]">Nuvii Baby</Link></li>
               <li aria-hidden>/</li>
               <li><a href={`/categoria/${categoria}`} className="hover:text-[#5B4CF0]">{categoryName}</a></li>
               <li aria-hidden>/</li>

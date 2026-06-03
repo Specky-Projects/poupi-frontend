@@ -4,10 +4,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const items = [
-  { href: '/dashboard', label: 'Inicio', icon: 'ti-layout-dashboard' },
-  { href: '/alertas', label: 'Alertas', icon: 'ti-bell' },
-  { href: '/billing', label: 'Planos', icon: 'ti-crown' },
-  { href: '/conta', label: 'Conta', icon: 'ti-user-circle' },
+  { href: '/dashboard', label: 'Inicio',  icon: 'ti-layout-dashboard' },
+  { href: '/produtos',  label: 'Buscar',  icon: 'ti-search' },
+  { href: '/alertas',   label: 'Alertas', icon: 'ti-bell' },
+  { href: '/billing',   label: 'Planos',  icon: 'ti-crown' },
+  { href: '/conta',     label: 'Conta',   icon: 'ti-user-circle' },
 ];
 
 export function MobileBottomNav() {
@@ -18,7 +19,7 @@ export function MobileBottomNav() {
       aria-label="Navegacao principal"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E4E7F2] bg-white/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-12px_30px_rgba(17,24,39,0.08)] backdrop-blur-xl lg:hidden"
     >
-      <div className="mx-auto grid max-w-md grid-cols-4 gap-1">
+      <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (

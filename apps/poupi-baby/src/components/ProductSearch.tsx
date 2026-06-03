@@ -151,7 +151,7 @@ export function ProductSearch({
         <div className="mt-4 rounded-lg border border-[#E4E7F2] bg-[#FAFBFF] p-4">
           <p className="text-sm font-semibold text-[#090A3D]">Produto nao encontrado no catalogo.</p>
           <p className="mt-1 text-sm text-[#5B607C]">
-            Use o fluxo secundario de URL para adicionar esse produto ao Radar do Berco.
+            Use o fluxo secundario de URL para adicionar esse produto ao Nuvii Baby.
           </p>
           <Link href="/dashboard#url-fallback" className="mt-3 inline-block text-sm font-semibold text-[#5B4CF0]">
             Colar uma URL

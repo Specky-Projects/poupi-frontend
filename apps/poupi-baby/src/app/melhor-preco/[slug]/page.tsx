@@ -26,15 +26,15 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await fetchBestPrice(slug);
-  if (!data?.product) return { title: 'Melhor Preço | Radar do Berço', robots: { index: false } };
+  if (!data?.product) return { title: 'Melhor Preço | Nuvii Baby', robots: { index: false } };
 
   const name = data.product.canonicalName || data.product.title;
   const price = data.bestOffer ? Number(data.bestOffer.currentPrice ?? data.bestOffer.price) : null;
   const url = `${SITE_URL}/melhor-preco/${slug}`;
-  const title = `Melhor Preço de ${name} | Radar do Berço`;
+  const title = `Melhor Preço de ${name} | Nuvii Baby`;
   const description = price
-    ? `Melhor Preço de ${name} hoje: ${money(price)}. Compare todas as farmácias e drogarias. histórico atualizado pelo Radar do Berço.`
-    : `Compare preços de ${name} nas farmácias. histórico atualizado pelo Radar do Berço.`;
+    ? `Melhor Preço de ${name} hoje: ${money(price)}. Compare todas as farmácias e drogarias. histórico atualizado pelo Nuvii Baby.`
+    : `Compare preços de ${name} nas farmácias. histórico atualizado pelo Nuvii Baby.`;
 
   return {
     title,
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url,
       type: 'website',
-      siteName: 'Radar do Berço',
+      siteName: 'Nuvii Baby',
       locale: 'pt_BR',
       images: data.product.imageUrl ? [{ url: data.product.imageUrl, alt: name }] : [],
     },
@@ -104,7 +104,7 @@ export default async function MelhorPrecoPage({ params }: Props) {
 
           <nav className="text-xs text-[#5B607C]">
             <ol className="flex flex-wrap items-center gap-1">
-              <li><Link href="/" className="hover:text-[#5B4CF0]">Radar do Berço</Link></li>
+              <li><Link href="/" className="hover:text-[#5B4CF0]">Nuvii Baby</Link></li>
               {product.category && categorySlug && (
                 <>
                   <li aria-hidden>/</li>
@@ -127,7 +127,7 @@ export default async function MelhorPrecoPage({ params }: Props) {
                 {product.brand && <p className="text-xs font-semibold text-[#5B4CF0]">{product.brand}</p>}
                 <h1 className="text-xl font-semibold tracking-tight">Melhor Preço de {name}</h1>
                 <p className="mt-1 text-sm text-[#5B607C]">
-                  Comparação em {allOffers.length} loja{allOffers.length !== 1 ? 's' : ''}, atualizado pelo Radar do Berço.
+                  Comparação em {allOffers.length} loja{allOffers.length !== 1 ? 's' : ''}, atualizado pelo Nuvii Baby.
                 </p>
               </div>
             </div>

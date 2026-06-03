@@ -6,7 +6,7 @@ export default function PrivacyPage() {
       <article className="mx-auto max-w-3xl rounded-lg border border-[#E4E7F2] bg-white p-8 shadow-sm">
         <Link href="/dashboard" className="text-sm font-medium text-[#5B4CF0]">Voltar</Link>
         <h1 className="mt-5 text-3xl font-semibold tracking-tight">Política de Privacidade</h1>
-        <p className="mt-4 text-[#5B607C]">O Radar do Berço usa seus dados para manter sua conta, monitorar produtos e enviar alertas de Preço.</p>
+        <p className="mt-4 text-[#5B607C]">O Nuvii Baby usa seus dados para manter sua conta, monitorar produtos e enviar alertas de Preço.</p>
         {[
           ['Dados coletados', 'Coletamos nome, e-mail, telefone opcional, produtos monitorados, alertas criados e informações técnicas necessárias para segurança e funcionamento da plataforma.'],
           ['Uso das informações', 'Usamos esses dados para autenticação, personalização da experiência, confirmação de e-mail, envio de notificações e melhoria do serviço.'],

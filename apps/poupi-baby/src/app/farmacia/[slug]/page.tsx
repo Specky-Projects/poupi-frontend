@@ -26,18 +26,18 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await fetchMarketplace(slug);
-  if (!data?.marketplace) return { title: 'Farmácia | Radar do Berço', robots: { index: false } };
+  if (!data?.marketplace) return { title: 'Farmácia | Nuvii Baby', robots: { index: false } };
 
   const storeName = data.marketplace.name;
   const url = `${SITE_URL}/farmacia/${slug}`;
-  const title = `${storeName} — Melhores preços | Radar do Berço`;
-  const description = `Compare preços na ${storeName}. ${data.total} ofertas monitoradas em tempo real pelo Radar do Berço com histórico e alertas automáticos.`;
+  const title = `${storeName} — Melhores preços | Nuvii Baby`;
+  const description = `Compare preços na ${storeName}. ${data.total} ofertas monitoradas em tempo real pelo Nuvii Baby com histórico e alertas automáticos.`;
 
   return {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, type: 'website', siteName: 'Radar do Berço', locale: 'pt_BR' },
+    openGraph: { title, description, url, type: 'website', siteName: 'Nuvii Baby', locale: 'pt_BR' },
     twitter: { card: 'summary', title, description },
   };
 }
@@ -62,14 +62,14 @@ export default async function FarmaciaPage({ params }: Props) {
     '@type': 'Store',
     name: marketplace.name,
     url: `${SITE_URL}/farmacia/${slug}`,
-    description: `preços na ${marketplace.name} monitorados pelo Radar do Berço.`,
+    description: `preços na ${marketplace.name} monitorados pelo Nuvii Baby.`,
   };
 
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Radar do Berço', item: SITE_URL },
+      { '@type': 'ListItem', position: 1, name: 'Nuvii Baby', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: marketplace.name, item: `${SITE_URL}/farmacia/${slug}` },
     ],
   };
@@ -84,7 +84,7 @@ export default async function FarmaciaPage({ params }: Props) {
 
           <nav className="text-xs text-[#5B607C]">
             <ol className="flex flex-wrap items-center gap-1">
-              <li><Link href="/" className="hover:text-[#5B4CF0]">Radar do Berço</Link></li>
+              <li><Link href="/" className="hover:text-[#5B4CF0]">Nuvii Baby</Link></li>
               <li aria-hidden>/</li>
               <li className="font-medium text-[#090A3D]">{marketplace.name}</li>
             </ol>
@@ -94,7 +94,7 @@ export default async function FarmaciaPage({ params }: Props) {
             <h1 className="text-2xl font-semibold tracking-tight">{marketplace.name} — Melhores preços</h1>
             <p className="mt-1 text-sm text-[#5B607C]">
               {total} oferta{total !== 1 ? 's' : ''} monitorada{total !== 1 ? 's' : ''} na {marketplace.name}.
-              preços atualizados automaticamente pelo Radar do Berço.
+              preços atualizados automaticamente pelo Nuvii Baby.
             </p>
           </header>
 

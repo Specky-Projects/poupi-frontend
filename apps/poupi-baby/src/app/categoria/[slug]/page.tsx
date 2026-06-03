@@ -26,9 +26,9 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await fetchCategory(slug);
-  if (!data?.category) return { title: 'Categoria | Radar do Berço', robots: { index: false } };
+  if (!data?.category) return { title: 'Categoria | Nuvii Baby', robots: { index: false } };
 
-  const title = `${data.category} — Melhores preços | Radar do Berço`;
+  const title = `${data.category} — Melhores preços | Nuvii Baby`;
   const description = `Compare preços de ${data.category} nas principais farmácias e drogarias. ${data.total} produtos monitorados com histórico de Preço e alertas automáticos.`;
   const url = `${SITE_URL}/categoria/${slug}`;
 
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, type: 'website', siteName: 'Radar do Berço', locale: 'pt_BR' },
+    openGraph: { title, description, url, type: 'website', siteName: 'Nuvii Baby', locale: 'pt_BR' },
     twitter: { card: 'summary', title, description },
   };
 }
@@ -70,7 +70,7 @@ export default async function CategoryPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Radar do Berço', item: SITE_URL },
+      { '@type': 'ListItem', position: 1, name: 'Nuvii Baby', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: category, item: `${SITE_URL}/categoria/${slug}` },
     ],
   };
@@ -85,7 +85,7 @@ export default async function CategoryPage({ params }: Props) {
 
           <nav className="text-xs text-[#5B607C]">
             <ol className="flex flex-wrap items-center gap-1">
-              <li><Link href="/" className="hover:text-[#5B4CF0]">Radar do Berço</Link></li>
+              <li><Link href="/" className="hover:text-[#5B4CF0]">Nuvii Baby</Link></li>
               <li aria-hidden>/</li>
               <li className="font-medium text-[#090A3D]">{category}</li>
             </ol>
@@ -95,7 +95,7 @@ export default async function CategoryPage({ params }: Props) {
             <h1 className="text-2xl font-semibold tracking-tight">{category} — Melhores preços</h1>
             <p className="mt-1 text-sm text-[#5B607C]">
               {total} produto{total !== 1 ? 's' : ''} monitorado{total !== 1 ? 's' : ''} nas principais farmácias.
-              preços atualizados automaticamente pelo Radar do Berço.
+              preços atualizados automaticamente pelo Nuvii Baby.
             </p>
           </header>
 
@@ -103,7 +103,7 @@ export default async function CategoryPage({ params }: Props) {
 
           <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 text-center shadow-sm">
             <h2 className="text-base font-semibold">Quer saber quando {category} entrar em promoção?</h2>
-            <p className="mt-1 text-sm text-[#5B607C]">O Radar do Berço monitora preços 24h e envia alertas automáticos.</p>
+            <p className="mt-1 text-sm text-[#5B607C]">O Nuvii Baby monitora preços 24h e envia alertas automáticos.</p>
             <a href="/login" className="mt-3 inline-block rounded-lg bg-[#5B4CF0] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#493BD0]">
               Criar conta Grátis
             </a>

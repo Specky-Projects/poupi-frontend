@@ -257,10 +257,10 @@ function ExplainabilityBlock({ scoreData, hasPriceIntel }: {
 }
 
 function dealScoreLabel(score: number) {
-  if (score >= 90) return 'Excelente';
-  if (score >= 80) return 'Otima oferta';
-  if (score >= 70) return 'Boa oferta';
-  return 'Oferta comum';
+  if (score >= 90) return 'Oferta Forte';
+  if (score >= 70) return 'Comprar Agora';
+  if (score >= 50) return 'Vale acompanhar';
+  return 'Melhor esperar';
 }
 
 function scrapedStatus(iso?: string | null): string {
@@ -279,15 +279,17 @@ function normalizeProductResponse(raw: any): ProductDetail {
       offers: raw.offers ?? raw.product?.offers ?? [],
       histories: raw.histories ?? [],
       variants: raw.variants ?? [],
+      priceIntelligence: raw.priceIntelligence ?? raw.product?.priceIntelligence ?? null,
     };
   }
 
-  const { offers, histories, ...product } = raw ?? {};
+  const { offers, histories, priceIntelligence, ...product } = raw ?? {};
   return {
     product,
     offers: offers ?? [],
     histories: histories ?? [],
     variants: [],
+    priceIntelligence: priceIntelligence ?? null,
   };
 }
 

@@ -7,11 +7,11 @@ const intent = 'melhor-custo-beneficio';
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  return metadataFromPayload(await fetchSeoPayload(`/seo/pages/category/${slug}/${intent}`), 'Melhor custo-beneficio | Radar do Berço');
+  return metadataFromPayload(await fetchSeoPayload(`/seo/pages/category/${slug}/${intent}`), 'Melhor custo-beneficio | Nuvii Baby');
 }
 
 export default async function Page({ params }: Props) {
   const { slug } = await params;
   const payload = assertSeoPayload(await fetchSeoPayload(`/seo/pages/category/${slug}/${intent}`), `/melhor-custo-beneficio/${slug}`);
-  return <ProgrammaticSeoPage payload={payload} breadcrumb={[{ label: 'Radar do Berço', href: '/' }, { label: payload.title }]} />;
+  return <ProgrammaticSeoPage payload={payload} breadcrumb={[{ label: 'Nuvii Baby', href: '/' }, { label: payload.title }]} />;
 }

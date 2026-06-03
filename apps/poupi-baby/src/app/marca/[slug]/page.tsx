@@ -28,9 +28,9 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await fetchBrand(slug);
-  if (!data?.brand) return { title: 'Marca | Radar do Berço', robots: { index: false } };
+  if (!data?.brand) return { title: 'Marca | Nuvii Baby', robots: { index: false } };
 
-  const title = `${data.brand} — Melhores preços | Radar do Berço`;
+  const title = `${data.brand} — Melhores preços | Nuvii Baby`;
   const description = `Compare preços de produtos ${data.brand} nas farmácias. ${data.total} produtos monitorados com histórico e alertas automáticos.`;
   const url = `${SITE_URL}/marca/${slug}`;
 
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, type: 'website', siteName: 'Radar do Berço', locale: 'pt_BR' },
+    openGraph: { title, description, url, type: 'website', siteName: 'Nuvii Baby', locale: 'pt_BR' },
     twitter: { card: 'summary', title, description },
   };
 }
@@ -70,7 +70,7 @@ export default async function BrandPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Radar do Berço', item: SITE_URL },
+      { '@type': 'ListItem', position: 1, name: 'Nuvii Baby', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: brand, item: `${SITE_URL}/marca/${slug}` },
     ],
   };
@@ -85,7 +85,7 @@ export default async function BrandPage({ params }: Props) {
 
           <nav className="text-xs text-[#5B607C]">
             <ol className="flex flex-wrap items-center gap-1">
-              <li><Link href="/" className="hover:text-[#5B4CF0]">Radar do Berço</Link></li>
+              <li><Link href="/" className="hover:text-[#5B4CF0]">Nuvii Baby</Link></li>
               <li aria-hidden>/</li>
               <li className="font-medium text-[#090A3D]">{brand}</li>
             </ol>

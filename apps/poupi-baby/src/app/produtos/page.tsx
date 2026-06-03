@@ -70,7 +70,7 @@ async function fetchJson<T>(path: string, fallback: T): Promise<T> {
 }
 
 export const metadata: Metadata = {
-  title: 'Produtos | Radar do Berco',
+  title: 'Produtos | Nuvii Baby',
   description: 'Busque produtos infantis por nome, marca ou categoria e crie alertas de preco.',
   alternates: { canonical: `${SITE_URL}/produtos` },
 };
@@ -98,7 +98,7 @@ export default async function ProdutosPage({
           <ol className="flex flex-wrap items-center gap-1">
             <li>
               <Link href="/" className="hover:text-[#5B4CF0]">
-                Radar do Berco
+                Nuvii Baby
               </Link>
             </li>
             <li aria-hidden>/</li>

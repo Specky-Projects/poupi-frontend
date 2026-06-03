@@ -87,10 +87,10 @@ function offerStores(product: Product) {
 }
 
 function dealScoreLabel(score: number) {
-  if (score >= 90) return 'Excelente';
-  if (score >= 80) return 'Otima oferta';
-  if (score >= 70) return 'Boa oferta';
-  return 'Oferta comum';
+  if (score >= 90) return 'Oferta Forte';
+  if (score >= 70) return 'Comprar Agora';
+  if (score >= 50) return 'Vale acompanhar';
+  return 'Melhor esperar';
 }
 
 export default function DashboardPage() {
@@ -174,11 +174,6 @@ export default function DashboardPage() {
   }
 
   const activeAlerts = alerts.filter((a) => a.active);
-  const storeCount = useMemo(() => {
-    const stores = new Set<string>();
-    products.forEach((p) => p.offers?.forEach((o) => o.marketplace?.name && stores.add(o.marketplace.name)));
-    return stores.size;
-  }, [products]);
   const displayName = profile?.name || session?.user?.name || '';
   const greeting = displayName ? `Olá, ${displayName.split(' ')[0]}` : 'Olá';
 
@@ -203,7 +198,6 @@ export default function DashboardPage() {
 
   const planName = billing?.planName || quota?.planName || quota?.plan || billing?.currentPlan || 'Free';
   const daysRemaining = billing?.daysRemaining;
-  const offerCount = products.reduce((sum, product) => sum + (product.offers?.length ?? 0), 0);
 
   return (
     <main className="min-h-screen bg-[#F7F8FC] pb-24 text-[#090A3D] lg:pb-0">
@@ -255,11 +249,87 @@ export default function DashboardPage() {
           )}
 
           <div className="mt-5 grid gap-4 md:grid-cols-4">
-            <Metric label="Produtos monitorados" value={products.length} hint={quota?.unlimited ? 'Ilimitado no seu plano' : quota ? `${Math.max(0, quota.max - quota.current)} espaços restantes` : 'Monitorados por você'} icon="ti-package" />
-            <Metric label="Ofertas comparadas" value={offerCount} hint="Farmácias e lojas vinculadas" icon="ti-tags" />
-            <Metric label="Lojas cobertas" value={storeCount} hint="Quantidade real nas suas ofertas" icon="ti-building-store" />
-            <Metric label="Premium" value={typeof daysRemaining === 'number' ? daysRemaining : '-'} hint={typeof daysRemaining === 'number' ? 'dias restantes' : `${activeAlerts.length} alertas ativos`} icon="ti-crown" />
+            <Metric
+              label="Economia estimada"
+              value={(() => {
+                const total = products.reduce((sum, p) => {
+                  const prices = p.offers?.map((o) => offerPrice(o)).filter((x) => x > 0) ?? [];
+                  if (prices.length < 2) return sum;
+                  return sum + (Math.max(...prices) - Math.min(...prices));
+                }, 0);
+                return total > 0 ? total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-';
+              })()}
+              hint="entre as lojas monitoradas"
+              icon="ti-coin"
+            />
+            <Metric
+              label="Oportunidades fortes"
+              value={topOpportunities.length}
+              hint={topOpportunities.length > 0 ? 'com Deal Score ≥ 60' : 'Nenhuma no momento'}
+              icon="ti-sparkles"
+            />
+            <Metric
+              label="Alertas ativos"
+              value={activeAlerts.length}
+              hint={quota ? `${quota.unlimited ? 'ilimitados' : `${Math.max(0, quota.max - quota.current)} espaços livres`}` : 'monitorando para você'}
+              icon="ti-bell-ringing"
+            />
+            <Metric
+              label="Produtos monitorados"
+              value={products.length}
+              hint={quota?.unlimited ? 'Ilimitado no seu plano' : quota ? `${Math.max(0, quota.max - quota.current)} espaços restantes` : 'no seu plano'}
+              icon="ti-package"
+            />
           </div>
+
+          {/* ── Banner contextual: melhor oportunidade do momento ── */}
+          {topOpportunities.length > 0 && (() => {
+            const top = topOpportunities[0];
+            const offer = bestOffer(top.product);
+            return (
+              <div className="mt-5 flex items-start gap-3 rounded-xl border border-[#7C5CFF]/30 bg-[#EDE7FF] px-4 py-3">
+                <span className="mt-0.5 shrink-0 text-xl">🔥</span>
+                <p className="flex-1 text-sm font-medium text-[#1A1D3B]">
+                  <strong className="text-[#7C5CFF]">{top.product.title.split(' ').slice(0, 5).join(' ')}</strong> está
+                  {' '}
+                  {offer ? `por ${money(offerPrice(offer))} — ` : ''}
+                  no menor preço recente. Eu aproveitaria.
+                </p>
+                <a href={`/produto/${top.product.id}`} className="shrink-0 rounded-lg bg-[#7C5CFF] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#6B4DDE]">
+                  Ver oferta →
+                </a>
+              </div>
+            );
+          })()}
+
+          {topOpportunities.length > 0 && (
+            <section className="mt-5 rounded-xl border border-[#d5f0de] bg-[#f6fdf8] p-4 shadow-sm">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-[#2f8a51]">
+                <i className="ti ti-sparkles" />Melhores oportunidades agora
+              </h2>
+              <p className="mt-1 text-xs text-[#4a7a5e]">Produtos da sua lista com o melhor Deal Score neste momento.</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                {topOpportunities.map(({ product, badge }) => {
+                  const offer = bestOffer(product);
+                  return (
+                    <a key={product.id} href={`/produto/${product.id}`} className="flex flex-col gap-2 rounded-lg border border-[#c0ecd0] bg-white p-3 transition hover:border-[#2f8a51] hover:shadow-md">
+                      <div className="flex items-center gap-2">
+                        {product.imageUrl ? <img src={product.imageUrl} alt={product.title} className="h-10 w-10 rounded object-contain" /> : <div className="flex h-10 w-10 items-center justify-center rounded bg-[#EDE7FF]"><i className="ti ti-package text-[#7C5CFF]" /></div>}
+                        <span className="min-w-0 flex-1 truncate text-sm font-medium">{product.title}</span>
+                      </div>
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <div className="text-xs text-[#5B607C]">melhor preço</div>
+                          <div className="text-base font-semibold text-[#1A1D3B]">{offer ? money(offerPrice(offer)) : '-'}</div>
+                        </div>
+                        <span style={{ background: badge.labelColor + '22', color: badge.labelColor }} className="rounded-full px-2 py-0.5 text-sm font-bold">{badge.emoji} {badge.score}</span>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           <section className="mt-5">
             <ProductSearch compact />
@@ -267,9 +337,9 @@ export default function DashboardPage() {
 
           <section id="url-fallback" className="mt-5 rounded-lg border border-[#E4E7F2] bg-white p-4 shadow-sm">
             <div className="mb-3">
-              <h2 className="text-base font-semibold">Nao encontrou seu produto?</h2>
+              <h2 className="text-base font-semibold">Não encontrou seu produto?</h2>
               <p className="mt-1 text-sm text-[#5B607C]">
-                Cole uma URL para adicionar o item ao Radar do Berco. Esse fluxo antigo continua funcionando como fallback.
+                Cole uma URL para adicionar o produto. O Nuvii Baby compara preços entre lojas e te avisa quando cair.
               </p>
             </div>
             <div className="flex flex-col gap-3 md:flex-row">
@@ -284,41 +354,9 @@ export default function DashboardPage() {
                 {loading ? 'Comparando...' : 'Monitorar produto'}
               </button>
             </div>
-            <p className="mt-2 text-xs text-[#8A8FB1]">Se o link trouxer várias farmácias, o Radar do Berço salva uma única ficha do produto com todas as ofertas encontradas.</p>
+            <p className="mt-2 text-xs text-[#8A8FB1]">Se o link trouxer várias farmácias, o Nuvii Baby salva uma única ficha do produto com todas as ofertas encontradas.</p>
             {error && <div className="mt-3 rounded-lg border border-[#f0a5a5] bg-[#fff1f1] px-4 py-3 text-sm text-[#9f2828]">{error}</div>}
           </section>
-
-          {topOpportunities.length > 0 && (
-            <section className="mt-5 rounded-lg border border-[#d5f0de] bg-[#f6fdf8] p-4 shadow-sm">
-              <h2 className="flex items-center gap-2 text-base font-semibold text-[#2f8a51]">
-                <i className="ti ti-sparkles" />Melhores oportunidades agora
-                <span title="Deal Score combina preco atual, historico e disponibilidade. 90+ Excelente | 80+ Otima oferta | 70+ Boa oferta | abaixo de 70 Oferta comum" className="cursor-help text-xs font-normal text-[#4a7a5e]">
-                  <i className="ti ti-info-circle" />
-                </span>
-              </h2>
-              <p className="mt-1 text-xs text-[#4a7a5e]">Produtos da sua lista com o melhor DealScore no momento.</p>
-              <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                {topOpportunities.map(({ product, badge }) => {
-                  const offer = bestOffer(product);
-                  return (
-                    <Link key={product.id} href={`/produto/${product.id}`} className="flex flex-col gap-2 rounded-lg border border-[#c0ecd0] bg-white p-3 transition hover:border-[#2f8a51] hover:shadow-md">
-                      <div className="flex items-center gap-2">
-                        {product.imageUrl ? <img src={product.imageUrl} alt={product.title} className="h-10 w-10 rounded object-contain" /> : <div className="flex h-10 w-10 items-center justify-center rounded bg-[#EEF2FF]"><i className="ti ti-package text-[#5B4CF0]" /></div>}
-                        <span className="min-w-0 flex-1 truncate text-sm font-medium">{product.title}</span>
-                      </div>
-                      <div className="flex items-end justify-between">
-                        <div>
-                          <div className="text-xs text-[#5B607C]">melhor preço</div>
-                          <div className="text-base font-semibold text-[#090A3D]">{offer ? money(offerPrice(offer)) : '-'}</div>
-                        </div>
-                        <span style={{ background: badge.labelColor + '22', color: badge.labelColor }} className="rounded-full px-2 py-0.5 text-sm font-bold">{badge.emoji} {badge.score}</span>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
-          )}
 
           <section id="produtos" className="mt-5 rounded-lg border border-[#E4E7F2] bg-white shadow-sm">
             <div className="border-b border-[#E4E7F2] p-4">
@@ -345,7 +383,7 @@ export default function DashboardPage() {
                   {alerts.length === 0 ? (
                     <div className="px-4 py-8">
                       <i className="ti ti-radar text-5xl text-[#5B4CF0]" />
-                      <h3 className="mt-4 text-lg font-bold text-[#090A3D]">Bem-vindo ao Radar do Berço</h3>
+                      <h3 className="mt-4 text-lg font-bold text-[#090A3D]">Bem-vindo ao Nuvii Baby</h3>
                       <p className="mt-2 text-sm text-[#5B607C]">Comece em 3 passos para nunca pagar caro em produtos infantis.</p>
                       <div className="mt-6 grid gap-4 text-left sm:grid-cols-3">
                         {([
@@ -373,7 +411,7 @@ export default function DashboardPage() {
                       <i className="ti ti-package text-4xl text-[#b9aec8]" />
                       <h3 className="mt-3 text-base font-semibold text-[#090A3D]">Nenhum produto monitorado ainda</h3>
                       <p className="mt-2 mx-auto max-w-sm text-sm text-[#5B607C]">
-                        Cole o link de qualquer produto de Farmácia acima. O Radar do Berço compara preços entre lojas e te avisa quando cair.
+                        Cole o link de qualquer produto de Farmácia acima. O Nuvii Baby compara preços entre lojas e te avisa quando cair.
                       </p>
                       <div className="mt-4 mx-auto max-w-sm rounded-lg bg-[#EEF2FF] px-4 py-3 text-left text-xs text-[#5B607C]">
                         <span className="font-semibold text-[#5B4CF0]">Exemplo:</span>{' '}

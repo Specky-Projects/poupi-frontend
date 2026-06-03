@@ -222,7 +222,7 @@ export default function AccountPage() {
                 </button>
                 {telegramToken && (
                   <div className="rounded-lg bg-[#EEF2FF] p-3 text-sm text-[#3a176e]">
-                    <p className="font-semibold">Envie este comando para o bot Radar do Berço:</p>
+                    <p className="font-semibold">Envie este comando para o bot Nuvii Baby:</p>
                     <code className="mt-2 block break-all rounded bg-white px-3 py-2 text-xs text-[#090A3D]">
                       /start {telegramToken}
                     </code>

@@ -54,15 +54,13 @@ function pct(n: number | null) {
 
 function scoreLabel(score: number) {
   if (score >= 90) return 'Oferta Forte';
-  if (score >= 80) return 'Comprar Agora';
-  if (score >= 70) return 'Boa Oferta';
-  if (score >= 50) return 'Vale Monitorar';
-  return 'Melhor Esperar';
+  if (score >= 70) return 'Comprar Agora';
+  if (score >= 50) return 'Vale acompanhar';
+  return 'Melhor esperar';
 }
 
 function decisionBadge(score: number): string {
   if (score >= 90) return '🔥';
-  if (score >= 80) return '🟢';
   if (score >= 70) return '🟢';
   if (score >= 50) return '🟡';
   return '⏳';

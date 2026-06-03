@@ -54,6 +54,62 @@ function dealScoreLabel(score: number) {
   return 'Oferta comum';
 }
 
+function buyAdvice(score?: number | null) {
+  if (score == null) {
+    return {
+      title: 'Acompanhe antes de decidir',
+      body: 'Ainda nao temos score suficiente para cravar o melhor momento. Crie um alerta e acompanhe as proximas quedas.',
+      tone: 'neutral',
+    };
+  }
+  if (score >= 85) {
+    return {
+      title: 'Excelente momento para compra',
+      body: 'Preco forte em relacao ao historico recente. Se este pacote atende sua necessidade, vale comprar agora.',
+      tone: 'good',
+    };
+  }
+  if (score >= 70) {
+    return {
+      title: 'Boa oferta, mas compare os pacotes',
+      body: 'O preco esta competitivo. Confira o custo por unidade e veja se outro pacote entrega economia maior.',
+      tone: 'good',
+    };
+  }
+  if (score >= 50) {
+    return {
+      title: 'Pode valer esperar uma queda',
+      body: 'A oferta nao parece excepcional agora. Criar um alerta ajuda a comprar quando o preco melhorar.',
+      tone: 'warn',
+    };
+  }
+  return {
+    title: 'Nao recomendamos comprar agora',
+    body: 'Preco fraco para o historico recente. Acompanhe por alerta e espere uma oferta melhor.',
+    tone: 'bad',
+  };
+}
+
+function historySummary(points: PriceHistoryPoint[], currentPrice: number | null) {
+  if (!points.length) return null;
+  const prices = points.map((point) => point.price).filter((price) => Number.isFinite(price) && price > 0);
+  if (!prices.length) return null;
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const avg = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+  const today = currentPrice ?? prices[prices.length - 1];
+  const delta = avg > 0 ? Math.round(((avg - today) / avg) * 100) : 0;
+  const nearMin = today <= min * 1.05;
+  return {
+    min,
+    max,
+    avg,
+    today,
+    delta,
+    nearMin,
+  };
+}
+
 export const PublicProductPage: FC<{
   product: Product;
   internalLinks?: SeoInternalLinkGraph | null;
@@ -71,6 +127,9 @@ export const PublicProductPage: FC<{
   const prices = available.map(offerPrice);
   const maxPrice = prices.length ? Math.max(...prices) : null;
   const spread = bestPrice !== null && maxPrice !== null ? maxPrice - bestPrice : 0;
+  const advice = buyAdvice(dealScore?.score);
+  const recentHistory = priceHistory.slice(-30);
+  const recentSummary = historySummary(recentHistory, bestPrice);
 
   const categorySlug = product.category
     ? product.category.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -105,7 +164,7 @@ export const PublicProductPage: FC<{
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Radar do Berço', item: SITE_URL },
+      { '@type': 'ListItem', position: 1, name: 'Nuvii Baby', item: SITE_URL },
       ...(product.category && categorySlug
         ? [{ '@type': 'ListItem', position: 2, name: product.category, item: `${SITE_URL}/categoria/${categorySlug}` }]
         : []),
@@ -124,7 +183,7 @@ export const PublicProductPage: FC<{
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" className="text-xs text-[#5B607C]">
             <ol className="flex flex-wrap items-center gap-1">
-              <li><Link href="/" className="hover:text-[#5B4CF0]">Radar do Berço</Link></li>
+              <li><Link href="/" className="hover:text-[#5B4CF0]">Nuvii Baby</Link></li>
               {product.category && categorySlug && (
                 <>
                   <li aria-hidden>/</li>
@@ -138,7 +197,7 @@ export const PublicProductPage: FC<{
 
           {/* Header do produto */}
           <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
-            <div className="grid gap-6 lg:grid-cols-[160px_1fr_240px] lg:items-start">
+            <div className="grid gap-6 lg:grid-cols-[168px_1fr_280px] lg:items-start">
 
               {/* Imagem */}
               <div className="flex justify-center rounded-lg bg-[#f8f3ff] p-4">
@@ -158,42 +217,42 @@ export const PublicProductPage: FC<{
                   )}
                 </div>
 
-                <h1 className="mt-3 text-2xl font-semibold tracking-tight">{name}</h1>
+                <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-tight">{name}</h1>
 
                 {product.variantLabel && (
-                  <p className="mt-1 text-sm text-[#5B607C]">Variante: {product.variantLabel}</p>
+                  <p className="mt-1 text-sm font-medium text-[#5B607C]">{product.variantLabel}</p>
                 )}
 
-                {updatedLabel && (
-                  <p className="mt-2 text-xs text-[#8A8FB1]">Atualizado em {updatedLabel}</p>
-                )}
+                <div className={`mt-4 rounded-lg border p-4 ${
+                  advice.tone === 'good'
+                    ? 'border-[#b9e4c7] bg-[#f3fbf6]'
+                    : advice.tone === 'bad'
+                      ? 'border-[#f0c7c7] bg-[#fff7f7]'
+                      : advice.tone === 'warn'
+                        ? 'border-[#f3dc9b] bg-[#fffaf0]'
+                        : 'border-[#E4E7F2] bg-[#FAFBFF]'
+                }`}>
+                  <p className="text-sm font-semibold text-[#090A3D]">{advice.title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-[#5B607C]">{advice.body}</p>
+                </div>
 
-                <div className="mt-4 grid gap-3 sm:grid-cols-4">
-                  <PriceStat label="Menor Preço" value={bestPrice ? money(bestPrice) : 'Indisponível'} highlight />
-                  <PriceStat label="Maior Preço" value={maxPrice ? money(maxPrice) : 'Indisponível'} />
-                  <PriceStat label="Lojas" value={`${allOffers.length}`} />
-                  <PriceStat label="Economia possível" value={spread > 0 ? money(spread) : '-'} />
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <PriceStat label="Lojas com oferta" value={`${available.length}`} />
+                  <PriceStat label="Diferença entre lojas" value={spread > 0 ? money(spread) : '-'} />
+                  <PriceStat label="Atualização" value={updatedLabel ?? 'Recente'} />
                 </div>
               </div>
 
               {/* CTA */}
-              <div className="rounded-lg bg-[#EEF2FF] p-4">
+              <div className="rounded-lg border border-[#DDE2FF] bg-[#F4F6FF] p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#5B607C]">Melhor oferta agora</p>
+                <p className="mt-2 text-3xl font-black text-[#5B4CF0]">{best ? money(offerPrice(best)) : '-'}</p>
                 {best?.pricePerUnit && (
-                  <>
-                    <p className="text-sm font-medium text-[#5B607C]">Melhor custo agora</p>
-                    <p className="mt-2 text-3xl font-bold text-[#5B4CF0]">{formatPricePerUnit(Number(best.pricePerUnit), unit)}</p>
-                    <p className="mt-1 text-sm text-[#090A3D]">{money(offerPrice(best))} total</p>
-                  </>
-                )}
-                {!best?.pricePerUnit && (
-                  <>
-                    <p className="text-sm font-medium text-[#5B607C]">Melhor Preco agora</p>
-                    <p className="mt-2 text-3xl font-bold text-[#5B4CF0]">{best ? money(offerPrice(best)) : '-'}</p>
-                  </>
+                  <p className="mt-1 text-sm font-semibold text-[#090A3D]">{formatPricePerUnit(Number(best.pricePerUnit), unit)}</p>
                 )}
                 {best && <p className="mt-1 text-sm text-[#090A3D]">{best.marketplace.name}</p>}
                 {dealScore && (
-                  <div title={`DealScore Radar do Berço: ${dealScore.label}`} style={{ background: dealScore.labelColor + '18', borderColor: dealScore.labelColor + '44', color: dealScore.labelColor }} className="mt-3 flex items-center justify-between rounded-lg border px-3 py-2 text-sm font-semibold">
+                  <div title={`DealScore Nuvii Baby: ${dealScore.label}`} style={{ background: dealScore.labelColor + '18', borderColor: dealScore.labelColor + '44', color: dealScore.labelColor }} className="mt-3 flex items-center justify-between rounded-lg border px-3 py-2 text-sm font-semibold">
                     <span>Deal Score</span>
                     <span>{dealScore.score} · {dealScoreLabel(dealScore.score)}</span>
                   </div>
@@ -210,16 +269,16 @@ export const PublicProductPage: FC<{
                 >
                   Ver lojas
                 </a>
-                <p className="mt-2 text-center text-xs text-[#8A8FB1]">Receba notificação quando baixar</p>
+                <p className="mt-2 text-center text-xs text-[#8A8FB1]">Receba aviso quando ficar mais barato</p>
               </div>
             </div>
           </section>
 
           {/* Comparação de farmácias */}
           <section id="lojas" className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Comparação de preços por Farmácia</h2>
+            <h2 className="text-lg font-semibold">Compare as lojas antes de sair para comprar</h2>
             <p className="mt-1 mb-4 text-sm text-[#5B607C]">
-              {available.length} loja{available.length !== 1 ? 's' : ''} com disponibilidade no momento. Preços coletados automaticamente pelo Radar do Berço.
+              {available.length} loja{available.length !== 1 ? 's' : ''} com disponibilidade no momento. O menor preco fica destacado, mas confira frete e custo por {unit}.
             </p>
             <div className="space-y-3">
               {allOffers.length === 0 && (
@@ -228,13 +287,13 @@ export const PublicProductPage: FC<{
               {allOffers.map((offer, i) => (
                 <div
                   key={offer.id}
-                  className={`rounded-lg border p-4 ${i === 0 && offer.availability ? 'border-[#5B4CF0] bg-[#faf7ff]' : 'border-[#E4E7F2]'}`}
+                  className={`rounded-lg border p-4 ${i === 0 && offer.availability ? 'border-[#5B4CF0] bg-[#FAF7FF]' : 'border-[#E4E7F2] bg-white'} ${!offer.availability ? 'opacity-75' : ''}`}
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="grid gap-3 sm:grid-cols-[1fr_150px_120px] sm:items-center">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         {i === 0 && offer.availability && (
-                          <span className="rounded-full bg-[#e8f8ee] px-2 py-0.5 text-xs font-semibold text-[#2f8a51]">melhor Preço</span>
+                          <span className="rounded-full bg-[#e8f8ee] px-2 py-0.5 text-xs font-semibold text-[#2f8a51]">Melhor preco hoje</span>
                         )}
                         <span className="font-semibold">{offer.marketplace.name}</span>
                         {!offer.availability && (
@@ -244,17 +303,17 @@ export const PublicProductPage: FC<{
                       {offer.pricePerUnit && (
                         <p className="mt-1 text-xs text-[#5B607C]">{formatPricePerUnit(Number(offer.pricePerUnit), unit)}</p>
                       )}
+                    </div>
+                    <div className="sm:text-right">
                       {offer.originalPrice && Number(offer.originalPrice) > offerPrice(offer) && (
-                        <p className="mt-1 text-xs text-[#5B607C] line-through">de {money(Number(offer.originalPrice))}</p>
+                        <p className="text-xs text-[#8A8FB1] line-through">de {money(Number(offer.originalPrice))}</p>
+                      )}
+                      <p className="text-xl font-bold text-[#5B4CF0]">{money(offerPrice(offer))}</p>
+                      {Number(offer.freightPrice ?? 0) > 0 && (
+                        <p className="text-xs text-[#5B607C]">+ frete {money(Number(offer.freightPrice))}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-[#5B4CF0]">{money(offerPrice(offer))}</p>
-                        {Number(offer.freightPrice ?? 0) > 0 && (
-                          <p className="text-xs text-[#5B607C]">+ frete {money(Number(offer.freightPrice))}</p>
-                        )}
-                      </div>
+                    <div className="sm:text-right">
                       {offer.availability && offer.productUrl && (
                         <a
                           href={offer.productUrl}
@@ -274,13 +333,35 @@ export const PublicProductPage: FC<{
 
           {/* Historico publico */}
           <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Historico de preco</h2>
+            <h2 className="text-lg font-semibold">Historico de preco dos ultimos 30 dias</h2>
             <p className="mt-1 text-sm text-[#5B607C]">
-              Menor preco encontrado nas lojas monitoradas ao longo do tempo.
+              Resumo do menor preco encontrado nas lojas monitoradas recentemente.
             </p>
+            {recentSummary && (
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg border border-[#E4E7F2] bg-[#FAFBFF] p-3">
+                  <p className="text-xs font-medium text-[#5B607C]">Variação recente</p>
+                  <p className="mt-1 text-sm font-semibold text-[#090A3D]">
+                    Entre {money(recentSummary.min)} e {money(recentSummary.max)}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-[#E4E7F2] bg-[#FAFBFF] p-3">
+                  <p className="text-xs font-medium text-[#5B607C]">Hoje vs. média</p>
+                  <p className={`mt-1 text-sm font-semibold ${recentSummary.delta >= 0 ? 'text-[#2f8a51]' : 'text-[#b13a3a]'}`}>
+                    {Math.abs(recentSummary.delta)}% {recentSummary.delta >= 0 ? 'abaixo' : 'acima'} da media
+                  </p>
+                </div>
+                <div className="rounded-lg border border-[#E4E7F2] bg-[#FAFBFF] p-3">
+                  <p className="text-xs font-medium text-[#5B607C]">Leitura rápida</p>
+                  <p className="mt-1 text-sm font-semibold text-[#090A3D]">
+                    {recentSummary.nearMin ? 'Um dos menores precos recentes' : 'Ainda pode baixar mais'}
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="mt-4">
-              {priceHistory.length > 0 ? (
-                <PriceChart data={priceHistory} />
+              {recentHistory.length > 0 ? (
+                <PriceChart data={recentHistory} />
               ) : (
                 <div className="rounded-lg bg-[#F2F4FF] p-6 text-center text-sm text-[#5B607C]">
                   Historico sera formado nas proximas coletas deste produto.
@@ -301,26 +382,15 @@ export const PublicProductPage: FC<{
 
           {/* CTA informativo — contexto dinâmico quando dealScore dispoNível */}
           <section className="rounded-lg border border-[#E4E7F2] bg-white p-6 text-center shadow-sm">
-            {dealScore && dealScore.score >= 75 ? (
-              <>
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#e8f8ee] px-4 py-1.5 text-sm font-semibold text-[#2f8a51]">
-                  {dealScore.emoji} Deal Score {dealScore.score}/100 - {dealScoreLabel(dealScore.score)}
-                </div>
-                <h2 className="mt-3 text-lg font-semibold">Este é um bom momento para comprar</h2>
-                <p className="mt-2 text-sm text-[#5B607C]">
-                  O Radar do Berço analisou o histórico de preços de <strong>{name}</strong> e identificou esta como uma oportunidade acima da média.
-                  Crie uma conta gratuita para monitorar e receber alertas quando o Preço cair ainda mais.
-                </p>
-              </>
-            ) : (
-              <>
-                <h2 className="text-lg font-semibold">Vale a pena comprar agora?</h2>
-                <p className="mt-2 text-sm text-[#5B607C]">
-                  O Radar do Berço analisa o histórico de preços de <strong>{name}</strong> e calcula automaticamente se é um bom momento para comprar.
-                  Crie uma conta gratuita e receba alertas quando o Preço baixar.
-                </p>
-              </>
+            {dealScore && (
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#e8f8ee] px-4 py-1.5 text-sm font-semibold text-[#2f8a51]">
+                {dealScore.emoji} Score {dealScore.score}/100 - {dealScoreLabel(dealScore.score)}
+              </div>
             )}
+            <h2 className="mt-3 text-lg font-semibold">Vale a pena comprar agora?</h2>
+            <p className="mt-2 text-sm text-[#5B607C]">
+              <strong>{advice.title}.</strong> {advice.body} O alerta gratuito ajuda a nao perder uma queda melhor de <strong>{name}</strong>.
+            </p>
             <Link
               href="/login"
               className="mt-4 inline-block rounded-lg bg-[#5B4CF0] px-6 py-3 text-sm font-semibold text-white hover:bg-[#493BD0]"

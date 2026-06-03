@@ -37,17 +37,17 @@ type Props = { params: Promise<{ comparação: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { comparação } = await params;
   const slugs = parseComparação(comparação);
-  if (!slugs) return { title: 'Comparador | Radar do Berço', robots: { index: false } };
+  if (!slugs) return { title: 'Comparador | Nuvii Baby', robots: { index: false } };
   const canonicalSlug = canonicalComparison(slugs);
-  if (slugs[0] === slugs[1]) return { title: 'Comparador | Radar do Berço', robots: { index: false } };
+  if (slugs[0] === slugs[1]) return { title: 'Comparador | Nuvii Baby', robots: { index: false } };
 
   const [a, b] = await Promise.all([fetchProduct(slugs[0]), fetchProduct(slugs[1])]);
-  if (!a || !b) return { title: 'Comparador | Radar do Berço', robots: { index: false } };
+  if (!a || !b) return { title: 'Comparador | Nuvii Baby', robots: { index: false } };
 
   const nameA = a.canonicalName || a.title;
   const nameB = b.canonicalName || b.title;
   const url = `${SITE_URL}/comparar/${canonicalSlug}`;
-  const title = `${nameA} vs ${nameB} — Qual é Melhor? | Radar do Berço`;
+  const title = `${nameA} vs ${nameB} — Qual é Melhor? | Nuvii Baby`;
   const description = `Compare ${nameA} e ${nameB}: Preço atual, histórico, custo por unidade e qual tem o melhor custo-benefício agora.`;
 
   return {
@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url,
       type: 'website',
-      siteName: 'Radar do Berço',
+      siteName: 'Nuvii Baby',
       locale: 'pt_BR',
       images: a.imageUrl || b.imageUrl ? [{ url: a.imageUrl || b.imageUrl, alt: `${nameA} vs ${nameB}` }] : [],
     },
@@ -150,7 +150,7 @@ export default async function CompararPage({ params }: Props) {
 
           <nav className="text-xs text-[#5B607C]">
             <ol className="flex flex-wrap items-center gap-1">
-              <li><Link href="/" className="hover:text-[#5B4CF0]">Radar do Berço</Link></li>
+              <li><Link href="/" className="hover:text-[#5B4CF0]">Nuvii Baby</Link></li>
               <li aria-hidden>/</li>
               <li className="font-medium text-[#090A3D]">Comparar</li>
             </ol>

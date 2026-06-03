@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 
 type BrandLogoProps = {
   href?: string;
@@ -7,35 +7,42 @@ type BrandLogoProps = {
   className?: string;
 };
 
-export function CribRadarIcon({ className = 'h-12 w-12' }: { className?: string }) {
+export function NuviiIcon({ className = 'h-12 w-12' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 64 64" role="img" aria-label="Radar do Berço" fill="none">
-      <path d="M12 29h40v19H12z" stroke="currentColor" strokeWidth="4" strokeLinejoin="round" />
-      <path d="M18 29V20M46 29V20M20 48v6M44 48v6" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-      <path d="M20 36h24" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-      <path d="M28 29V48M36 29V48" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-      <path d="M23 15c5.2-5.1 12.1-5.1 18 0" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-      <path d="M15 10c9.8-9.3 24.2-9.3 34 0M8 16c13.8-13.5 34.2-13.5 48 0" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity="0.42" />
+    <svg className={className} viewBox="0 0 64 64" role="img" aria-label="Nuvii Baby" fill="none">
+      <path
+        d="M46 36c0-5.5-4.5-10-10-10a9.97 9.97 0 0 0-8.5 4.7C26.1 29.3 24.1 28 21.8 28 17.5 28 14 31.5 14 35.8c0 .1 0 .2.01.3C11.7 37.1 10 39.3 10 42c0 3.3 2.7 6 6 6h30c3.3 0 6-2.7 6-6 0-2.9-2-5.3-4.8-5.8C47.1 35.5 46 35.8 46 36Z"
+        stroke="currentColor" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round"
+      />
+      <path d="M32 48v8M24 54h16" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+      <circle cx="32" cy="22" r="3" fill="currentColor" opacity="0.35" />
+      <circle cx="22" cy="17" r="2" fill="currentColor" opacity="0.22" />
+      <circle cx="42" cy="18" r="2.5" fill="currentColor" opacity="0.28" />
     </svg>
   );
 }
 
+// Alias mantido para compatibilidade com usos legados no código existente
+export function CribRadarIcon({ className = 'h-12 w-12' }: { className?: string }) {
+  return <NuviiIcon className={className} />;
+}
+
 export function BrandLogo({ href = '/', compact = false, light = false, className = '' }: BrandLogoProps) {
   const content = (
-    <span className={`inline-flex items-center gap-3 ${className}`}>
-      <span className={light ? 'text-white' : 'text-[#5B4CF0]'}>
-        <CribRadarIcon className={compact ? 'h-9 w-9' : 'h-12 w-12'} />
+    <span className={`inline-flex items-center gap-2.5 ${className}`}>
+      <span className={light ? 'text-white' : 'text-[#7C5CFF]'}>
+        <NuviiIcon className={compact ? 'h-8 w-8' : 'h-11 w-11'} />
       </span>
       <span className="leading-none">
-        <span className={`block font-black tracking-tight ${compact ? 'text-xl' : 'text-3xl'} ${light ? 'text-white' : 'text-[#090A3D]'}`}>
-          Radar do
+        <span className={`block font-black tracking-tight ${compact ? 'text-lg' : 'text-2xl'} ${light ? 'text-white' : 'text-[#1A1D3B]'}`}>
+          Nuvii
         </span>
-        <span className={`block font-black tracking-tight ${compact ? 'text-2xl' : 'text-4xl'} ${light ? 'text-white' : 'text-[#090A3D]'}`}>
-          Berço
+        <span className={`block font-black tracking-tight ${compact ? 'text-xl' : 'text-3xl'} ${light ? 'text-white' : 'text-[#7C5CFF]'}`}>
+          Baby
         </span>
         {!compact && (
-          <span className={`mt-2 block text-xs font-medium leading-4 ${light ? 'text-white/80' : 'text-[#090A3D]/75'}`}>
-            Menos tempo procurando.<br />Mais tempo cuidando.
+          <span className={`mt-1 block text-xs font-medium leading-4 ${light ? 'text-white/80' : 'text-[#1A1D3B]/60'}`}>
+            Seu copiloto nas compras do bebê
           </span>
         )}
       </span>
@@ -45,7 +52,7 @@ export function BrandLogo({ href = '/', compact = false, light = false, classNam
   if (!href) return content;
 
   return (
-    <Link href={href} aria-label="Radar do Berço">
+    <Link href={href} aria-label="Nuvii Baby">
       {content}
     </Link>
   );

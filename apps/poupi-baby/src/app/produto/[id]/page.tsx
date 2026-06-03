@@ -101,7 +101,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await fetchPublicProduct(id);
 
   if (!product) {
-    return { title: 'Produto | Radar do Berço', robots: { index: false } };
+    return { title: 'Produto | Nuvii Baby', robots: { index: false } };
   }
 
   const name = product.canonicalName || product.title;
@@ -116,14 +116,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     price ? `Menor Preço: R$ ${price.toFixed(2).replace('.', ',')}` : '',
     store ? `em ${store}` : '',
     product.category ? `| ${product.category}` : '',
-    '| Radar do Berço Monitor de preços',
+    '| Nuvii Baby — Monitor de preços',
   ].filter(Boolean).join(' ');
 
   const productJsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name,
-    description: `Compare preços de ${name} nas principais farmácias. histórico de Preço, score Radar do Berço e alertas automáticos.`,
+    description: `Compare preços de ${name} nas principais farmácias. Histórico de preços, Deal Score e alertas automáticos — Nuvii Baby.`,
     brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
     image: product.imageUrl ?? undefined,
     url: canonicalUrl,
@@ -141,7 +141,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${name} — Melhor Preço | Radar do Berço`,
+    title: `${name} — Melhor Preço | Nuvii Baby`,
     description,
     alternates: { canonical: canonicalUrl },
     openGraph: {
@@ -150,12 +150,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonicalUrl,
       type: 'website',
       images: product.imageUrl ? [{ url: product.imageUrl, alt: name }] : [],
-      siteName: 'Radar do Berço',
+      siteName: 'Nuvii Baby',
       locale: 'pt_BR',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${name} — Melhor Preço | Radar do Berço`,
+      title: `${name} — Melhor Preço | Nuvii Baby`,
       description,
       images: product.imageUrl ? [product.imageUrl] : [],
     },
