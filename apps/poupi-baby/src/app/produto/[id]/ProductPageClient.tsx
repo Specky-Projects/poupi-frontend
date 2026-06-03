@@ -75,6 +75,187 @@ type ScoreResult = {
 const money = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const offerPrice = (offer?: Offer | null) => Number(offer?.currentPrice ?? offer?.price ?? 0);
 
+// ─── Decision helpers ─────────────────────────────────────────────────────────
+
+function getDecision(score: number | null | undefined, priceIntel?: PriceIntelligence | null) {
+  if (score == null) return {
+    badge: '🔍', label: 'Analisando', color: '#8A8FB1', bg: '#F2F4FF',
+    headline: 'Ainda não tenho histórico suficiente para dar uma recomendação com confiança.',
+    sub: 'Por enquanto, recomendo criar um alerta e acompanhar o preço.',
+    cta: 'alert' as const,
+  };
+  if (score >= 90) return {
+    badge: '🔥', label: 'Oferta Forte', color: '#d97706', bg: '#fef3c7',
+    headline: 'Essa é uma das melhores ofertas que vimos recentemente.',
+    sub: priceIntel?.trendDirection === 'falling'
+      ? 'O preço está em queda — ótimo momento para comprar.'
+      : 'Dificilmente você pagará muito menos no curto prazo.',
+    cta: 'buy' as const,
+  };
+  if (score >= 80) return {
+    badge: '🟢', label: 'Comprar Agora', color: '#2f8a51', bg: '#e8f8ee',
+    headline: 'Eu aproveitaria essa oferta.',
+    sub: 'O preço está melhor do que normalmente encontramos para este produto.',
+    cta: 'buy' as const,
+  };
+  if (score >= 70) return {
+    badge: '🟢', label: 'Boa Oferta', color: '#2f8a51', bg: '#e8f8ee',
+    headline: 'Esse preço está melhor do que costumamos encontrar.',
+    sub: 'Se esse produto já está na sua lista, eu não esperaria muito.',
+    cta: 'buy' as const,
+  };
+  if (score >= 50) return {
+    badge: '🟡', label: 'Vale Monitorar', color: '#92720a', bg: '#fef9e7',
+    headline: 'Não é uma oferta incrível, mas também não está caro.',
+    sub: 'Se você precisa comprar agora, pode seguir sem grandes preocupações. Se não tiver urgência, vale acompanhar.',
+    cta: 'neutral' as const,
+  };
+  return {
+    badge: '⏳', label: 'Melhor Esperar', color: '#b13a3a', bg: '#fff1f1',
+    headline: 'Eu esperaria um pouco.',
+    sub: 'Já vimos esse produto aparecer por valores melhores. Existe uma boa chance de economizar mais se você puder esperar.',
+    cta: 'wait' as const,
+  };
+}
+
+function DecisionPanel({
+  score,
+  priceIntelligence,
+  currentPrice,
+  savings,
+  best,
+  onAlert,
+}: {
+  score: number | null | undefined;
+  priceIntelligence: PriceIntelligence | null | undefined;
+  currentPrice: number | null;
+  savings: { amount: number; basis: string } | null;
+  best: Offer | null;
+  onAlert: () => void;
+}) {
+  const d = getDecision(score, priceIntelligence);
+
+  const chips: Array<{ text: string; color: string }> = [];
+  if (priceIntelligence && currentPrice !== null) {
+    if (priceIntelligence.trendDirection === 'falling')
+      chips.push({ text: '📉 Preço em queda', color: '#2f8a51' });
+    if (priceIntelligence.trendDirection === 'rising')
+      chips.push({ text: '📈 Preço subindo', color: '#b13a3a' });
+    if (priceIntelligence.lowestPrice30d !== null && currentPrice <= priceIntelligence.lowestPrice30d * 1.02)
+      chips.push({ text: '🏆 Menor preço em 30 dias', color: '#2f8a51' });
+    if (priceIntelligence.allTimeMin !== null && currentPrice <= priceIntelligence.allTimeMin * 1.02)
+      chips.push({ text: '🎯 Próximo do mínimo histórico', color: '#d97706' });
+    if (priceIntelligence.trendDeltaPercent !== null && priceIntelligence.trendDeltaPercent > 5)
+      chips.push({ text: `📉 Caiu ${priceIntelligence.trendDeltaPercent.toFixed(0)}% recentemente`, color: '#2f8a51' });
+  }
+
+  return (
+    <section
+      className="rounded-xl border p-5 shadow-sm"
+      style={{ background: d.bg, borderColor: d.color + '55' }}
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex-1 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">{d.badge}</span>
+            <span className="rounded-full px-3 py-1 text-sm font-bold" style={{ background: d.color + '22', color: d.color }}>
+              {d.label}
+              {score != null && <span className="ml-1.5 opacity-70">· {score}/100</span>}
+            </span>
+          </div>
+
+          <p className="text-base font-semibold text-[#090A3D]">{d.headline}</p>
+          <p className="text-sm text-[#5B607C]">{d.sub}</p>
+
+          {chips.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {chips.map((chip) => (
+                <span
+                  key={chip.text}
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
+                  style={{ background: chip.color + '18', color: chip.color }}
+                >
+                  {chip.text}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {savings && (
+            <div className="flex flex-wrap gap-5 pt-1 text-sm">
+              <div>
+                <span className="text-[#5B607C]">Economia estimada </span>
+                <span className="font-bold" style={{ color: d.color }}>{money(savings.amount)}</span>
+                <span className="text-xs text-[#8A8FB1]"> vs. {savings.basis}</span>
+              </div>
+              {score != null && (
+                <div>
+                  <span className="text-[#5B607C]">Confiança </span>
+                  <span className="font-bold" style={{ color: d.color }}>{score}%</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-row gap-2 sm:flex-col sm:min-w-[160px]">
+          {best && (
+            <a
+              href={best.productUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-1 items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white sm:flex-none"
+              style={{ background: d.color }}
+            >
+              Ver oferta →
+            </a>
+          )}
+          <button
+            onClick={onAlert}
+            className="flex flex-1 items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-semibold sm:flex-none"
+            style={{ borderColor: d.color, color: d.color, background: 'transparent' }}
+          >
+            🔔 Criar alerta
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ExplainabilityBlock({ scoreData, hasPriceIntel }: {
+  scoreData: DealScoreData | null | undefined;
+  hasPriceIntel: boolean;
+}) {
+  if (!scoreData) return null;
+
+  const factors = [
+    { ok: scoreData.context.pricePoints >= 3, label: 'Histórico de preço' },
+    { ok: scoreData.context.avg90d !== null, label: 'Média dos últimos 90 dias' },
+    { ok: scoreData.context.allTimeMin !== null, label: 'Mínimo histórico' },
+    { ok: hasPriceIntel, label: 'Comparação entre lojas' },
+    { ok: scoreData.components.recentTrend > 0, label: 'Tendência recente de preço' },
+    { ok: scoreData.context.discountVsAvg !== null, label: 'Qualidade da oferta atual' },
+  ].filter((f) => f.ok);
+
+  if (factors.length === 0) return null;
+
+  return (
+    <div className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
+      <h2 className="mb-1 text-base font-semibold text-[#090A3D]">Por que estou recomendando isso?</h2>
+      <p className="mb-3 text-sm text-[#5B607C]">Considerei os seguintes fatores para chegar a esta recomendação:</p>
+      <div className="space-y-1.5">
+        {factors.map((f) => (
+          <div key={f.label} className="flex items-center gap-2 text-sm text-[#374151]">
+            <span className="text-[#2f8a51] font-bold">✓</span>
+            <span>{f.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function dealScoreLabel(score: number) {
   if (score >= 90) return 'Excelente';
   if (score >= 80) return 'Otima oferta';
@@ -192,6 +373,15 @@ export function ProductPageClient() {
     return scores.all.find((score) => score.offerId === selectedOffer.id)?.score ?? scores.best?.score ?? null;
   }, [scores, selectedOffer]);
 
+  const savings = useMemo(() => {
+    if (activeScore?.context.discountVsAvg && activeScore.context.avg90d && stats.min) {
+      const saved = activeScore.context.avg90d - stats.min;
+      if (saved > 1) return { amount: saved, basis: 'média dos últimos 90 dias' };
+    }
+    if (stats.spread > 1) return { amount: stats.spread, basis: 'diferença entre lojas' };
+    return null;
+  }, [activeScore, stats]);
+
   if (error) return (
     <main className="flex min-h-screen items-center justify-center bg-[#F7F8FC]">
       <div className="text-center">
@@ -232,6 +422,15 @@ export function ProductPageClient() {
             <i className="ti ti-arrow-left" /> Voltar
           </button>
 
+          <DecisionPanel
+            score={activeScore?.score ?? null}
+            priceIntelligence={data.priceIntelligence}
+            currentPrice={stats.min}
+            savings={savings}
+            best={best}
+            onAlert={() => setShowAlertModal(true)}
+          />
+
           <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
             <div className="grid gap-6 lg:grid-cols-[180px_1fr_260px] lg:items-center">
               <div className="flex justify-center rounded-lg bg-[#f8f3ff] p-4">
@@ -249,7 +448,7 @@ export function ProductPageClient() {
                 </div>
                 <h1 className="mt-3 text-2xl font-semibold tracking-tight">{product.canonicalName || product.title}</h1>
                 <p className="mt-2 text-sm text-[#5B607C]">
-                  Acompanhamento por produto canônico: várias lojas, um histórico de decisão e comparação de preço por unidade.
+                  Monitoramos este produto em várias lojas para você tomar a melhor decisão de compra.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
                   {product.productFamilyName && <span className="rounded-full bg-[#fff5d8] px-2.5 py-1 text-[#8a6316]">Familia: {product.productFamilyName}</span>}
@@ -397,13 +596,15 @@ export function ProductPageClient() {
               </div>
 
               <div className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
-                <h2 className="mb-3 text-lg font-semibold">💚 Economia Inteligente</h2>
+                <h2 className="mb-3 text-lg font-semibold">Análise detalhada</h2>
                 <DealScoreWidget data={activeScore} />
               </div>
 
+              <ExplainabilityBlock scoreData={activeScore} hasPriceIntel={!!data.priceIntelligence} />
+
               {data.priceIntelligence && data.priceIntelligence.dataQuality !== 'insufficient' && (
                 <div className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
-                  <h2 className="mb-3 text-lg font-semibold">Inteligência de Preço</h2>
+                  <h2 className="mb-3 text-lg font-semibold">Contexto de preço</h2>
                   <div className="space-y-2 text-sm">
                     {data.priceIntelligence.lowestPrice30d !== null && (
                       <IntelRow label="Menor Preço 30 dias" value={money(data.priceIntelligence.lowestPrice30d)} />

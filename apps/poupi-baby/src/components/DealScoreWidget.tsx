@@ -53,10 +53,19 @@ function pct(n: number | null) {
 }
 
 function scoreLabel(score: number) {
-  if (score >= 90) return 'Excelente';
-  if (score >= 80) return 'Otima oferta';
-  if (score >= 70) return 'Boa oferta';
-  return 'Oferta comum';
+  if (score >= 90) return 'Oferta Forte';
+  if (score >= 80) return 'Comprar Agora';
+  if (score >= 70) return 'Boa Oferta';
+  if (score >= 50) return 'Vale Monitorar';
+  return 'Melhor Esperar';
+}
+
+function decisionBadge(score: number): string {
+  if (score >= 90) return '🔥';
+  if (score >= 80) return '🟢';
+  if (score >= 70) return '🟢';
+  if (score >= 50) return '🟡';
+  return '⏳';
 }
 
 // ─── ArcGauge ─────────────────────────────────────────────────────────────────
@@ -220,6 +229,7 @@ export function DealScoreWidget({ data }: { data: DealScoreData | null | undefin
 
   const { score, labelColor: color, emoji, components, context } = data;
   const label = scoreLabel(score);
+  void emoji;
 
   const BARS = [
     {
@@ -276,25 +286,13 @@ export function DealScoreWidget({ data }: { data: DealScoreData | null | undefin
     }}>
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#111827' }}>
-            💚 Economia Inteligente
-          </h3>
-          <p style={{ margin: '3px 0 0', fontSize: 12, color: '#9ca3af' }}>
-            {context.pricePoints} pontos de dados · {context.daysMonitored} dias monitorados
-          </p>
-        </div>
-
-        {/* Score label badge */}
-        <div style={{
-          background: score >= 60 ? `${color}18` : '#f3f4f6',
-          border:     `1px solid ${score >= 60 ? color + '44' : '#e5e7eb'}`,
-          color:      score >= 60 ? color : '#9ca3af',
-          fontSize:   11, fontWeight: 700, borderRadius: 20,
-          padding:    '4px 12px',
-        }}>
-          {emoji} {label}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span style={{ fontSize: 28, flexShrink: 0 }}>{decisionBadge(score)}</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 17, fontWeight: 800, color, lineHeight: 1.2 }}>{label}</div>
+          <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>
+            Score {score}/100 · {context.pricePoints} pontos de dados · {context.daysMonitored} dias monitorados
+          </div>
         </div>
       </div>
 
@@ -384,30 +382,32 @@ function Interpretation({ score, context, color }: {
 
     if (score >= 90) return {
       icon: '🔥',
-      title: 'Raridade absoluta — compre agora',
-      body:  `Este produto está em seu menor preço histórico com desconto expressivo. Oportunidades assim aparecem poucas vezes.`,
+      title: 'Essa é uma das melhores ofertas que vimos.',
+      body:  atMin
+        ? 'O preço está no mínimo histórico. Oportunidades assim aparecem poucas vezes — eu não esperaria.'
+        : 'Desconto expressivo em relação à média histórica. Dificilmente você pagará muito menos no curto prazo.',
     };
     if (score >= 75) return {
-      icon: '⚡',
-      title: 'Ótimo momento para comprar',
-      body:  `Preço significativamente abaixo da média histórica.${atMin ? ' Está muito próximo do mínimo de todos os tempos.' : ''} Recomendado.`,
+      icon: '🟢',
+      title: 'Eu aproveitaria essa oferta.',
+      body:  `Preço significativamente abaixo da média histórica.${atMin ? ' Está muito próximo do mínimo de todos os tempos.' : ''} Se esse produto já está na sua lista, eu não esperaria.`,
     };
     if (score >= 60) return {
-      icon: '✅',
-      title: 'Boa oferta',
+      icon: '🟢',
+      title: 'Esse preço está melhor do que costumamos encontrar.',
       body:  disc != null && disc > 0
         ? `${disc.toFixed(1)}% abaixo da média dos últimos 90 dias. Preço justo com desconto real.`
-        : 'Preço abaixo da média recente. Bom momento para adquirir.',
+        : 'Preço abaixo da média recente. Bom momento para comprar.',
     };
     if (score >= 40) return {
-      icon: '👍',
-      title: 'Preço razoável',
-      body:  'Preço dentro da faixa normal. Não é a melhor oferta histórica, mas não está caro.',
+      icon: '🟡',
+      title: 'Não é uma oferta incrível, mas também não está caro.',
+      body:  'Preço dentro da faixa normal. Se você precisa comprar agora, pode seguir sem grandes preocupações.',
     };
     return {
       icon: '⏳',
-      title: 'Aguarde uma promoção melhor',
-      body:  'O preço atual está acima da média histórica ou próximo do máximo. Vale esperar.',
+      title: 'Eu esperaria um pouco.',
+      body:  'Já vimos esse produto aparecer por valores melhores. Existe uma boa chance de economizar mais se você puder esperar.',
     };
   }
 
@@ -437,7 +437,7 @@ export function MiniScoreBadge({ score, emoji, label, color }: {
   const normalizedLabel = scoreLabel(score);
   return (
     <div
-      title={`💚 Economia Inteligente: ${score}/100 — ${emoji} ${label}`}
+      title={`Análise de preço: ${score}/100 — ${normalizedLabel}`}
       style={{
         display:        'inline-flex',
         alignItems:     'center',
@@ -454,7 +454,7 @@ export function MiniScoreBadge({ score, emoji, label, color }: {
         flexShrink:     0,
       }}
     >
-      {emoji} {score} · {normalizedLabel}
+      {decisionBadge(score)} {normalizedLabel} · {score}/100
     </div>
   );
 }
