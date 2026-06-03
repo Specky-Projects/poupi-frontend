@@ -104,8 +104,6 @@ export default async function BrandPage({ params }: Props) {
               const bestOffer = p.offers[0] ?? null;
               const bestPrice = bestOffer ? Number(bestOffer.currentPrice ?? bestOffer.price) : null;
               const name = p.canonicalName || p.title;
-              const offerHref = bestOffer?.offerUrl || bestOffer?.productUrl || null;
-              const marketplaceName = bestOffer?.marketplaceName || bestOffer?.marketplace?.name;
               const unit = resolveUnit({ category: p.category, title: p.title, variantLabel: p.variantLabel });
               return (
                 <article
@@ -126,22 +124,22 @@ export default async function BrandPage({ params }: Props) {
                   </Link>
                   <div className="mt-3 flex items-end justify-between">
                     <div>
-                      {bestPrice
-                        ? <p className="text-lg font-bold text-[#5B4CF0]">{money(bestPrice)}</p>
-                        : <p className="text-sm text-[#8A8FB1]">Indisponível</p>}
                       {bestOffer?.pricePerUnit && (
-                        <p className="text-xs text-[#5B607C]">{money(Number(bestOffer.pricePerUnit))}/{unit}</p>
+                        <>
+                          <p className="text-lg font-bold text-[#5B4CF0]">{money(Number(bestOffer.pricePerUnit))}/{unit}</p>
+                          {bestPrice && <p className="text-xs text-[#5B607C]">{money(bestPrice)} total</p>}
+                        </>
+                      )}
+                      {!bestOffer?.pricePerUnit && (
+                        bestPrice
+                          ? <p className="text-lg font-bold text-[#5B4CF0]">{money(bestPrice)}</p>
+                          : <p className="text-sm text-[#8A8FB1]">Indisponível</p>
                       )}
                     </div>
-                    {marketplaceName && (
-                      <p className="text-xs text-[#8A8FB1]">{marketplaceName}</p>
-                    )}
                   </div>
-                  {offerHref && (
-                    <a href={offerHref} target="_blank" rel="noopener noreferrer" className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#5B4CF0] px-3 py-2 text-sm font-semibold text-white hover:bg-[#493BD0]">
-                      Ver oferta
-                    </a>
-                  )}
+                  <Link href={`/produto/${p.slug}`} className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#5B4CF0] px-3 py-2 text-sm font-semibold text-white hover:bg-[#493BD0]">
+                    Ver produto
+                  </Link>
                 </article>
               );
             })}

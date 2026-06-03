@@ -132,7 +132,7 @@ export function ProductSearch({
                     {product.name}
                   </h3>
                   <p className="mt-1 truncate text-xs text-[#5B607C]">
-                    {product.availableStores.join(' | ') || `${product.offerCount} oferta(s)`}
+                    {product.offerCount} oferta{product.offerCount !== 1 ? 's' : ''} monitorada{product.offerCount !== 1 ? 's' : ''}
                   </p>
                 </div>
               </div>

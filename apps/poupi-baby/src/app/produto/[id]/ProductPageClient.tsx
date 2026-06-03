@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { PriceChart } from '@/components/PriceChart';
 import { AlertModal } from '@/components/AlertModal';
 import { DealScoreWidget, type DealScoreData } from '@/components/DealScoreWidget';
+import { resolveUnit, formatPricePerUnit } from '@/lib/unit-label';
 
 type Offer = {
   id: string;
@@ -74,9 +75,11 @@ type ScoreResult = {
 const money = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const offerPrice = (offer?: Offer | null) => Number(offer?.currentPrice ?? offer?.price ?? 0);
 
-function formatDate(iso?: string | null) {
-  if (!iso) return 'sem coleta';
-  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+function dealScoreLabel(score: number) {
+  if (score >= 90) return 'Excelente';
+  if (score >= 80) return 'Otima oferta';
+  if (score >= 70) return 'Boa oferta';
+  return 'Oferta comum';
 }
 
 function scrapedStatus(iso?: string | null): string {
@@ -205,6 +208,7 @@ export function ProductPageClient() {
   );
 
   const { product } = data;
+  const unit = resolveUnit({ category: product.category, title: product.title, variantLabel: product.variantLabel });
   const lowestPrice = stats.min;
   const best = sortedOffers[0] ?? null;
   const variants = data.variants ?? [];
@@ -242,7 +246,6 @@ export function ProductPageClient() {
                 <div className="flex flex-wrap gap-2 text-xs font-semibold">
                   {product.brand && <span className="rounded-full bg-[#EEF2FF] px-2.5 py-1 text-[#5B4CF0]">{product.brand}</span>}
                   {product.category && <span className="rounded-full bg-[#e8f8ee] px-2.5 py-1 text-[#2f8a51]">{product.category}</span>}
-                  {product.ean && <span className="rounded-full bg-[#F2F4FF] px-2.5 py-1 text-[#5B607C]">EAN {product.ean}</span>}
                 </div>
                 <h1 className="mt-3 text-2xl font-semibold tracking-tight">{product.canonicalName || product.title}</h1>
                 <p className="mt-2 text-sm text-[#5B607C]">
@@ -261,10 +264,14 @@ export function ProductPageClient() {
 
               <div className="rounded-lg bg-[#EEF2FF] p-4">
                 <div className="text-sm font-medium text-[#5B607C]">🏆 Melhor oferta agora</div>
-                {best?.pricePerUnit && (
-                  <div className="mt-2 text-2xl font-black text-[#5B4CF0]">{money(Number(best.pricePerUnit))}<span className="ml-1 text-sm font-semibold text-[#5B607C]">/un</span></div>
+                {best?.pricePerUnit ? (
+                  <>
+                    <div className="mt-2 text-2xl font-black text-[#5B4CF0]">{formatPricePerUnit(Number(best.pricePerUnit), unit)}</div>
+                    <div className="mt-1 text-base font-semibold text-[#090A3D]">{money(offerPrice(best))} <span className="text-xs font-normal text-[#5B607C]">total</span></div>
+                  </>
+                ) : (
+                  <div className="mt-2 text-3xl font-semibold text-[#090A3D]">{best ? money(offerPrice(best)) : '-'}</div>
                 )}
-                <div className={`${best?.pricePerUnit ? 'mt-1 text-base' : 'mt-2 text-3xl'} font-semibold text-[#090A3D]`}>{best ? money(offerPrice(best)) : '-'} <span className="text-xs font-normal text-[#5B607C]">total</span></div>
                 <div className="mt-1 text-sm text-[#5B607C]">🛒 {best?.marketplace.name ?? 'Sem loja disponível'}</div>
                 {best && <div className="mt-1 text-xs text-[#5B607C]">{scrapedStatus(best.lastValidScrapedAt ?? best.lastScrapedAt)}</div>}
                 <button onClick={() => setShowAlertModal(true)} className="mt-4 w-full rounded-lg bg-[#5B4CF0] px-4 py-2.5 text-sm font-semibold text-white">
@@ -355,10 +362,10 @@ export function ProductPageClient() {
                             {index === 0 && offer.availability && <span className="rounded-full bg-[#e8f8ee] px-2 py-1 text-xs font-semibold text-[#2f8a51]">🏆 Melhor preço</span>}
                             <span className="font-semibold">🛒 {offer.marketplace.name}</span>
                             {!offer.availability && <span className="rounded-full bg-[#fff1f1] px-2 py-1 text-xs font-semibold text-[#b13a3a]">indisponível</span>}
-                            {score && <span className="rounded-full bg-[#f0faf3] px-2 py-1 text-xs font-semibold text-[#2f8a51]">💚 Economia Inteligente: {score.score}/100</span>}
+                            {score && <span className="rounded-full bg-[#f0faf3] px-2 py-1 text-xs font-semibold text-[#2f8a51]">Deal Score: {score.score}/100 - {dealScoreLabel(score.score)}</span>}
                           </div>
                           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#5B607C]">
-                            {offer.pricePerUnit && <span className="font-semibold text-[#090A3D]">{money(Number(offer.pricePerUnit))}/un</span>}
+                            {offer.pricePerUnit && <span className="font-semibold text-[#090A3D]">{formatPricePerUnit(Number(offer.pricePerUnit), unit)}</span>}
                             {offer.originalPrice && Number(offer.originalPrice) > offerPrice(offer) && <span>de {money(Number(offer.originalPrice))}</span>}
                             {(offer.city || offer.state) && <span>{[offer.city, offer.state].filter(Boolean).join(' - ')}</span>}
                             <span>{scrapedStatus(offer.lastValidScrapedAt ?? offer.lastScrapedAt)}</span>

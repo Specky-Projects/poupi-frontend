@@ -4,6 +4,7 @@ import { getSiteUrl } from '@/lib/site-url';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/SiteFooter';
+import { resolveUnit, formatPricePerUnit } from '@/lib/unit-label';
 
 const BACKEND = getBackendUrl('3001');
 const SITE_URL = getSiteUrl();
@@ -26,6 +27,7 @@ type ProductCard = {
   offers: Array<{
     price: number | string;
     currentPrice?: number | string | null;
+    pricePerUnit?: number | string | null;
     productUrl?: string | null;
     offerUrl?: string | null;
     marketplaceName?: string | null;
@@ -135,10 +137,9 @@ export default async function ProdutosPage({
             {catalog.products.map((product) => {
               const bestOffer = product.offers?.[0] ?? null;
               const bestPrice = bestOffer ? Number(bestOffer.currentPrice ?? bestOffer.price) : null;
+              const pricePerUnit = bestOffer?.pricePerUnit ? Number(bestOffer.pricePerUnit) : null;
+              const unit = resolveUnit({ category: product.category, title: product.title });
               const name = product.canonicalName || product.title;
-              const offerHref = bestOffer?.offerUrl || bestOffer?.productUrl || null;
-              const marketplaceName =
-                bestOffer?.marketplaceName || bestOffer?.marketplace?.name || 'Lojas monitoradas';
               return (
                 <article
                   key={product.id}
@@ -159,34 +160,30 @@ export default async function ProdutosPage({
                         </p>
                         <h3 className="mt-1 line-clamp-2 text-sm font-semibold">{name}</h3>
                         <p className="mt-1 truncate text-xs text-[#5B607C]">
-                          {marketplaceName}
+                          {product.category || 'Produto monitorado'}
                         </p>
                       </div>
                     </div>
                   </Link>
-                  <div className="mt-3 flex items-center justify-between gap-3">
-                    <span className="text-xs text-[#5B607C]">Menor preco</span>
-                    <span className="text-base font-semibold text-[#5B4CF0]">
-                      {bestPrice ? money(bestPrice) : 'Indisponivel'}
+                  <div className="mt-3 flex items-end justify-between gap-3">
+                    <span className="text-xs text-[#5B607C]">{pricePerUnit ? 'Melhor custo' : 'Menor preco'}</span>
+                    <span className="text-right text-base font-semibold text-[#5B4CF0]">
+                      {pricePerUnit ? (
+                        <>
+                          {formatPricePerUnit(pricePerUnit, unit)}
+                          {bestPrice && <span className="block text-xs font-normal text-[#5B607C]">{money(bestPrice)} total</span>}
+                        </>
+                      ) : (
+                        bestPrice ? money(bestPrice) : 'Indisponivel'
+                      )}
                     </span>
                   </div>
-                  {offerHref ? (
-                    <a
-                      href={offerHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#5B4CF0] px-3 py-2 text-sm font-semibold text-white hover:bg-[#493BD0]"
-                    >
-                      Ver oferta
-                    </a>
-                  ) : (
-                    <Link
-                      href={`/produto/${product.slug}`}
-                      className="mt-3 flex w-full items-center justify-center rounded-lg border border-[#D9DEF0] px-3 py-2 text-sm font-semibold text-[#5B607C] hover:border-[#5B4CF0] hover:text-[#5B4CF0]"
-                    >
-                      Detalhes
-                    </Link>
-                  )}
+                  <Link
+                    href={`/produto/${product.slug}`}
+                    className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#5B4CF0] px-3 py-2 text-sm font-semibold text-white hover:bg-[#493BD0]"
+                  >
+                    Ver produto
+                  </Link>
                 </article>
               );
             })}

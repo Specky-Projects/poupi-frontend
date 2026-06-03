@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { resolveUnit, formatPricePerUnit } from '@/lib/unit-label';
 
 const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -50,14 +51,34 @@ function sortSizes(sizes: string[]): string[] {
 
 export function CategoryGrid({
   products,
-  category,
 }: {
   products: Product[];
   category: string;
 }) {
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [showUnavailable, setShowUnavailable] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const selectedBrand = searchParams.get('marca');
+  const selectedSize = searchParams.get('tamanho');
+  const showUnavailable = searchParams.get('indisponiveis') === '1';
+
+  function setFilter(next: { brand?: string | null; size?: string | null; unavailable?: boolean | null }) {
+    const params = new URLSearchParams(searchParams.toString());
+    if ('brand' in next) {
+      if (next.brand) params.set('marca', next.brand);
+      else params.delete('marca');
+    }
+    if ('size' in next) {
+      if (next.size) params.set('tamanho', next.size);
+      else params.delete('tamanho');
+    }
+    if ('unavailable' in next) {
+      if (next.unavailable) params.set('indisponiveis', '1');
+      else params.delete('indisponiveis');
+    }
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
 
   const { brands, sizes } = useMemo(() => {
     const brandSet = new Set<string>();
@@ -88,16 +109,16 @@ export function CategoryGrid({
 
   return (
     <div className="space-y-4">
-      {/* Filter bar */}
       {hasFilters && (
         <div className="rounded-lg border border-[#E4E7F2] bg-white p-3 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
-            {/* Linha (brand) */}
             {brands.length > 1 && (
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-xs font-semibold text-[#5B607C]">Linha:</span>
+                <span className="text-xs font-semibold text-[#5B607C]">
+                  <i className="ti ti-tag mr-1" />Marca:
+                </span>
                 <button
-                  onClick={() => setSelectedBrand(null)}
+                  onClick={() => setFilter({ brand: null })}
                   className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
                     selectedBrand === null
                       ? 'bg-[#5B4CF0] text-white'
@@ -109,7 +130,7 @@ export function CategoryGrid({
                 {brands.map((b) => (
                   <button
                     key={b}
-                    onClick={() => setSelectedBrand(selectedBrand === b ? null : b)}
+                    onClick={() => setFilter({ brand: selectedBrand === b ? null : b })}
                     className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
                       selectedBrand === b
                         ? 'bg-[#5B4CF0] text-white'
@@ -122,17 +143,17 @@ export function CategoryGrid({
               </div>
             )}
 
-            {/* Separator */}
             {brands.length > 1 && sizes.length > 1 && (
               <div className="h-5 w-px bg-[#E4E7F2]" aria-hidden />
             )}
 
-            {/* Tamanho (size) */}
             {sizes.length > 1 && (
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-xs font-semibold text-[#5B607C]">Tamanho:</span>
+                <span className="text-xs font-semibold text-[#5B607C]">
+                  <i className="ti ti-ruler-2 mr-1" />Tamanho:
+                </span>
                 <button
-                  onClick={() => setSelectedSize(null)}
+                  onClick={() => setFilter({ size: null })}
                   className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
                     selectedSize === null
                       ? 'bg-[#5B4CF0] text-white'
@@ -144,7 +165,7 @@ export function CategoryGrid({
                 {sizes.map((s) => (
                   <button
                     key={s}
-                    onClick={() => setSelectedSize(selectedSize === s ? null : s)}
+                    onClick={() => setFilter({ size: selectedSize === s ? null : s })}
                     className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
                       selectedSize === s
                         ? 'bg-[#5B4CF0] text-white'
@@ -157,30 +178,29 @@ export function CategoryGrid({
               </div>
             )}
 
-            {/* Toggle unavailable */}
             {unavailableCount > 0 && (
               <button
-                onClick={() => setShowUnavailable((v) => !v)}
+                onClick={() => setFilter({ unavailable: !showUnavailable })}
                 className={`ml-auto rounded-full px-3 py-1 text-xs font-medium transition ${
                   showUnavailable
                     ? 'bg-[#f3f4f6] text-[#5B607C]'
                     : 'border border-dashed border-[#C9CEEA] text-[#8A8FB1] hover:border-[#5B4CF0] hover:text-[#5B4CF0]'
                 }`}
               >
-                {showUnavailable ? `Ocultar ${unavailableCount} indisponíveis` : `+ Mostrar ${unavailableCount} indisponíveis`}
+                <i className={`ti ${showUnavailable ? 'ti-eye-off' : 'ti-eye'} mr-1`} />
+                {showUnavailable ? `Ocultar ${unavailableCount} indisponiveis` : `Mostrar ${unavailableCount} indisponiveis`}
               </button>
             )}
           </div>
         </div>
       )}
 
-      {/* Results count */}
       {hasFilters && (
         <p className="text-xs text-[#8A8FB1]">
           {filtered.length} produto{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
-          {(selectedBrand || selectedSize) && (
+          {(selectedBrand || selectedSize || showUnavailable) && (
             <button
-              onClick={() => { setSelectedBrand(null); setSelectedSize(null); }}
+              onClick={() => setFilter({ brand: null, size: null, unavailable: null })}
               className="ml-2 text-[#5B4CF0] hover:underline"
             >
               Limpar filtros
@@ -189,7 +209,6 @@ export function CategoryGrid({
         </p>
       )}
 
-      {/* Product grid */}
       {filtered.length === 0 ? (
         <p className="rounded-lg border border-[#E4E7F2] bg-white p-8 text-center text-sm text-[#8A8FB1]">
           Nenhum produto encontrado para os filtros selecionados.
@@ -202,8 +221,6 @@ export function CategoryGrid({
             const pricePerUnit = bestOffer?.pricePerUnit ? Number(bestOffer.pricePerUnit) : null;
             const unit = resolveUnit({ category: p.category, title: p.title, variantLabel: p.variantLabel });
             const name = p.canonicalName || p.title;
-            const offerHref = bestOffer?.offerUrl || bestOffer?.productUrl || null;
-            const marketplaceName = bestOffer?.marketplaceName || bestOffer?.marketplace?.name;
             return (
               <article
                 key={p.id}
@@ -211,12 +228,18 @@ export function CategoryGrid({
               >
                 <Link href={`/produto/${p.slug}`} className="block">
                   <div className="flex items-start gap-3">
-                    {p.imageUrl
-                      ? <img src={p.imageUrl} alt={name} width={56} height={56} className="h-14 w-14 rounded-lg object-contain" />
-                      : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-[#EEF2FF] text-2xl">📦</div>}
+                    {p.imageUrl ? (
+                      <img src={p.imageUrl} alt={name} width={56} height={56} className="h-14 w-14 rounded-lg object-contain" />
+                    ) : (
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-[#EEF2FF]">
+                        <i className="ti ti-package text-2xl text-[#5B4CF0]" />
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
                       {index === 0 && bestPrice !== null && (
-                        <span className="mb-1 inline-block rounded-full bg-[#e8f8ee] px-2 py-0.5 text-[11px] font-semibold text-[#2f8a51]">🏆 Melhor preço</span>
+                        <span className="mb-1 inline-block rounded-full bg-[#e8f8ee] px-2 py-0.5 text-[11px] font-semibold text-[#2f8a51]">
+                          Melhor preco
+                        </span>
                       )}
                       {p.brand && <p className="text-xs font-semibold text-[#5B4CF0]">{p.brand}</p>}
                       <h2 className="mt-0.5 line-clamp-2 text-sm font-semibold">{name}</h2>
@@ -227,27 +250,20 @@ export function CategoryGrid({
                 <div className="mt-3">
                   {pricePerUnit ? (
                     <>
-                      <p className="text-xl font-black text-[#5B4CF0]">{money(pricePerUnit)}<span className="ml-1 text-xs font-semibold text-[#5B607C]">/{unit}</span></p>
-                      <p className="text-sm text-[#5B607C]">{bestPrice ? money(bestPrice) : ''} total</p>
+                      <p className="text-xl font-black text-[#5B4CF0]">
+                        {formatPricePerUnit(pricePerUnit, unit)}
+                      </p>
+                      <p className="text-sm text-[#5B607C]">{bestPrice ? `${money(bestPrice)} total` : ''}</p>
                     </>
                   ) : bestPrice ? (
                     <p className="text-xl font-black text-[#5B4CF0]">{money(bestPrice)}</p>
                   ) : (
-                    <p className="text-sm text-[#8A8FB1]">Indisponível</p>
-                  )}
-                  {marketplaceName && (
-                    <p className="mt-1 text-xs text-[#8A8FB1]">🛒 {marketplaceName}</p>
+                    <p className="text-sm text-[#8A8FB1]">Indisponivel</p>
                   )}
                 </div>
-                {offerHref ? (
-                  <a href={offerHref} target="_blank" rel="noopener noreferrer" className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#5B4CF0] px-3 py-2 text-sm font-semibold text-white hover:bg-[#493BD0]">
-                    Ver oferta
-                  </a>
-                ) : (
-                  <Link href={`/produto/${p.slug}`} className="mt-3 flex w-full items-center justify-center rounded-lg border border-[#D9DEF0] px-3 py-2 text-sm font-semibold text-[#5B607C] hover:border-[#5B4CF0] hover:text-[#5B4CF0]">
-                    Ver produto
-                  </Link>
-                )}
+                <Link href={`/produto/${p.slug}`} className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#5B4CF0] px-3 py-2 text-sm font-semibold text-white hover:bg-[#493BD0]">
+                  Ver produto
+                </Link>
               </article>
             );
           })}

@@ -46,10 +46,17 @@ function brl(n: number | null) {
   return `R$ ${n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function pct(n: number | null, positive = true) {
+function pct(n: number | null) {
   if (n == null) return '—';
   const sign = n > 0 ? '+' : '';
   return `${sign}${n.toFixed(1)}%`;
+}
+
+function scoreLabel(score: number) {
+  if (score >= 90) return 'Excelente';
+  if (score >= 80) return 'Otima oferta';
+  if (score >= 70) return 'Boa oferta';
+  return 'Oferta comum';
 }
 
 // ─── ArcGauge ─────────────────────────────────────────────────────────────────
@@ -211,7 +218,8 @@ function InsufficientData({ points }: { points?: number }) {
 export function DealScoreWidget({ data }: { data: DealScoreData | null | undefined }) {
   if (!data) return <InsufficientData />;
 
-  const { score, label, labelColor: color, emoji, components, context } = data;
+  const { score, labelColor: color, emoji, components, context } = data;
+  const label = scoreLabel(score);
 
   const BARS = [
     {
@@ -222,7 +230,7 @@ export function DealScoreWidget({ data }: { data: DealScoreData | null | undefin
     },
     {
       label: 'Menor preço histórico',
-      hint:  `Proximidade do all-time low. ${context.discountVsMin != null ? `Acima do mínimo: ${pct(context.discountVsMin, false)}` : 'Sem dados suficientes'}`,
+      hint:  `Proximidade do all-time low. ${context.discountVsMin != null ? `Acima do mínimo: ${pct(context.discountVsMin)}` : 'Sem dados suficientes'}`,
       score: components.nearAllTimeLow,
       max:   25,
     },
@@ -426,6 +434,7 @@ function Interpretation({ score, context, color }: {
 export function MiniScoreBadge({ score, emoji, label, color }: {
   score: number; emoji: string; label: string; color: string;
 }) {
+  const normalizedLabel = scoreLabel(score);
   return (
     <div
       title={`💚 Economia Inteligente: ${score}/100 — ${emoji} ${label}`}
@@ -445,7 +454,7 @@ export function MiniScoreBadge({ score, emoji, label, color }: {
         flexShrink:     0,
       }}
     >
-      {emoji} {score}
+      {emoji} {score} · {normalizedLabel}
     </div>
   );
 }

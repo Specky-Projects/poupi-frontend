@@ -62,6 +62,38 @@ async function fetchVariants(slugOrId: string) {
   return fetchBackendJson(`/seo/products/${encodeURIComponent(slugOrId)}/variants`, 3600);
 }
 
+async function fetchPublicPriceHistory(slugOrId: string) {
+  return fetchBackendJson(
+    `/seo/products/${encodeURIComponent(slugOrId)}/price-history?days=365`,
+    1800,
+  );
+}
+
+function buildPublicChartData(raw: unknown): Array<{ date: string; price: number }> {
+  const histories = (raw as { histories?: Array<{ history?: Array<{ capturedAt?: string; price?: string | number }> }> } | null)?.histories ?? [];
+  const byDay = new Map<string, { capturedAt: string; price: number }>();
+
+  for (const entry of histories) {
+    for (const point of entry.history ?? []) {
+      if (!point.capturedAt || point.price == null) continue;
+      const price = Number(point.price);
+      if (!Number.isFinite(price) || price <= 0) continue;
+      const day = new Date(point.capturedAt).toISOString().slice(0, 10);
+      const current = byDay.get(day);
+      if (!current || price < current.price) {
+        byDay.set(day, { capturedAt: point.capturedAt, price });
+      }
+    }
+  }
+
+  return [...byDay.values()]
+    .sort((a, b) => new Date(a.capturedAt).getTime() - new Date(b.capturedAt).getTime())
+    .map((point) => ({
+      date: new Date(point.capturedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+      price: point.price,
+    }));
+}
+
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -93,7 +125,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     name,
     description: `Compare preços de ${name} nas principais farmácias. histórico de Preço, score Radar do Berço e alertas automáticos.`,
     brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
-    sku: product.ean ?? undefined,
     image: product.imageUrl ?? undefined,
     url: canonicalUrl,
   };
@@ -141,9 +172,10 @@ export default async function Page({ params }: Props) {
     return <ProductPageClient />;
   }
 
-  const [product, internalLinks] = await Promise.all([
+  const [product, internalLinks, priceHistoryRaw] = await Promise.all([
     fetchPublicProduct(id),
     fetchInternalLinks(id),
+    fetchPublicPriceHistory(id),
   ]);
   if (!product) notFound();
 
@@ -169,6 +201,7 @@ export default async function Page({ params }: Props) {
       internalLinks={internalLinks}
       dealScore={dealScore}
       variants={variants}
+      priceHistory={buildPublicChartData(priceHistoryRaw)}
     />
   );
 }

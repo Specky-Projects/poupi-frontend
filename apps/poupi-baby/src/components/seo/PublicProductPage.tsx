@@ -3,6 +3,7 @@ import type { FC } from 'react';
 import Link from 'next/link';
 import { SeoInternalLinks, type SeoInternalLinkGraph } from './SeoInternalLinks';
 import { PackageComparator } from '@/components/PackageComparator';
+import { PriceChart } from '@/components/PriceChart';
 import { resolveUnit, formatPricePerUnit } from '@/lib/unit-label';
 import { SiteFooter } from '@/components/SiteFooter';
 
@@ -44,13 +45,22 @@ function offerPrice(o: Offer) {
 }
 
 type DealScoreBadge = { score: number; emoji: string; label: string; labelColor: string };
+type PriceHistoryPoint = { date: string; price: number };
+
+function dealScoreLabel(score: number) {
+  if (score >= 90) return 'Excelente';
+  if (score >= 80) return 'Otima oferta';
+  if (score >= 70) return 'Boa oferta';
+  return 'Oferta comum';
+}
 
 export const PublicProductPage: FC<{
   product: Product;
   internalLinks?: SeoInternalLinkGraph | null;
   dealScore?: DealScoreBadge | null;
   variants?: unknown[];
-}> = ({ product, internalLinks, dealScore, variants }) => {
+  priceHistory?: PriceHistoryPoint[];
+}> = ({ product, internalLinks, dealScore, variants, priceHistory = [] }) => {
   const name = product.canonicalName || product.title;
   const unit = resolveUnit({ category: product.category, title: product.title, variantLabel: product.variantLabel });
   const available = product.offers.filter((o) => o.availability).sort((a, b) => offerPrice(a) - offerPrice(b));
@@ -79,7 +89,6 @@ export const PublicProductPage: FC<{
     '@type': 'Product',
     name,
     image: product.imageUrl,
-    sku: product.ean ?? undefined,
     brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
     url: canonicalUrl,
     offers: available.map((o) => ({
@@ -147,7 +156,6 @@ export const PublicProductPage: FC<{
                   {product.category && categorySlug && (
                     <Link href={`/categoria/${categorySlug}`} className="rounded-full bg-[#e8f8ee] px-2.5 py-1 text-[#2f8a51] hover:bg-[#d5f0df]">{product.category}</Link>
                   )}
-                  {product.ean && <span className="rounded-full bg-[#F2F4FF] px-2.5 py-1 text-[#5B607C]">EAN {product.ean}</span>}
                 </div>
 
                 <h1 className="mt-3 text-2xl font-semibold tracking-tight">{name}</h1>
@@ -170,16 +178,24 @@ export const PublicProductPage: FC<{
 
               {/* CTA */}
               <div className="rounded-lg bg-[#EEF2FF] p-4">
-                <p className="text-sm font-medium text-[#5B607C]">Melhor Preço agora</p>
-                <p className="mt-2 text-3xl font-bold text-[#5B4CF0]">{best ? money(offerPrice(best)) : '—'}</p>
-                {best && <p className="mt-1 text-sm text-[#090A3D]">{best.marketplace.name}</p>}
                 {best?.pricePerUnit && (
-                  <p className="mt-1 text-xs text-[#5B607C]">{formatPricePerUnit(Number(best.pricePerUnit), unit)}</p>
+                  <>
+                    <p className="text-sm font-medium text-[#5B607C]">Melhor custo agora</p>
+                    <p className="mt-2 text-3xl font-bold text-[#5B4CF0]">{formatPricePerUnit(Number(best.pricePerUnit), unit)}</p>
+                    <p className="mt-1 text-sm text-[#090A3D]">{money(offerPrice(best))} total</p>
+                  </>
                 )}
+                {!best?.pricePerUnit && (
+                  <>
+                    <p className="text-sm font-medium text-[#5B607C]">Melhor Preco agora</p>
+                    <p className="mt-2 text-3xl font-bold text-[#5B4CF0]">{best ? money(offerPrice(best)) : '-'}</p>
+                  </>
+                )}
+                {best && <p className="mt-1 text-sm text-[#090A3D]">{best.marketplace.name}</p>}
                 {dealScore && (
                   <div title={`DealScore Radar do Berço: ${dealScore.label}`} style={{ background: dealScore.labelColor + '18', borderColor: dealScore.labelColor + '44', color: dealScore.labelColor }} className="mt-3 flex items-center justify-between rounded-lg border px-3 py-2 text-sm font-semibold">
-                    <span>DealScore Radar do Berço</span>
-                    <span>{dealScore.emoji} {dealScore.score} · {dealScore.label}</span>
+                    <span>Deal Score</span>
+                    <span>{dealScore.score} · {dealScoreLabel(dealScore.score)}</span>
                   </div>
                 )}
                 <Link
@@ -256,6 +272,23 @@ export const PublicProductPage: FC<{
             </div>
           </section>
 
+          {/* Historico publico */}
+          <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
+            <h2 className="text-lg font-semibold">Historico de preco</h2>
+            <p className="mt-1 text-sm text-[#5B607C]">
+              Menor preco encontrado nas lojas monitoradas ao longo do tempo.
+            </p>
+            <div className="mt-4">
+              {priceHistory.length > 0 ? (
+                <PriceChart data={priceHistory} />
+              ) : (
+                <div className="rounded-lg bg-[#F2F4FF] p-6 text-center text-sm text-[#5B607C]">
+                  Historico sera formado nas proximas coletas deste produto.
+                </div>
+              )}
+            </div>
+          </section>
+
           {/* Comparador de pacotes */}
           {variants && variants.length > 0 && (
             <PackageComparator
@@ -271,7 +304,7 @@ export const PublicProductPage: FC<{
             {dealScore && dealScore.score >= 75 ? (
               <>
                 <div className="inline-flex items-center gap-2 rounded-full bg-[#e8f8ee] px-4 py-1.5 text-sm font-semibold text-[#2f8a51]">
-                  {dealScore.emoji} DealScore {dealScore.score}/100 — {dealScore.label}
+                  {dealScore.emoji} Deal Score {dealScore.score}/100 - {dealScoreLabel(dealScore.score)}
                 </div>
                 <h2 className="mt-3 text-lg font-semibold">Este é um bom momento para comprar</h2>
                 <p className="mt-2 text-sm text-[#5B607C]">

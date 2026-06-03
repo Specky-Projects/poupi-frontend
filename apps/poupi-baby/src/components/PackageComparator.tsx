@@ -27,7 +27,7 @@ function extractSize(variantLabel: string | null | undefined): string | null {
 
 function extractQty(variantLabel: string | null | undefined): number | null {
   if (!variantLabel) return null;
-  const m = variantLabel.match(/(\d+)\s*(?:unidades|un|g|ml|lenços?)?/i);
+  const m = variantLabel.match(/(\d+)\s*(?:unidades|un|g|ml|lencos?|lenços?)?/i);
   return m ? parseInt(m[1], 10) : null;
 }
 
@@ -45,12 +45,7 @@ function bestPricePerUnit(variant: Variant): number | null {
   return v > 0 ? v : null;
 }
 
-/** Build comparable groups: same size, different quantities, ≥2 items with offers */
-function buildComparableGroups(
-  currentId: string,
-  variants: Variant[],
-): Variant[][] {
-  // Group variants by their size tag
+function buildComparableGroups(currentId: string, variants: Variant[]): Variant[][] {
   const bySize = new Map<string, Variant[]>();
   for (const v of variants) {
     const size = extractSize(v.variantLabel) ?? '__no_size__';
@@ -60,10 +55,8 @@ function buildComparableGroups(
 
   const groups: Variant[][] = [];
   for (const group of bySize.values()) {
-    // Need at least 2 variants and at least one must be the current product
     if (group.length < 2) continue;
     if (!group.some((v) => v.id === currentId)) continue;
-    // Filter to variants that have an offer with pricePerUnit
     const withPrice = group.filter((v) => bestPricePerUnit(v) !== null);
     if (withPrice.length < 2) continue;
     groups.push(withPrice);
@@ -94,7 +87,7 @@ export function PackageComparator({
     <section className="rounded-lg border border-[#E4E7F2] bg-white p-5 shadow-sm">
       <h2 className="text-base font-semibold">Comparador de pacotes</h2>
       <p className="mt-1 mb-4 text-sm text-[#5B607C]">
-        Mesmo produto, tamanhos diferentes — veja qual pacote dá mais valor por {unit}.
+        Mesmo produto e tamanho, quantidades diferentes. Veja qual pacote entrega melhor custo por {unit}.
       </p>
 
       {groups.map((group, gi) => {
@@ -130,7 +123,7 @@ export function PackageComparator({
                       <div className="flex flex-wrap items-center gap-1.5">
                         {isBest && (
                           <span className="rounded-full bg-[#e8f8ee] px-2 py-0.5 text-[11px] font-semibold text-[#2f8a51]">
-                            🏆 Melhor custo
+                            Melhor custo
                           </span>
                         )}
                         {isCurrent && (
@@ -139,15 +132,15 @@ export function PackageComparator({
                           </span>
                         )}
                       </div>
-                      <p className="mt-1 text-sm font-semibold line-clamp-1">{name}</p>
+                      <p className="mt-1 line-clamp-1 text-sm font-semibold">{name}</p>
                       {qty !== null && (
                         <p className="text-xs text-[#5B607C]">{qty} {unit}{qty !== 1 ? 's' : ''}</p>
                       )}
                       {marketplace && (
-                        <p className="text-xs text-[#8A8FB1]">🛒 {marketplace}</p>
+                        <p className="text-xs text-[#8A8FB1]">{marketplace}</p>
                       )}
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="shrink-0 text-right">
                       {ppu !== null && (
                         <p className={`text-base font-bold ${isBest ? 'text-[#2f8a51]' : 'text-[#5B4CF0]'}`}>
                           {formatPricePerUnit(ppu, unit)}
@@ -161,7 +154,7 @@ export function PackageComparator({
                           href={`/produto/${v.slug}`}
                           className="mt-1 inline-block text-xs text-[#5B4CF0] hover:underline"
                         >
-                          Ver →
+                          Ver
                         </Link>
                       )}
                     </div>

@@ -86,6 +86,13 @@ function offerStores(product: Product) {
   return Array.from(new Set(product.offers?.map((o) => o.marketplace?.name).filter(Boolean) as string[]));
 }
 
+function dealScoreLabel(score: number) {
+  if (score >= 90) return 'Excelente';
+  if (score >= 80) return 'Otima oferta';
+  if (score >= 70) return 'Boa oferta';
+  return 'Oferta comum';
+}
+
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [products, setProducts] = useState<Product[]>([]);
@@ -285,7 +292,7 @@ export default function DashboardPage() {
             <section className="mt-5 rounded-lg border border-[#d5f0de] bg-[#f6fdf8] p-4 shadow-sm">
               <h2 className="flex items-center gap-2 text-base font-semibold text-[#2f8a51]">
                 <i className="ti ti-sparkles" />Melhores oportunidades agora
-                <span title="DealScore combina preço atual, histórico e disponibilidade. 80+ = Excelente oportunidade | 60–79 = Bom preço | Abaixo de 60 = preço normal" className="cursor-help text-xs font-normal text-[#4a7a5e]">
+                <span title="Deal Score combina preco atual, historico e disponibilidade. 90+ Excelente | 80+ Otima oferta | 70+ Boa oferta | abaixo de 70 Oferta comum" className="cursor-help text-xs font-normal text-[#4a7a5e]">
                   <i className="ti ti-info-circle" />
                 </span>
               </h2>
@@ -394,7 +401,7 @@ export default function DashboardPage() {
                           {savings > 0 && <span className="rounded-full bg-[#fff5d8] px-2.5 py-1 text-xs font-semibold text-[#8a6316]">economia até {money(savings)}</span>}
                           <span className="rounded-full bg-[#EEF2FF] px-2.5 py-1 text-xs font-semibold text-[#5B4CF0]">{availableOffers}/{product.offers?.length ?? 0} ofertas ativas</span>
                           {offer?.pricePerUnit && <span className="rounded-full bg-[#F2F4FF] px-2.5 py-1 text-xs font-semibold text-[#5B607C]">{money(Number(offer.pricePerUnit))}/un</span>}
-                          {scoreBadge && <span title="DealScore combina preço atual, histórico e disponibilidade. 80+ = Excelente oportunidade | 60–79 = Bom preço | Abaixo de 60 = preço normal" style={{ background: scoreBadge.labelColor + '22', color: scoreBadge.labelColor, borderColor: scoreBadge.labelColor + '55' }} className="cursor-help rounded-full border px-2.5 py-1 text-xs font-semibold">{scoreBadge.emoji} {scoreBadge.score} · {scoreBadge.label}</span>}
+                          {scoreBadge && <span title="Deal Score combina preco atual, historico e disponibilidade. 90+ Excelente | 80+ Otima oferta | 70+ Boa oferta | abaixo de 70 Oferta comum" style={{ background: scoreBadge.labelColor + '22', color: scoreBadge.labelColor, borderColor: scoreBadge.labelColor + '55' }} className="cursor-help rounded-full border px-2.5 py-1 text-xs font-semibold">{scoreBadge.emoji} {scoreBadge.score} · {dealScoreLabel(scoreBadge.score)}</span>}
                         </div>
                       </div>
                     </Link>
