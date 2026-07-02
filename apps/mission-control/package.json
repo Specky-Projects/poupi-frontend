@@ -1,0 +1,38 @@
+{
+  "name": "@poupi-frontend/mission-control",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@poupi-frontend/api-client": "workspace:*",
+    "@poupi-frontend/types": "workspace:*",
+    "@poupi-frontend/ui": "workspace:*",
+    "@poupi-frontend/utils": "workspace:*",
+    "next": "16.2.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@poupi-frontend/config": "workspace:*",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^3.2.4",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "jsdom": "^26.0.0"
+  }
+}
